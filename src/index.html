@@ -1,0 +1,93 @@
+<include src="layout.html">
+  <template name="head">
+    <title th:text="${theme.config.basic.title ?: site.title}">Home</title>
+    <script type="module" src="./js/index.ts"></script>
+  </template>
+
+  <section class="section-heading">
+    <h2>最新文章</h2>
+    <a th:href="@{/archives}">更多文章</a>
+  </section>
+
+  <ul class="repo-grid pinned-repos">
+    <include src="latest-post-card.html"></include>
+  </ul>
+
+  <div class="contrib-layout">
+    <section class="contribution-area">
+      <div class="section-heading compact">
+        <h2>36 contributions in the last year</h2>
+        <button class="settings-button" type="button">Contribution settings <span></span></button>
+      </div>
+      <div class="contribution-panel">
+        <div class="contribution-months">
+          <span>Aug</span>
+          <span>Sep</span>
+          <span>Oct</span>
+          <span>Nov</span>
+          <span>Dec</span>
+          <span>Jan</span>
+          <span>Feb</span>
+          <span>Mar</span>
+          <span>Apr</span>
+          <span>May</span>
+          <span>Jun</span>
+          <span>Jul</span>
+        </div>
+        <div class="contribution-body">
+          <div class="contribution-weekdays">
+            <span>Mon</span>
+            <span>Wed</span>
+            <span>Fri</span>
+          </div>
+          <div class="contribution-graph" aria-label="Contribution graph">
+            <span
+              th:each="i : ${#numbers.sequence(1, 371)}"
+              th:class="|day level-${(i > 330 || i == 305 || i == 319) ? i % 5 : 0}|"
+            ></span>
+          </div>
+        </div>
+        <div class="contribution-footer">
+          <a href="#">Learn how we count contributions</a>
+          <div class="contribution-legend">
+            <span>Less</span>
+            <span class="day level-0"></span>
+            <span class="day level-1"></span>
+            <span class="day level-2"></span>
+            <span class="day level-3"></span>
+            <span class="day level-4"></span>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <aside class="year-nav" aria-label="Contribution years">
+      <a class="is-active" href="#">2026</a>
+      <a href="#">2025</a>
+      <a href="#">2024</a>
+      <a href="#">2023</a>
+    </aside>
+  </div>
+
+  <section class="activity-section">
+    <h2>Contribution activity</h2>
+    <div class="activity-month">
+      <h3>August 2026</h3>
+      <span></span>
+    </div>
+    <div class="activity-item">
+      <div class="activity-icon">⇧</div>
+      <div class="activity-copy">
+        <h3>Created 5 commits in 1 repository</h3>
+        <p
+          th:text="|${theme.config.basic.description ?: 'dengchuanfu'} / ${theme.config.basic.title ?: site.title}|"
+        >
+          dengchuanfu / repo
+        </p>
+      </div>
+      <button type="button" aria-label="More">⌄</button>
+    </div>
+  </section>
+
+  <include src="pagination.html"></include>
+</include>

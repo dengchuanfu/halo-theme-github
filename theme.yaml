@@ -1,0 +1,15 @@
+apiVersion: theme.halo.run/v1alpha1
+kind: Theme
+metadata:
+  name: halo-theme-github
+spec:
+  displayName: GitHub
+  author:
+    name: monster
+  description: A GitHub-inspired theme for Halo
+  settingName: "halo-theme-github-setting"
+  configMapName: "halo-theme-github-configMap"
+  version: 1.0.0
+  requires: ">=2.0.0"
+  license:
+    - name: "GPL-3.0"

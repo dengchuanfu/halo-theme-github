@@ -1,0 +1,101 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: halo-theme-github-setting
+spec:
+  forms:
+    - group: basic
+      label: 基础设置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 站点信息设置 - 标题
+          value: "monster"
+          help: 显示在顶部站点 Logo 右侧
+        - $formkit: text
+          name: name
+          label: 站点信息设置 - 名称
+          value: "Monster"
+          help: 显示在大 Logo 下方的加粗名称
+        - $formkit: textarea
+          name: description
+          label: 站点信息设置 - 描述
+          value: "dengchuanfu"
+          help: 显示在加粗名称下方的灰色文字
+        - $formkit: text
+          name: location
+          label: 所在地
+          value: "ShenZhen"
+        - $formkit: text
+          name: company
+          label: 公司 / 学校
+          value: "EasySpeed"
+        - $formkit: text
+          name: email
+          label: 邮箱
+          value: ""
+        - $formkit: select
+          name: status
+          label: 状态 Emoji
+          value: "😊"
+          help: 显示在前端大 Logo 右下角的小圆圈中
+          options:
+            - label: "😊 开心"
+              value: "😊"
+            - label: "🤔 思考"
+              value: "🤔"
+            - label: "💻 写代码"
+              value: "💻"
+            - label: "🚀 发布"
+              value: "🚀"
+            - label: "☕ 喝咖啡"
+              value: "☕"
+            - label: "📚 学习"
+              value: "📚"
+            - label: "🎧 听歌"
+              value: "🎧"
+            - label: "🌙 夜间模式"
+              value: "🌙"
+            - label: "🔥 忙碌"
+              value: "🔥"
+            - label: "✨ 灵感"
+              value: "✨"
+    - group: icons
+      label: 图标配置
+      formSchema:
+        - $formkit: text
+          name: home
+          label: 首页图标
+          value: "octicon:book-16"
+          help: 填写 Iconify 图标名称，例如 octicon:book-16
+        - $formkit: text
+          name: posts
+          label: 文章图标
+          value: "octicon:repo-16"
+          help: 填写 Iconify 图标名称，例如 octicon:repo-16
+        - $formkit: text
+          name: projects
+          label: Projects 图标
+          value: "octicon:project-16"
+          help: 填写 Iconify 图标名称，例如 octicon:project-16
+        - $formkit: text
+          name: packages
+          label: Packages 图标
+          value: "octicon:package-16"
+          help: 填写 Iconify 图标名称，例如 octicon:package-16
+        - $formkit: text
+          name: stars
+          label: Stars 图标
+          value: "octicon:star-16"
+          help: 填写 Iconify 图标名称，例如 octicon:star-16
+    - group: styles
+      label: 样式
+      formSchema:
+        - $formkit: color
+          name: background_color
+          label: 背景颜色
+          value: "#ffffff"
+        - $formkit: color
+          name: accent_color
+          label: 强调色
+          value: "#0969da"
