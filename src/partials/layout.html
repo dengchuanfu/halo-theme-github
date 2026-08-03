@@ -93,14 +93,14 @@
     </div>
 
     <nav class="profile-tabs">
-      <a class="is-active" th:href="@{/}">
+      <a class="{{activeHome}}" th:href="@{/}">
         <iconify-icon
           class="tab-icon"
           th:attr="icon=${theme.config.icons.home ?: 'octicon:book-16'}"
         ></iconify-icon>
         <span>首页</span>
       </a>
-      <a th:href="@{/archives}">
+      <a class="{{activePosts}}" th:href="@{/archives}">
         <iconify-icon
           class="tab-icon"
           th:attr="icon=${theme.config.icons.posts ?: 'octicon:repo-16'}"
@@ -108,14 +108,14 @@
         <span>文章</span>
         <span class="counter">6</span>
       </a>
-      <a th:href="@{/categories}">
+      <a class="{{activeProjects}}" th:href="@{/categories}">
         <iconify-icon
           class="tab-icon"
           th:attr="icon=${theme.config.icons.projects ?: 'octicon:project-16'}"
         ></iconify-icon>
         <span>Projects</span>
       </a>
-      <a th:href="@{/tags}">
+      <a class="{{activePackages}}" th:href="@{/tags}">
         <iconify-icon
           class="tab-icon"
           th:attr="icon=${theme.config.icons.packages ?: 'octicon:package-16'}"
@@ -139,11 +139,16 @@
             th:src="${site.logo ?: 'https://avatars.githubusercontent.com/u/9919?s=240&v=4'}"
             th:alt="${theme.config.basic.name ?: site.title}"
           />
-          <div class="profile-status">
-            <span th:if="${theme.config.basic.status}" th:text="${theme.config.basic.status}"
-              >Available</span
-            >
-            <span th:unless="${theme.config.basic.status}">☺</span>
+          <div
+            class="profile-status"
+            tabindex="0"
+            th:with="
+              statusEmoji=${theme.config.basic.status ?: '☺'},
+              statusText=${statusEmoji == '😊' ? '开心' : statusEmoji == '🤔' ? '思考' : statusEmoji == '💻' ? '写代码' : statusEmoji == '🚀' ? '发布' : statusEmoji == '☕' ? '喝咖啡' : statusEmoji == '📚' ? '学习' : statusEmoji == '🎧' ? '听歌' : statusEmoji == '🌙' ? '夜间模式' : statusEmoji == '🔥' ? '忙碌' : statusEmoji == '✨' ? '灵感' : '状态 Emoji'}
+            "
+            th:attr="data-status-text=${statusText}, aria-label=${statusText}"
+          >
+            <span th:text="${statusEmoji}">😊</span>
           </div>
           <h1 class="profile-name" th:text="${theme.config.basic.name ?: site.title}">GitHub</h1>
           <p class="profile-username" th:text="${theme.config.basic.description ?: 'halo-user'}">

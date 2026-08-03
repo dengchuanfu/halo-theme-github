@@ -1,4 +1,10 @@
-<include src="layout.html">
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages="is-active"
+>
   <template name="head">
     <title th:text="|Tags - ${theme.config.basic.title ?: site.title}|">Tags</title>
   </template>

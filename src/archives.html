@@ -1,28 +1,83 @@
-<include src="layout.html">
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts="is-active"
+  activeProjects=""
+  activePackages=""
+>
   <template name="head">
-    <title th:text="|Archives - ${theme.config.basic.title ?: site.title}|">Archives</title>
+    <title th:text="|文章 - ${theme.config.basic.title ?: site.title}|">文章</title>
   </template>
 
-  <h1>Archives</h1>
-
-  <th:block th:each="archive : ${archives.items}">
-    <div class="archive-year">
-      <h2 th:text="${archive.year}"></h2>
-      <th:block th:each="month : ${archive.months}">
-        <h3 th:text="|${archive.year}-${month.month}|"></h3>
-        <ul class="post-list">
-          <li class="post-item" th:each="post : ${month.posts}">
-            <h2 class="post-title">
-              <a th:href="@{${post.status.permalink}}" th:text="${post.spec.title}"></a>
-            </h2>
-            <p class="post-meta">
-              <time th:text="${#temporals.format(post.spec.publishTime, 'yyyy-MM-dd')}"></time>
-            </p>
-          </li>
-        </ul>
-      </th:block>
+  <section class="repositories-page">
+    <div class="repositories-toolbar">
+      <button class="repository-search" type="button" data-search-trigger aria-label="搜索文章">
+        Find an article...
+      </button>
+      <div class="repository-filters" aria-label="文章筛选">
+        <button class="repository-filter-button" type="button">
+          <span>Type</span>
+          <span class="chevron"></span>
+        </button>
+        <button class="repository-filter-button" type="button">
+          <span>Language</span>
+          <span class="chevron"></span>
+        </button>
+        <button class="repository-filter-button" type="button">
+          <span>Sort</span>
+          <span class="chevron"></span>
+        </button>
+      </div>
     </div>
-  </th:block>
+
+    <ul class="repository-list">
+      <th:block th:each="archive : ${archives.items}">
+        <th:block th:each="month : ${archive.months}">
+          <li class="repository-list-item" th:each="post : ${month.posts}">
+            <div class="repository-list-copy">
+              <div class="repository-list-heading">
+                <h2 class="repository-list-title">
+                  <a th:href="@{${post.status.permalink}}" th:text="${post.spec.title}">
+                    Article title
+                  </a>
+                </h2>
+              </div>
+              <p class="repository-list-desc" th:text="${post.status.excerpt ?: '暂无文章摘要'}">
+                暂无文章摘要
+              </p>
+              <div class="repository-list-meta">
+                <span class="language-dot"></span>
+                <span th:if="${not #lists.isEmpty(post.categories)}">
+                  <a
+                    th:each="cat, catStat : ${post.categories}"
+                    th:if="${catStat.first}"
+                    th:href="@{${cat.status.permalink}}"
+                    th:text="${cat.spec.displayName}"
+                  ></a>
+                </span>
+                <span th:unless="${not #lists.isEmpty(post.categories)}">未分类</span>
+                <time th:text="|Updated ${#temporals.format(post.spec.publishTime, 'MMM d')}|">
+                  Updated now
+                </time>
+              </div>
+            </div>
+            <div class="repository-action-group" aria-label="文章操作">
+              <a class="repository-action-button" th:href="@{${post.status.permalink}}">
+                <iconify-icon icon="octicon:thumbsup-16"></iconify-icon>
+                <span>点赞</span>
+              </a>
+              <a
+                class="repository-action-button"
+                th:href="@{${post.status.permalink} + '#comments'}"
+              >
+                <span>评论</span>
+              </a>
+            </div>
+          </li>
+        </th:block>
+      </th:block>
+    </ul>
+  </section>
 
   <nav class="pagination" th:if="${archives.hasPrevious() || archives.hasNext()}">
     <a th:if="${archives.hasPrevious()}" th:href="@{${archives.prevUrl}}">Previous</a>
