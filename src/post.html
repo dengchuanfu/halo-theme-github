@@ -58,7 +58,12 @@
     </nav>
   </article>
 
-  <div th:if="${haloCommentEnabled}">
-    <halo:comment group="content.halo.run" kind="Post" th:attr="name=${post.metadata.name}" />
+  <div id="comments">
+    <halo:comment
+      th:if="${haloCommentEnabled}"
+      group="content.halo.run"
+      kind="Post"
+      th:attr="name=${post.metadata.name}"
+    />
   </div>
 </include>

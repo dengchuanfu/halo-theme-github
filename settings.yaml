@@ -34,6 +34,11 @@ spec:
           name: email
           label: 邮箱
           value: ""
+        - $formkit: checkbox
+          name: show_stats
+          label: 是否显示网站统计信息
+          value: false
+          help: 开启后在前端大 Logo 资料区显示总文章数量、总评论数量和总访问量
         - $formkit: select
           name: status
           label: 状态 Emoji
@@ -65,29 +70,53 @@ spec:
       formSchema:
         - $formkit: text
           name: home
-          label: 首页图标
+          label: 首页图标（/）
           value: "octicon:book-16"
-          help: 填写 Iconify 图标名称，例如 octicon:book-16
+          help: 对应后台菜单链接 /，填写 Iconify 图标名称，例如 octicon:book-16
         - $formkit: text
           name: posts
-          label: 文章图标
+          label: 文章图标（/archives）
           value: "octicon:repo-16"
-          help: 填写 Iconify 图标名称，例如 octicon:repo-16
+          help: 对应后台菜单链接 /archives，填写 Iconify 图标名称，例如 octicon:repo-16
         - $formkit: text
-          name: projects
-          label: Projects 图标
-          value: "octicon:project-16"
-          help: 填写 Iconify 图标名称，例如 octicon:project-16
+          name: default_category
+          label: 默认分类图标（/categories/default）
+          value: "octicon:bookmark-16"
+          help: 对应后台菜单链接 /categories/default，填写 Iconify 图标名称，例如 octicon:bookmark-16
         - $formkit: text
-          name: packages
-          label: Packages 图标
-          value: "octicon:package-16"
-          help: 填写 Iconify 图标名称，例如 octicon:package-16
+          name: about
+          label: 关于图标（/about）
+          value: "octicon:person-16"
+          help: 对应后台菜单链接 /about，填写 Iconify 图标名称，例如 octicon:person-16
+        - $formkit: array
+          name: custom_menu_icons
+          label: 其他菜单栏自定义图标
+          value: []
+          addLabel: 添加菜单图标
+          emptyText: 暂无自定义菜单图标，点击下方按钮添加
+          help: 根据后台菜单栏路径逐条设置 Iconify 图标，例如 /links 对应 octicon:link-16
+          itemLabels:
+            - type: text
+              label: "$value.path"
+            - type: text
+              label: "$value.icon"
+          children:
+            - $formkit: text
+              name: path
+              label: 菜单栏路径
+              value: ""
+              placeholder: "/links"
+              help: 填写后台菜单项的链接路径，建议以 / 开头
+            - $formkit: text
+              name: icon
+              label: Iconify 图标名称
+              value: "octicon:star-16"
+              placeholder: "octicon:link-16"
         - $formkit: text
-          name: stars
-          label: Stars 图标
+          name: fallback
+          label: 未匹配菜单默认图标
           value: "octicon:star-16"
-          help: 填写 Iconify 图标名称，例如 octicon:star-16
+          help: 只有菜单路径没有匹配到上面的自定义规则时才使用
     - group: styles
       label: 样式
       formSchema:

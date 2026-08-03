@@ -41,6 +41,14 @@
                     Article title
                   </a>
                 </h2>
+                <span class="repository-title-tags" th:if="${not #lists.isEmpty(post.tags)}">
+                  <a
+                    class="repository-title-tag"
+                    th:each="tag : ${post.tags}"
+                    th:href="@{${tag.status.permalink}}"
+                    th:text="${tag.spec.displayName}"
+                  ></a>
+                </span>
               </div>
               <p class="repository-list-desc" th:text="${post.status.excerpt ?: '暂无文章摘要'}">
                 暂无文章摘要
@@ -61,17 +69,31 @@
                 </time>
               </div>
             </div>
-            <div class="repository-action-group" aria-label="文章操作">
-              <a class="repository-action-button" th:href="@{${post.status.permalink}}">
-                <iconify-icon icon="octicon:thumbsup-16"></iconify-icon>
-                <span>点赞</span>
-              </a>
-              <a
-                class="repository-action-button"
-                th:href="@{${post.status.permalink} + '#comments'}"
-              >
-                <span>评论</span>
-              </a>
+            <div class="repository-side">
+              <div class="repository-action-group" aria-label="文章操作">
+                <a class="repository-action-button" th:href="@{${post.status.permalink}}">
+                  <iconify-icon icon="octicon:thumbsup-16"></iconify-icon>
+                  <span>点赞</span>
+                </a>
+                <a
+                  class="repository-action-button"
+                  th:href="@{${post.status.permalink} + '#comments'}"
+                >
+                  <span>评论</span>
+                </a>
+              </div>
+              <div class="repository-activity-wave" aria-label="点赞和评论波动">
+                <span class="wave-bar wave-1"></span>
+                <span class="wave-bar wave-2"></span>
+                <span class="wave-bar wave-3"></span>
+                <span class="wave-bar wave-4"></span>
+                <span class="wave-bar wave-5"></span>
+                <span class="wave-bar wave-6"></span>
+                <span class="wave-bar wave-7"></span>
+                <span class="wave-bar wave-8"></span>
+                <span class="wave-bar wave-9"></span>
+                <span class="wave-bar wave-10"></span>
+              </div>
             </div>
           </li>
         </th:block>

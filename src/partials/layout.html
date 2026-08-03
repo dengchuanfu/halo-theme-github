@@ -92,43 +92,85 @@
       </div>
     </div>
 
-    <nav class="profile-tabs">
-      <a class="{{activeHome}}" th:href="@{/}">
-        <iconify-icon
-          class="tab-icon"
-          th:attr="icon=${theme.config.icons.home ?: 'octicon:book-16'}"
-        ></iconify-icon>
-        <span>首页</span>
-      </a>
-      <a class="{{activePosts}}" th:href="@{/archives}">
-        <iconify-icon
-          class="tab-icon"
-          th:attr="icon=${theme.config.icons.posts ?: 'octicon:repo-16'}"
-        ></iconify-icon>
-        <span>文章</span>
-        <span class="counter">6</span>
-      </a>
-      <a class="{{activeProjects}}" th:href="@{/categories}">
-        <iconify-icon
-          class="tab-icon"
-          th:attr="icon=${theme.config.icons.projects ?: 'octicon:project-16'}"
-        ></iconify-icon>
-        <span>Projects</span>
-      </a>
-      <a class="{{activePackages}}" th:href="@{/tags}">
-        <iconify-icon
-          class="tab-icon"
-          th:attr="icon=${theme.config.icons.packages ?: 'octicon:package-16'}"
-        ></iconify-icon>
-        <span>Packages</span>
-      </a>
-      <a href="#">
-        <iconify-icon
-          class="tab-icon"
-          th:attr="icon=${theme.config.icons.stars ?: 'octicon:star-16'}"
-        ></iconify-icon>
-        <span>Stars</span>
-      </a>
+    <nav
+      class="profile-tabs"
+      th:with="siteStats=${siteStatsFinder.getStats()}, menu=${menuFinder.getPrimary()}"
+    >
+      <th:block th:if="${menu != null and not #lists.isEmpty(menu.menuItems)}">
+        <a
+          th:each="item : ${menu.menuItems}"
+          th:with="
+            menuHref=${item.status.href ?: ''},
+            isHomeMenu=${menuHref == '/' or menuHref == ''},
+            isPostsMenu=${menuHref == '/archives' or menuHref == 'archives' or #strings.startsWith(menuHref, '/archives')},
+            isDefaultCategoryMenu=${menuHref == '/categories/default' or menuHref == 'categories/default'},
+            isCategoryMenu=${menuHref == '/categories' or menuHref == 'categories' or #strings.startsWith(menuHref, '/categories')},
+            isTagsMenu=${menuHref == '/tags' or menuHref == 'tags' or #strings.startsWith(menuHref, '/tags')},
+            isAboutMenu=${menuHref == '/about' or menuHref == 'about'},
+            customMenuIcon=${theme.config.icons.custom_menu_icons != null ? theme.config.icons.custom_menu_icons.^[#this.path == menuHref] : null}
+          "
+          th:href="@{${item.status.href}}"
+          th:target="${item.spec.target?.value}"
+          th:classappend="${(
+            (isHomeMenu and '{{activeHome}}' == 'is-active') or
+            (isPostsMenu and '{{activePosts}}' == 'is-active') or
+            (isCategoryMenu and '{{activeProjects}}' == 'is-active') or
+            (isTagsMenu and '{{activePackages}}' == 'is-active') or
+            (singlePage != null and singlePage.status?.permalink != null and (singlePage.status.permalink == menuHref or #strings.endsWith(singlePage.status.permalink, menuHref)))
+          ) ? 'is-active' : ''}"
+        >
+          <iconify-icon
+            class="tab-icon"
+            th:attr="icon=${
+              isHomeMenu
+                ? (theme.config.icons.home ?: 'octicon:book-16')
+                : (isPostsMenu
+                  ? (theme.config.icons.posts ?: 'octicon:repo-16')
+                  : (isDefaultCategoryMenu
+                    ? (theme.config.icons.default_category ?: 'octicon:bookmark-16')
+                    : (isAboutMenu
+                      ? (theme.config.icons.about ?: 'octicon:person-16')
+                      : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
+                        ? customMenuIcon.icon
+                        : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16')))))
+            }"
+          ></iconify-icon>
+          <span th:text="${item.status.displayName}">菜单</span>
+          <span class="counter" th:if="${isPostsMenu}" th:text="${siteStats.post ?: 0}">0</span>
+        </a>
+      </th:block>
+
+      <th:block th:if="${menu == null or #lists.isEmpty(menu.menuItems)}">
+        <a class="{{activeHome}}" th:href="@{/}">
+          <iconify-icon
+            class="tab-icon"
+            th:attr="icon=${theme.config.icons.home ?: 'octicon:book-16'}"
+          ></iconify-icon>
+          <span>首页</span>
+        </a>
+        <a class="{{activePosts}}" th:href="@{/archives}">
+          <iconify-icon
+            class="tab-icon"
+            th:attr="icon=${theme.config.icons.posts ?: 'octicon:repo-16'}"
+          ></iconify-icon>
+          <span>文章</span>
+          <span class="counter" th:text="${siteStats.post ?: 0}">0</span>
+        </a>
+        <a class="{{activeProjects}}" th:href="@{/categories/default}">
+          <iconify-icon
+            class="tab-icon"
+            th:attr="icon=${theme.config.icons.default_category ?: 'octicon:bookmark-16'}"
+          ></iconify-icon>
+          <span>默认分类</span>
+        </a>
+        <a class="{{activeHome}}" th:href="@{/about}">
+          <iconify-icon
+            class="tab-icon"
+            th:attr="icon=${theme.config.icons.about ?: 'octicon:person-16'}"
+          ></iconify-icon>
+          <span>关于</span>
+        </a>
+      </th:block>
     </nav>
 
     <main class="site-main github-shell">
@@ -172,6 +214,26 @@
                 th:href="|mailto:${theme.config.basic.email}|"
                 th:text="${theme.config.basic.email}"
               ></a>
+            </li>
+            <li
+              class="profile-stats-row"
+              th:if="${theme.config.basic.show_stats}"
+              th:with="siteStats=${siteStatsFinder.getStats()}"
+            >
+              <a th:href="@{/archives}">
+                <span class="profile-stat-count" th:text="${siteStats.post ?: 0}">0</span>
+                <span>文章</span>
+              </a>
+              <span class="profile-stat-separator">·</span>
+              <span>
+                <span class="profile-stat-count" th:text="${siteStats.comment ?: 0}">0</span>
+                <span>评论</span>
+              </span>
+              <span class="profile-stat-separator">·</span>
+              <span>
+                <span class="profile-stat-count" th:text="${siteStats.visit ?: 0}">0</span>
+                <span>访问</span>
+              </span>
             </li>
           </ul>
         </div>
