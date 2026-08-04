@@ -183,8 +183,8 @@
       ></span>
     </div>
 
-    <main class="site-main github-shell">
-      <aside class="profile-sidebar">
+    <main class="site-main github-shell {{shellClass}}">
+      <aside class="profile-sidebar {{sidebarClass}}">
         <div class="profile-card">
           <img
             class="profile-avatar"
@@ -248,7 +248,7 @@
           </ul>
         </div>
       </aside>
-      <div class="content-column">
+      <div class="content-column {{contentClass}}">
         <slot />
       </div>
     </main>

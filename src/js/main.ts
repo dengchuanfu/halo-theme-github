@@ -63,6 +63,24 @@ const setupCustomMenuIcons = () => {
     });
 };
 
+const setupActiveMenuItem = () => {
+  const currentPath = normalizeMenuPath(window.location.pathname);
+
+  document
+    .querySelectorAll<HTMLAnchorElement>(".profile-tabs a[data-menu-href]")
+    .forEach((item) => {
+      const menuPath = normalizeMenuPath(item.dataset.menuHref || item.getAttribute("href"));
+      const isCurrent =
+        menuPath === "/"
+          ? currentPath === "/"
+          : currentPath === menuPath || currentPath.startsWith(`${menuPath}/`);
+
+      if (isCurrent) {
+        item.classList.add("is-active");
+      }
+    });
+};
+
 const isTypingTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) {
     return false;
@@ -203,4 +221,5 @@ const setupSearch = () => {
 };
 
 setupCustomMenuIcons();
+setupActiveMenuItem();
 setupSearch();

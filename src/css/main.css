@@ -380,8 +380,20 @@ svg {
   gap: 24px;
 }
 
+.github-shell-full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .profile-sidebar {
   min-width: 0;
+}
+
+.profile-sidebar.is-hidden {
+  display: none;
+}
+
+.content-column-full {
+  width: 100%;
 }
 
 .profile-card {

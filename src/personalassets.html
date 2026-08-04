@@ -1,0 +1,237 @@
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass="github-shell-full"
+  sidebarClass="is-hidden"
+  contentClass="content-column-full"
+>
+  <template name="head">
+    <title th:text="|${title ?: '资产'} - ${theme.config.basic.title ?: site.title}|">资产</title>
+    <th:block th:replace="~{plugin:personalassets:modules/style}"></th:block>
+    <style>
+      .github-personalassets {
+        display: grid;
+        gap: 16px;
+      }
+
+      .github-personalassets-heading {
+        align-items: flex-end;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        margin: 0;
+        padding-bottom: 16px;
+      }
+
+      .github-personalassets-heading h2 {
+        color: var(--fg);
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .github-personalassets-heading p {
+        color: var(--fg-muted);
+        font-size: 14px;
+        margin: 4px 0 0;
+      }
+
+      .github-personalassets #personalassets {
+        gap: 24px;
+      }
+
+      .github-personalassets .personalassets-toolbar {
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        gap: 8px;
+        justify-content: space-between;
+        margin: 0;
+        padding-bottom: 16px;
+      }
+
+      .github-personalassets .personalassets-filter,
+      .github-personalassets .personalassets-search {
+        background: var(--canvas);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        box-shadow: none;
+        color: var(--fg-muted);
+        height: 32px;
+        padding: 0 10px;
+      }
+
+      .github-personalassets .personalassets-filter {
+        flex-basis: 180px;
+        width: 180px;
+      }
+
+      .github-personalassets .personalassets-search {
+        flex: 1 1 260px;
+        max-width: 360px;
+        width: auto;
+      }
+
+      .github-personalassets .personalassets-filter-select,
+      .github-personalassets .personalassets-search-input {
+        color: var(--fg);
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .github-personalassets .personalassets-filter:focus-within,
+      .github-personalassets .personalassets-search:focus-within {
+        border-color: var(--accent);
+        box-shadow: inset 0 0 0 1px var(--accent);
+      }
+
+      .github-personalassets .personalassets-item {
+        border-bottom: 1px solid var(--border);
+        gap: 12px;
+        padding: 8px 0 24px;
+      }
+
+      .github-personalassets .personalassets-item:last-child {
+        border-bottom: 0;
+      }
+
+      .github-personalassets .personalassets-group-heading {
+        width: 100%;
+      }
+
+      .github-personalassets .personalassets-item-icon {
+        color: var(--fg-muted);
+        height: 18px;
+        width: 18px;
+      }
+
+      .github-personalassets .personalassets-item-title {
+        color: var(--accent);
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.5;
+      }
+
+      .github-personalassets .personalassets-item-count {
+        background: #eaeef2;
+        border-radius: 999px;
+        color: var(--fg);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 20px;
+        padding: 0 6px;
+      }
+
+      .github-personalassets .personalassets-item-count > span:first-child,
+      .github-personalassets .personalassets-item-count > span:last-child {
+        display: none;
+      }
+
+      .github-personalassets .personalassets-item-description {
+        color: var(--fg-muted);
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .github-personalassets .personalassets-item-content {
+        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      }
+
+      .github-personalassets .personalassets-item-content-item {
+        background: var(--canvas);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        box-shadow: none;
+        height: auto;
+        min-height: 246px;
+        padding-bottom: 14px;
+        transform: none;
+      }
+
+      .github-personalassets .personalassets-item-content-item:hover {
+        border-color: var(--border);
+        box-shadow: none;
+        transform: none;
+      }
+
+      .github-personalassets .personalassets-item-content-item-cover {
+        aspect-ratio: 16 / 9;
+        background: var(--canvas-subtle);
+        border-bottom: 1px solid var(--border-muted);
+      }
+
+      .github-personalassets .personalassets-item-content-item-image {
+        height: 100%;
+        object-fit: cover;
+        width: 100%;
+      }
+
+      .github-personalassets .personalassets-item-content-item-info {
+        flex-basis: auto;
+        padding: 12px 14px 0;
+      }
+
+      .github-personalassets .personalassets-item-content-item-name {
+        color: var(--accent);
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .github-personalassets .personalassets-item-content-item-specification,
+      .github-personalassets .personalassets-item-content-item-description,
+      .github-personalassets .personalassets-item-content-item-footer {
+        color: var(--fg-muted);
+      }
+
+      .github-personalassets .personalassets-item-content-item-body {
+        padding: 8px 14px 0;
+      }
+
+      .github-personalassets .personalassets-item-content-item-footer {
+        border-top: 0;
+        padding: 12px 14px 0;
+      }
+
+      .github-personalassets .personalassets-item-content-item-footer::before {
+        display: none;
+      }
+
+      @media (max-width: 900px) {
+        .github-personalassets .personalassets-toolbar,
+        .github-personalassets-heading {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .github-personalassets .personalassets-filter-form,
+        .github-personalassets .personalassets-filter,
+        .github-personalassets .personalassets-search {
+          flex-basis: auto;
+          max-width: none;
+          width: 100%;
+        }
+
+        .github-personalassets .personalassets-item-content {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </template>
+
+  <section class="github-personalassets">
+    <header class="github-personalassets-heading">
+      <div>
+        <h2 th:text="${title ?: '资产'}">资产</h2>
+        <p th:if="${not #strings.isEmpty(subtitle)}" th:text="${subtitle}"></p>
+      </div>
+    </header>
+
+    <th:block th:replace="~{plugin:personalassets:modules/personalassets-list}"></th:block>
+  </section>
+</include>
