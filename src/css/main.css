@@ -1871,6 +1871,74 @@ article {
   border-top: 1px solid var(--border);
 }
 
+.photos-page {
+  display: grid;
+  gap: 16px;
+}
+
+.photos-hero {
+  margin-bottom: 2px;
+}
+
+.photos-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.photos-tabs .tag.is-active {
+  border-color: var(--accent);
+  background: rgba(9, 105, 218, 0.08);
+  color: var(--accent);
+}
+
+.photos-grid {
+  column-count: 4;
+  column-gap: 12px;
+}
+
+.photo-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas-subtle);
+  color: var(--fg);
+}
+
+.photo-card:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.photo-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.photo-card-title {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  padding: 18px 10px 10px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  background: linear-gradient(180deg, rgba(31, 35, 40, 0) 0%, rgba(31, 35, 40, 0.72) 100%);
+}
+
+.photo-card-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @keyframes links-fade-up {
   from {
     opacity: 0;
@@ -1988,6 +2056,10 @@ article {
   .links-grid {
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   }
+
+  .photos-grid {
+    column-count: 3;
+  }
 }
 
 @media (max-width: 720px) {
@@ -2057,6 +2129,10 @@ article {
 
   .links-grid {
     grid-template-columns: 1fr;
+  }
+
+  .photos-grid {
+    column-count: 1;
   }
 
   .contribution-panel {
