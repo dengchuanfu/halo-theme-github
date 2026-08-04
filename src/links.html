@@ -1,0 +1,77 @@
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass=""
+  sidebarClass=""
+  contentClass=""
+>
+  <template name="head">
+    <title th:text="|${linksTitle ?: '友链'} - ${theme.config.basic.title ?: site.title}|">
+      友链
+    </title>
+  </template>
+
+  <section class="links-page">
+    <header class="links-hero">
+      <div>
+        <p class="links-eyebrow">Links</p>
+        <h1 th:text="${linksTitle ?: '友链'}">友链</h1>
+        <p>把值得常去的站点放在这里，像 GitHub stars 一样收藏朋友和灵感。</p>
+      </div>
+      <span class="links-count" th:if="${links != null}">
+        <span th:text="${#lists.size(links)}">0</span>
+        <span>个链接</span>
+      </span>
+    </header>
+
+    <div class="links-empty" th:if="${groups == null or #lists.isEmpty(groups)}">
+      <iconify-icon icon="octicon:link-16"></iconify-icon>
+      <h2>暂无友链</h2>
+      <p>在后台链接管理插件里添加链接后，这里会自动显示。</p>
+    </div>
+
+    <div class="links-groups" th:if="${groups != null and not #lists.isEmpty(groups)}">
+      <section class="links-group" th:each="linkGroup : ${groups}">
+        <div class="links-group-heading">
+          <h2 th:text="${linkGroup.spec.displayName}">默认分组</h2>
+          <span th:text="|${#lists.size(linkGroup.links)} 个链接|">0 个链接</span>
+        </div>
+
+        <div class="links-grid">
+          <a
+            class="link-card"
+            th:each="link : ${linkGroup.links}"
+            th:href="${link.spec.url}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="link-logo">
+              <img
+                th:if="${not #strings.isEmpty(link.spec.logo)}"
+                th:src="${link.spec.logo}"
+                th:alt="${link.spec.displayName}"
+              />
+              <iconify-icon
+                th:if="${#strings.isEmpty(link.spec.logo)}"
+                icon="octicon:link-16"
+              ></iconify-icon>
+            </span>
+            <span class="link-card-body">
+              <span class="link-card-title">
+                <span th:text="${link.spec.displayName}">Halo</span>
+                <iconify-icon icon="octicon:link-external-16"></iconify-icon>
+              </span>
+              <span class="link-card-desc" th:text="${link.spec.description ?: link.spec.url}">
+                一个朋友的网站
+              </span>
+              <span class="link-card-url" th:text="${link.spec.url}">https://halo.run</span>
+            </span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </section>
+</include>
