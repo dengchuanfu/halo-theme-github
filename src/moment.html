@@ -1,0 +1,113 @@
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass=""
+  sidebarClass=""
+  contentClass=""
+>
+  <template name="head">
+    <title th:text="|${title ?: '瞬间'} - ${theme.config.basic.title ?: site.title}|">瞬间</title>
+  </template>
+
+  <article class="moment-detail">
+    <header class="article-header moment-detail-header">
+      <a class="moment-back-link" th:href="@{/moments}">
+        <iconify-icon icon="octicon:arrow-left-16"></iconify-icon>
+        <span>返回瞬间</span>
+      </a>
+      <div class="moment-detail-author">
+        <img
+          th:src="${moment.owner?.avatar ?: site.logo ?: 'https://avatars.githubusercontent.com/u/9919?s=80&v=4'}"
+          th:alt="${moment.owner?.displayName ?: moment.owner?.name ?: theme.config.basic.name ?: site.title}"
+        />
+        <div>
+          <h1
+            class="article-title"
+            th:text="${moment.owner?.displayName ?: moment.owner?.name ?: theme.config.basic.name ?: site.title}"
+          >
+            monster
+          </h1>
+          <time
+            class="article-meta"
+            th:if="${moment.spec.releaseTime != null}"
+            th:datetime="${moment.spec.releaseTime}"
+            th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}"
+          >
+            now
+          </time>
+        </div>
+      </div>
+    </header>
+
+    <div
+      class="moment-content article-content"
+      th:if="${moment.spec.content != null and not #strings.isEmpty(moment.spec.content.html)}"
+      th:utext="${moment.spec.content.html}"
+    ></div>
+
+    <div
+      class="moment-media-grid moment-media-grid-detail"
+      th:if="${moment.spec.content != null and not #lists.isEmpty(moment.spec.content.medium)}"
+    >
+      <th:block th:each="medium : ${moment.spec.content.medium}">
+        <img
+          th:if="${medium.type != null and medium.type.name() == 'PHOTO'}"
+          th:src="${medium.url}"
+          alt=""
+          loading="lazy"
+        />
+        <video
+          th:if="${medium.type != null and medium.type.name() == 'VIDEO'}"
+          th:src="${medium.url}"
+          controls
+          preload="metadata"
+        ></video>
+        <audio
+          th:if="${medium.type != null and medium.type.name() == 'AUDIO'}"
+          th:src="${medium.url}"
+          controls
+        ></audio>
+        <a
+          class="moment-media-link"
+          th:if="${medium.type != null and medium.type.name() == 'POST'}"
+          th:href="${medium.url}"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <iconify-icon icon="octicon:link-16"></iconify-icon>
+          <span th:text="${medium.url}">相关链接</span>
+        </a>
+      </th:block>
+    </div>
+
+    <footer class="moment-footer moment-detail-footer">
+      <span th:if="${moment.stats != null}">
+        <iconify-icon icon="octicon:thumbsup-16"></iconify-icon>
+        <span th:text="${moment.stats.upvote ?: 0}">0</span>
+      </span>
+      <span th:if="${moment.stats != null}">
+        <iconify-icon icon="octicon:comment-16"></iconify-icon>
+        <span th:text="${moment.stats.approvedComment ?: 0}">0</span>
+      </span>
+      <span class="moment-tag-list" th:if="${not #lists.isEmpty(moment.spec.tags)}">
+        <a
+          th:each="tag : ${moment.spec.tags}"
+          th:href="@{/moments(tag=${tag})}"
+          th:text="|#${tag}|"
+        ></a>
+      </span>
+    </footer>
+  </article>
+
+  <div id="comments">
+    <halo:comment
+      th:if="${haloCommentEnabled}"
+      group="moment.halo.run"
+      kind="Moment"
+      th:attr="name=${moment.metadata.name}"
+    />
+  </div>
+</include>

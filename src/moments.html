@@ -1,0 +1,150 @@
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass=""
+  sidebarClass=""
+  contentClass=""
+>
+  <template name="head">
+    <title th:text="|${title ?: '瞬间'} - ${theme.config.basic.title ?: site.title}|">瞬间</title>
+  </template>
+
+  <section class="moments-page">
+    <header class="links-hero moments-hero">
+      <div>
+        <p class="links-eyebrow">Moments</p>
+        <h1 th:text="${title ?: '瞬间'}">瞬间</h1>
+        <p>把轻量的想法、照片和日常记录放在这里。</p>
+      </div>
+      <span class="links-count" th:if="${moments != null}">
+        <span th:text="${moments.total ?: 0}">0</span>
+        <span>条瞬间</span>
+      </span>
+    </header>
+
+    <nav class="moment-tags" th:if="${tags != null and not #lists.isEmpty(tags)}">
+      <a class="tag" th:href="@{/moments}">全部</a>
+      <a
+        class="tag"
+        th:each="tag : ${tags}"
+        th:href="@{${tag.permalink}}"
+        th:text="|#${tag.name}|"
+      ></a>
+    </nav>
+
+    <div class="links-empty" th:if="${moments == null or #lists.isEmpty(moments.items)}">
+      <iconify-icon icon="octicon:comment-discussion-16"></iconify-icon>
+      <h2>暂无瞬间</h2>
+      <p>在瞬间插件里发布内容后，这里会自动显示。</p>
+    </div>
+
+    <ol class="moments-list" th:if="${moments != null and not #lists.isEmpty(moments.items)}">
+      <li class="moment-card" th:each="item : ${moments.items}">
+        <a class="moment-avatar" th:href="@{|/moments/${item.metadata.name}|}">
+          <img
+            th:src="${item.owner?.avatar ?: site.logo ?: 'https://avatars.githubusercontent.com/u/9919?s=80&v=4'}"
+            th:alt="${item.owner?.displayName ?: item.owner?.name ?: theme.config.basic.name ?: site.title}"
+          />
+        </a>
+        <article class="moment-body">
+          <header class="moment-header">
+            <div>
+              <a
+                class="moment-author"
+                th:href="@{|/moments/${item.metadata.name}|}"
+                th:text="${item.owner?.displayName ?: item.owner?.name ?: theme.config.basic.name ?: site.title}"
+              >
+                monster
+              </a>
+              <time
+                th:if="${item.spec.releaseTime != null}"
+                th:datetime="${item.spec.releaseTime}"
+                th:text="${#temporals.format(item.spec.releaseTime, 'yyyy-MM-dd HH:mm')}"
+              >
+                now
+              </time>
+            </div>
+            <a
+              class="moment-permalink"
+              th:href="@{|/moments/${item.metadata.name}|}"
+              aria-label="打开瞬间"
+            >
+              <iconify-icon icon="octicon:link-external-16"></iconify-icon>
+            </a>
+          </header>
+
+          <div
+            class="moment-content article-content"
+            th:if="${item.spec.content != null and not #strings.isEmpty(item.spec.content.html)}"
+            th:utext="${item.spec.content.html}"
+          ></div>
+
+          <div
+            class="moment-media-grid"
+            th:if="${item.spec.content != null and not #lists.isEmpty(item.spec.content.medium)}"
+          >
+            <th:block th:each="medium : ${item.spec.content.medium}">
+              <img
+                th:if="${medium.type != null and medium.type.name() == 'PHOTO'}"
+                th:src="${medium.url}"
+                alt=""
+                loading="lazy"
+              />
+              <video
+                th:if="${medium.type != null and medium.type.name() == 'VIDEO'}"
+                th:src="${medium.url}"
+                controls
+                preload="metadata"
+              ></video>
+              <audio
+                th:if="${medium.type != null and medium.type.name() == 'AUDIO'}"
+                th:src="${medium.url}"
+                controls
+              ></audio>
+              <a
+                class="moment-media-link"
+                th:if="${medium.type != null and medium.type.name() == 'POST'}"
+                th:href="${medium.url}"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <iconify-icon icon="octicon:link-16"></iconify-icon>
+                <span th:text="${medium.url}">相关链接</span>
+              </a>
+            </th:block>
+          </div>
+
+          <footer class="moment-footer">
+            <span th:if="${item.stats != null}">
+              <iconify-icon icon="octicon:thumbsup-16"></iconify-icon>
+              <span th:text="${item.stats.upvote ?: 0}">0</span>
+            </span>
+            <a th:href="@{|/moments/${item.metadata.name}#comments|}">
+              <iconify-icon icon="octicon:comment-16"></iconify-icon>
+              <span th:text="${item.stats?.approvedComment ?: 0}">0</span>
+            </a>
+            <span class="moment-tag-list" th:if="${not #lists.isEmpty(item.spec.tags)}">
+              <a
+                th:each="tag : ${item.spec.tags}"
+                th:href="@{/moments(tag=${tag})}"
+                th:text="|#${tag}|"
+              ></a>
+            </span>
+          </footer>
+        </article>
+      </li>
+    </ol>
+  </section>
+
+  <nav
+    class="pagination"
+    th:if="${moments != null and (moments.hasPrevious() || moments.hasNext())}"
+  >
+    <a th:if="${moments.hasPrevious()}" th:href="@{${moments.prevUrl}}">Previous</a>
+    <span th:text="|${moments.page} / ${moments.totalPages}|"></span>
+    <a th:if="${moments.hasNext()}" th:href="@{${moments.nextUrl}}">Next</a>
+  </nav>
+</include>

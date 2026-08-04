@@ -53,11 +53,8 @@
                 th:if="${not #strings.isEmpty(link.spec.logo)}"
                 th:src="${link.spec.logo}"
                 th:alt="${link.spec.displayName}"
+                data-link-logo
               />
-              <iconify-icon
-                th:if="${#strings.isEmpty(link.spec.logo)}"
-                icon="octicon:link-16"
-              ></iconify-icon>
             </span>
             <span class="link-card-body">
               <span class="link-card-title">

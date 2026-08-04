@@ -81,6 +81,18 @@ const setupActiveMenuItem = () => {
     });
 };
 
+const setupLinkLogoFallbacks = () => {
+  document.querySelectorAll<HTMLImageElement>("img[data-link-logo]").forEach((image) => {
+    const showFallback = () => image.classList.add("is-invalid");
+
+    image.addEventListener("error", showFallback, { once: true });
+
+    if (image.complete && image.naturalWidth === 0) {
+      showFallback();
+    }
+  });
+};
+
 const isTypingTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) {
     return false;
@@ -222,4 +234,5 @@ const setupSearch = () => {
 
 setupCustomMenuIcons();
 setupActiveMenuItem();
+setupLinkLogoFallbacks();
 setupSearch();
