@@ -50,10 +50,11 @@
           >
             <span class="link-logo">
               <img
-                th:if="${not #strings.isEmpty(link.spec.logo)}"
-                th:src="${link.spec.logo}"
+                th:if="${not #strings.isEmpty(link.spec.logo) or not #strings.isEmpty(theme.config.styles.link_default_avatar)}"
+                th:src="${not #strings.isEmpty(link.spec.logo) ? link.spec.logo : theme.config.styles.link_default_avatar}"
                 th:alt="${link.spec.displayName}"
                 data-link-logo
+                th:attr="data-link-fallback=${theme.config.styles.link_default_avatar ?: ''}"
               />
             </span>
             <span class="link-card-body">

@@ -128,3 +128,9 @@ spec:
           name: accent_color
           label: 强调色
           value: "#0969da"
+        - $formkit: attachment
+          name: link_default_avatar
+          label: 友链默认头像
+          value: ""
+          accept: "image/*"
+          help: 当友链未设置 Logo 或 Logo 加载失败时显示，留空则保持默认占位样式

@@ -83,9 +83,20 @@ const setupActiveMenuItem = () => {
 
 const setupLinkLogoFallbacks = () => {
   document.querySelectorAll<HTMLImageElement>("img[data-link-logo]").forEach((image) => {
-    const showFallback = () => image.classList.add("is-invalid");
+    const fallback = image.dataset.linkFallback?.trim();
+    let fallbackAttempted = !fallback || image.getAttribute("src") === fallback;
 
-    image.addEventListener("error", showFallback, { once: true });
+    const showFallback = () => {
+      if (!fallbackAttempted && fallback) {
+        fallbackAttempted = true;
+        image.src = fallback;
+        return;
+      }
+
+      image.classList.add("is-invalid");
+    };
+
+    image.addEventListener("error", showFallback);
 
     if (image.complete && image.naturalWidth === 0) {
       showFallback();
