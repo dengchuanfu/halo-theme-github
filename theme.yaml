@@ -6,7 +6,7 @@ spec:
   displayName: GitHub
   author:
     name: monster
-  description: A GitHub-inspired theme for Halo
+  description: A GitHub-inspired theme for Halo, developed by monster
   settingName: "halo-theme-github-setting"
   configMapName: "halo-theme-github-configMap"
   version: 1.0.0

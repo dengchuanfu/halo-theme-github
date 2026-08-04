@@ -15,6 +15,54 @@ type SearchResult = {
 
 const searchEndpoint = "/apis/api.halo.run/v1alpha1/indices/-/search";
 
+const normalizeMenuPath = (path: string | null | undefined) => {
+  const value = (path || "").trim();
+
+  if (!value) {
+    return "/";
+  }
+
+  try {
+    const url = new URL(value, window.location.origin);
+    const pathname = url.pathname || "/";
+    return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  } catch {
+    const pathname = value.startsWith("/") ? value : `/${value}`;
+    return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  }
+};
+
+const setupCustomMenuIcons = () => {
+  const rules = new Map<string, string>();
+
+  document
+    .querySelectorAll<HTMLElement>("[data-menu-icon-rules] [data-menu-path][data-menu-icon]")
+    .forEach((rule) => {
+      const icon = rule.dataset.menuIcon?.trim();
+
+      if (!icon) {
+        return;
+      }
+
+      rules.set(normalizeMenuPath(rule.dataset.menuPath), icon);
+    });
+
+  if (!rules.size) {
+    return;
+  }
+
+  document
+    .querySelectorAll<HTMLAnchorElement>(".profile-tabs a[data-menu-href]")
+    .forEach((item) => {
+      const icon = rules.get(normalizeMenuPath(item.dataset.menuHref || item.getAttribute("href")));
+      const iconElement = item.querySelector("iconify-icon");
+
+      if (icon && iconElement) {
+        iconElement.setAttribute("icon", icon);
+      }
+    });
+};
+
 const isTypingTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) {
     return false;
@@ -154,4 +202,5 @@ const setupSearch = () => {
   });
 };
 
+setupCustomMenuIcons();
 setupSearch();

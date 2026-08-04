@@ -107,10 +107,13 @@
             isCategoryMenu=${menuHref == '/categories' or menuHref == 'categories' or #strings.startsWith(menuHref, '/categories')},
             isTagsMenu=${menuHref == '/tags' or menuHref == 'tags' or #strings.startsWith(menuHref, '/tags')},
             isAboutMenu=${menuHref == '/about' or menuHref == 'about'},
-            customMenuIcon=${theme.config.icons.custom_menu_icons != null ? theme.config.icons.custom_menu_icons.^[#this.path == menuHref] : null}
+            customMenuIcon=${theme.config.icons.custom_menu_icons != null ? theme.config.icons.custom_menu_icons.^[
+              #this.path == menuHref or ('/' + #this.path) == menuHref or #this.path == ('/' + menuHref)
+            ] : null}
           "
           th:href="@{${item.status.href}}"
           th:target="${item.spec.target?.value}"
+          th:attr="data-menu-href=${item.status.href}"
           th:classappend="${(
             (isHomeMenu and '{{activeHome}}' == 'is-active') or
             (isPostsMenu and '{{activePosts}}' == 'is-active') or
@@ -172,6 +175,13 @@
         </a>
       </th:block>
     </nav>
+
+    <div data-menu-icon-rules hidden th:if="${theme.config.icons.custom_menu_icons != null}">
+      <span
+        th:each="menuIcon : ${theme.config.icons.custom_menu_icons}"
+        th:attr="data-menu-path=${menuIcon.path}, data-menu-icon=${menuIcon.icon}"
+      ></span>
+    </div>
 
     <main class="site-main github-shell">
       <aside class="profile-sidebar">

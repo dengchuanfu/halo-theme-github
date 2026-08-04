@@ -1,7 +1,9 @@
 {
-  "name": "halo-theme-github",
+  "name": "com.monster.github",
   "version": "1.0.0",
   "private": true,
+  "description": "A GitHub-inspired Halo theme developed by monster.",
+  "author": "monster",
   "type": "module",
   "scripts": {
     "build": "tsc && vp build && theme-package",

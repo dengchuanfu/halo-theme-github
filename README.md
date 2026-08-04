@@ -1,7 +1,14 @@
-# Halo Theme GitHub
+# Halo Theme GitHub by monster
 
-A GitHub-inspired theme for Halo, based on the official
+This is a GitHub-inspired theme for Halo developed by **monster**, based on the official
 [`theme-vite-starter`](https://github.com/halo-dev/theme-vite-starter).
+
+## Author
+
+- Developer: **monster**
+- Development namespace: `com.monster.github`
+- Halo theme ID: `halo-theme-github`
+- Repository: `halo-theme-github`
 
 ## Development
 
