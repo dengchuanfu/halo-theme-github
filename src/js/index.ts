@@ -89,6 +89,11 @@ const displayDateFormatter = new Intl.DateTimeFormat("en", {
   month: "short",
   year: "numeric",
 });
+const selectedDateFormatter = new Intl.DateTimeFormat("zh-CN", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
 const atNoon = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
 
@@ -308,20 +313,22 @@ const renderActivity = (
   range: DateRange,
   selectedYear: number,
   currentYear: number,
+  selectedDateKey?: string,
 ) => {
   const visible = activities.filter(
-    ({ date }) =>
-      date >= range.start &&
-      date <= range.end &&
-      date <= new Date() &&
-      (selectedYear === currentYear || date.getFullYear() === selectedYear),
+    (activity) =>
+      (!selectedDateKey || activity.dateKey === selectedDateKey) &&
+      activity.date >= range.start &&
+      activity.date <= range.end &&
+      activity.date <= new Date() &&
+      (selectedYear === currentYear || activity.date.getFullYear() === selectedYear),
   );
   container.replaceChildren();
 
   if (!visible.length) {
     const empty = document.createElement("p");
     empty.className = "activity-empty";
-    empty.textContent = "这个时间段暂无站点动态。";
+    empty.textContent = selectedDateKey ? "该日期暂无站点动态。" : "这个时间段暂无站点动态。";
     container.append(empty);
     return;
   }
@@ -358,6 +365,8 @@ const renderContributionGraph = (
   range: DateRange,
   selectedYear: number,
   currentYear: number,
+  selectedDateKey: string | undefined,
+  onSelectDate: (dateKey: string) => void,
 ) => {
   const days = getRangeDays(range);
   const today = atNoon(new Date());
@@ -391,7 +400,7 @@ const renderContributionGraph = (
   days.forEach((day) => {
     const key = dateKey(day);
     const items = byDay.get(key) || [];
-    const cell = document.createElement("span");
+    const cell = document.createElement("button");
     const isOutside = day.getFullYear() !== selectedYear && selectedYear !== currentYear;
     const isFuture = day > today;
     const level =
@@ -399,10 +408,15 @@ const renderContributionGraph = (
     const titles = items.map(({ title }) => title).join(", ");
     const description = `${items.length} contribution${items.length === 1 ? "" : "s"} on ${displayDateFormatter.format(day)}${titles ? `: ${titles}` : ""}`;
 
-    cell.className = `day level-${level}${isOutside || isFuture ? " is-outside" : ""}`;
+    const isSelected = key === selectedDateKey;
+    cell.type = "button";
+    cell.className = `day level-${level}${isOutside || isFuture ? " is-outside" : ""}${isSelected ? " is-selected" : ""}`;
     cell.setAttribute("role", "gridcell");
     cell.setAttribute("aria-label", description);
+    cell.setAttribute("aria-selected", String(isSelected));
+    cell.disabled = isOutside || isFuture;
     cell.title = description;
+    cell.addEventListener("click", () => onSelectDate(key));
     graph.append(cell);
   });
 
@@ -426,9 +440,10 @@ const setupContributions = async () => {
   const months = root?.querySelector<HTMLElement>("[data-contribution-months]");
   const total = root?.querySelector<HTMLElement>("[data-contribution-total]");
   const years = root?.querySelector<HTMLElement>("[data-contribution-years]");
+  const activityHeading = root?.querySelector<HTMLElement>("[data-activity-heading]");
   const activity = document.querySelector<HTMLElement>("[data-contribution-activity]");
 
-  if (!root || !graph || !months || !total || !years || !activity) {
+  if (!root || !graph || !months || !total || !years || !activityHeading || !activity) {
     return;
   }
 
@@ -442,8 +457,16 @@ const setupContributions = async () => {
     ]);
     const siteActivities = getSiteActivities(posts, moments, tags, categories, photos);
     const currentYear = new Date().getFullYear();
-    const availableYears = Array.from({ length: 4 }, (_, index) => currentYear - index);
+    const earliestYear = Math.min(
+      currentYear,
+      ...siteActivities.map(({ date }) => date.getFullYear()),
+    );
+    const availableYears = Array.from(
+      { length: currentYear - earliestYear + 1 },
+      (_, index) => currentYear - index,
+    );
     let selectedYear = currentYear;
+    let selectedDateKey: string | undefined;
 
     const render = () => {
       const range = getRange(selectedYear, currentYear);
@@ -455,8 +478,19 @@ const setupContributions = async () => {
         range,
         selectedYear,
         currentYear,
+        selectedDateKey,
+        (key) => {
+          selectedDateKey = selectedDateKey === key ? undefined : key;
+          render();
+        },
       );
-      renderActivity(activity, siteActivities, range, selectedYear, currentYear);
+      renderActivity(activity, siteActivities, range, selectedYear, currentYear, selectedDateKey);
+      if (selectedDateKey) {
+        const [year, month, day] = selectedDateKey.split("-").map(Number);
+        activityHeading.textContent = `${selectedDateFormatter.format(new Date(year, month - 1, day, 12))}站点动态`;
+      } else {
+        activityHeading.textContent = "站点动态";
+      }
       years.querySelectorAll("button").forEach((button) => {
         const isActive = Number((button as HTMLButtonElement).dataset.year) === selectedYear;
         button.classList.toggle("is-active", isActive);
@@ -471,6 +505,7 @@ const setupContributions = async () => {
       button.textContent = String(year);
       button.addEventListener("click", () => {
         selectedYear = year;
+        selectedDateKey = undefined;
         render();
       });
       years.append(button);

@@ -1068,8 +1068,24 @@ svg {
   display: block;
   width: 10px;
   height: 10px;
+  padding: 0;
+  border: 0;
   border-radius: 2px;
   background: var(--green-0);
+}
+
+.contribution-graph .day:not(:disabled) {
+  cursor: pointer;
+}
+
+.contribution-graph .day.is-selected {
+  outline: 2px solid var(--fg);
+  outline-offset: 1px;
+}
+
+.contribution-graph .day:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .level-1 {
@@ -1150,7 +1166,8 @@ svg {
 }
 
 .activity-section {
-  margin-top: 32px;
+  min-width: 0;
+  grid-column: 1;
 }
 
 .activity-section > h2 {
