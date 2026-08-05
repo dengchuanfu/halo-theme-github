@@ -139,3 +139,36 @@ spec:
           value: ""
           accept: "image/*"
           help: 当友链未设置 Logo 或 Logo 加载失败时显示，留空则保持默认占位样式
+    - group: footer
+      label: 底部设置
+      formSchema:
+        - $formkit: text
+          name: icp_number
+          label: ICP 备案编号
+          value: ""
+          placeholder: "粤ICP备XXXXXXXX号"
+          help: 只填写备案编号，图标和工信部查询链接由主题提供
+        - $formkit: text
+          name: public_security_number
+          label: 公安备案编号
+          value: ""
+          placeholder: "粤公网安备 XXXXXXXXXXXXXX号"
+          help: 只填写备案编号，图标和公安部查询链接由主题提供
+        - $formkit: text
+          name: provider_name
+          label: 云服务商名称
+          value: ""
+          placeholder: "腾讯云"
+          help: 显示在“本站由 XX 提供服务”中，上传 Logo 后作为图片替代文字的辅助名称
+        - $formkit: attachment
+          name: provider_logo
+          label: 云服务商 Logo
+          value: ""
+          accept: "image/*"
+          help: 建议上传透明背景的横版 Logo，前端显示高度为 20px
+        - $formkit: text
+          name: provider_url
+          label: 云服务商链接
+          value: ""
+          placeholder: "https://cloud.example.com"
+          help: 点击云服务商 Logo 或名称时打开的地址

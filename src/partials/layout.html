@@ -257,9 +257,82 @@
     </main>
 
     <footer class="site-footer">
-      <div class="footer-inner">
-        <p th:text="${theme.config.basic.title ?: site.title}"></p>
-        <halo:footer />
+      <div class="footer-inner" th:with="footerConfig=${theme.config.footer}">
+        <div class="footer-primary">
+          <span class="footer-copyright">
+            <span aria-hidden="true">©</span>
+            <span th:text="${#temporals.year(#temporals.createNow())}">2026</span>
+            <strong th:text="${theme.config.basic.title ?: site.title}">站点名称</strong>
+            <span>保留所有权利</span>
+          </span>
+          <span class="footer-halo"><halo:footer /></span>
+        </div>
+
+        <div
+          class="footer-records"
+          th:if="${footerConfig != null and (not #strings.isEmpty(footerConfig.icp_number) or not #strings.isEmpty(footerConfig.public_security_number))}"
+        >
+          <a
+            th:if="${not #strings.isEmpty(footerConfig.icp_number)}"
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <iconify-icon icon="ri:shield-check-line"></iconify-icon>
+            <span th:text="${footerConfig.icp_number}">粤ICP备XXXXXXXX号</span>
+          </a>
+          <a
+            th:if="${not #strings.isEmpty(footerConfig.public_security_number)}"
+            href="https://beian.mps.gov.cn/#/query/webSearch"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <iconify-icon icon="ri:police-badge-line"></iconify-icon>
+            <span th:text="${footerConfig.public_security_number}">
+              粤公网安备 XXXXXXXXXXXXXX号
+            </span>
+          </a>
+        </div>
+
+        <div
+          class="footer-provider"
+          th:if="${footerConfig != null and (not #strings.isEmpty(footerConfig.provider_name) or not #strings.isEmpty(footerConfig.provider_logo))}"
+        >
+          <span>本站由</span>
+          <a
+            th:if="${not #strings.isEmpty(footerConfig.provider_url)}"
+            th:href="${footerConfig.provider_url}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              th:if="${not #strings.isEmpty(footerConfig.provider_logo)}"
+              th:src="${footerConfig.provider_logo}"
+              th:alt="${footerConfig.provider_name ?: '云服务商'}"
+            />
+            <span
+              th:if="${#strings.isEmpty(footerConfig.provider_logo)}"
+              th:text="${footerConfig.provider_name}"
+              >云服务商</span
+            >
+          </a>
+          <span
+            class="footer-provider-static"
+            th:if="${#strings.isEmpty(footerConfig.provider_url)}"
+          >
+            <img
+              th:if="${not #strings.isEmpty(footerConfig.provider_logo)}"
+              th:src="${footerConfig.provider_logo}"
+              th:alt="${footerConfig.provider_name ?: '云服务商'}"
+            />
+            <span
+              th:if="${#strings.isEmpty(footerConfig.provider_logo)}"
+              th:text="${footerConfig.provider_name}"
+              >云服务商</span
+            >
+          </span>
+          <span>提供服务</span>
+        </div>
       </div>
     </footer>
   </body>
