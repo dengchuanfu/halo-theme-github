@@ -1264,6 +1264,197 @@ svg {
   font-size: 14px;
 }
 
+.message-page {
+  min-width: 0;
+}
+
+.message-heading {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.message-eyebrow {
+  margin: 0 0 4px;
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.message-heading h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.message-count {
+  color: var(--fg-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.message-stage {
+  position: relative;
+  height: 340px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas-subtle);
+  contain: layout paint;
+}
+
+.message-stage::before,
+.message-stage::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--border);
+  content: "";
+  opacity: 0.55;
+}
+
+.message-stage::before {
+  top: 33.333%;
+}
+
+.message-stage::after {
+  top: 66.666%;
+}
+
+.message-stage-status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  color: var(--fg-muted);
+  font-size: 14px;
+}
+
+.message-stage-status iconify-icon {
+  font-size: 28px;
+}
+
+.floating-message {
+  --message-lane: 0;
+  --message-duration: 18s;
+  --message-delay: 0s;
+  position: absolute;
+  z-index: 1;
+  top: calc(15px + var(--message-lane) * 52px);
+  left: 100%;
+  display: flex;
+  max-width: min(460px, 80%);
+  height: 40px;
+  align-items: center;
+  gap: 8px;
+  animation: message-drift var(--message-duration) linear var(--message-delay) infinite;
+  white-space: nowrap;
+  will-change: left, transform;
+}
+
+.floating-message-avatar {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--canvas);
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.floating-message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.floating-message-body {
+  display: flex;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas);
+  box-shadow: 0 1px 2px rgb(31 35 40 / 6%);
+  font-size: 13px;
+}
+
+.floating-message-body strong {
+  flex: 0 0 auto;
+  color: var(--fg);
+  font-size: 12px;
+}
+
+.floating-message-body > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floating-message-body time {
+  flex: 0 0 auto;
+  color: var(--fg-muted);
+  font-size: 11px;
+}
+
+.message-stage:hover .floating-message {
+  animation-play-state: paused;
+}
+
+@keyframes message-drift {
+  from {
+    left: 100%;
+    transform: translateX(0);
+  }
+
+  to {
+    left: 0;
+    transform: translateX(-100%);
+  }
+}
+
+.message-intro {
+  margin-top: 24px;
+}
+
+.message-compose {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.message-compose-heading {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: center;
+  gap: 8px;
+}
+
+.message-compose-heading h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.message-comments-disabled {
+  color: var(--fg-muted);
+  font-size: 14px;
+}
+
 .pagination {
   display: flex;
   padding: 28px 0 0;
@@ -2001,6 +2192,21 @@ article {
   .link-card-title iconify-icon {
     transition: none;
   }
+
+  .message-stage {
+    display: grid;
+    height: 340px;
+    padding: 12px;
+    align-content: start;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  .floating-message {
+    position: static;
+    max-width: 100%;
+    animation: none;
+  }
 }
 
 .site-footer {
@@ -2166,5 +2372,24 @@ article {
 
   .contribution-panel {
     padding: 12px;
+  }
+
+  .message-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .message-stage {
+    height: 300px;
+  }
+
+  .floating-message {
+    top: calc(10px + var(--message-lane) * 46px);
+    max-width: 88%;
+  }
+
+  .floating-message-body time {
+    display: none;
   }
 }

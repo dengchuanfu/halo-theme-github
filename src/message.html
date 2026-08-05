@@ -1,0 +1,63 @@
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass=""
+  sidebarClass=""
+  contentClass=""
+>
+  <template name="head">
+    <title th:text="|${singlePage.spec.title} - ${theme.config.basic.title ?: site.title}|">
+      留言板
+    </title>
+    <script type="module" src="./js/message.ts"></script>
+  </template>
+
+  <section
+    class="message-page"
+    data-message-wall
+    th:attr="data-comment-name=${singlePage.metadata.name}"
+  >
+    <header class="message-heading">
+      <div>
+        <p class="message-eyebrow">Message board</p>
+        <h1 th:text="${singlePage.spec.title}">留言板</h1>
+      </div>
+      <span class="message-count" data-message-count>正在读取留言...</span>
+    </header>
+
+    <div class="message-stage" data-message-stage aria-live="polite">
+      <div class="message-stage-status" data-message-status>
+        <iconify-icon icon="octicon:comment-discussion-16"></iconify-icon>
+        <span>正在加载留言...</span>
+      </div>
+    </div>
+
+    <div
+      class="message-intro article-content"
+      th:if="${singlePage.content != null and not #strings.isEmpty(singlePage.content.content)}"
+      th:utext="${singlePage.content.content}"
+    ></div>
+
+    <section class="message-compose" id="message-comments">
+      <div class="message-compose-heading">
+        <iconify-icon icon="octicon:pencil-16"></iconify-icon>
+        <h2>留下你的消息</h2>
+      </div>
+      <halo:comment
+        th:if="${haloCommentEnabled and singlePage.spec.allowComment}"
+        group="content.halo.run"
+        kind="SinglePage"
+        th:attr="name=${singlePage.metadata.name}"
+      />
+      <p
+        class="message-comments-disabled"
+        th:if="${not haloCommentEnabled or not singlePage.spec.allowComment}"
+      >
+        当前页面未启用评论。
+      </p>
+    </section>
+  </section>
+</include>

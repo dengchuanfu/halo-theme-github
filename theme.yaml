@@ -9,6 +9,11 @@ spec:
   description: A GitHub-inspired theme for Halo, developed by monster
   settingName: "halo-theme-github-setting"
   configMapName: "halo-theme-github-configMap"
+  customTemplates:
+    page:
+      - name: 留言板
+        description: 带评论飘屏效果的留言板页面
+        file: message.html
   version: 1.0.0
   requires: ">=2.0.0"
   license:
