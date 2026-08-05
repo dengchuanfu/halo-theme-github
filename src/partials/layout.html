@@ -107,6 +107,7 @@
             isCategoryMenu=${menuHref == '/categories' or menuHref == 'categories' or #strings.startsWith(menuHref, '/categories')},
             isTagsMenu=${menuHref == '/tags' or menuHref == 'tags' or #strings.startsWith(menuHref, '/tags')},
             isAboutMenu=${menuHref == '/about' or menuHref == 'about'},
+            isPhotosMenu=${menuHref == '/photos' or menuHref == 'photos' or #strings.startsWith(menuHref, '/photos')},
             customMenuIcon=${theme.config.icons.custom_menu_icons != null ? theme.config.icons.custom_menu_icons.^[
               #this.path == menuHref or ('/' + #this.path) == menuHref or #this.path == ('/' + menuHref)
             ] : null}
@@ -133,9 +134,11 @@
                     ? (theme.config.icons.default_category ?: 'octicon:bookmark-16')
                     : (isAboutMenu
                       ? (theme.config.icons.about ?: 'octicon:person-16')
-                      : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
-                        ? customMenuIcon.icon
-                        : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16')))))
+                      : (isPhotosMenu
+                        ? (theme.config.icons.photos ?: 'lineicons:photos')
+                        : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
+                          ? customMenuIcon.icon
+                          : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16'))))))
             }"
           ></iconify-icon>
           <span th:text="${item.status.displayName}">菜单</span>

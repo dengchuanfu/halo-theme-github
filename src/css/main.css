@@ -993,25 +993,10 @@ svg {
   margin-bottom: 8px;
 }
 
-.settings-button {
-  display: inline-flex;
-  padding: 0;
-  align-items: center;
-  gap: 6px;
-  border: 0;
-  background: transparent;
+.contribution-source {
   color: var(--fg-muted);
-  font: inherit;
   font-size: 12px;
   font-weight: 400;
-}
-
-.settings-button span {
-  width: 0;
-  height: 0;
-  border-top: 4px solid var(--fg-muted);
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
 }
 
 .contribution-panel {
@@ -1021,14 +1006,25 @@ svg {
   background: var(--canvas);
 }
 
+.contribution-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
 .contribution-months {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  width: max-content;
   margin-left: 34px;
   margin-bottom: 2px;
+  grid-template-columns: repeat(var(--contribution-weeks, 53), 10px);
+  column-gap: 3px;
   color: var(--fg);
   font-size: 12px;
   font-weight: 400;
+}
+
+.contribution-months span {
+  white-space: nowrap;
 }
 
 .contribution-body {
@@ -1060,11 +1056,12 @@ svg {
 
 .contribution-graph {
   display: grid;
+  width: max-content;
   grid-auto-flow: column;
+  grid-template-columns: repeat(var(--contribution-weeks, 53), 10px);
   grid-template-rows: repeat(7, 10px);
   justify-content: start;
   gap: 3px;
-  overflow: hidden;
 }
 
 .day {
@@ -1089,6 +1086,10 @@ svg {
 
 .level-4 {
   background: var(--green-4);
+}
+
+.contribution-graph .day.is-outside {
+  visibility: hidden;
 }
 
 .contribution-footer {
@@ -1124,19 +1125,23 @@ svg {
   padding-top: 0;
 }
 
-.year-nav a {
+.year-nav button {
   display: flex;
   height: 32px;
   padding: 0 16px;
   align-items: center;
+  border: 0;
   border-radius: 6px;
+  background: transparent;
   color: var(--fg-muted);
+  cursor: pointer;
+  font: inherit;
   font-size: 14px;
   font-weight: 500;
 }
 
-.year-nav a:hover {
-  text-decoration: none;
+.year-nav button:hover {
+  background: var(--canvas-subtle);
 }
 
 .year-nav .is-active {
@@ -1176,7 +1181,7 @@ svg {
 .activity-item {
   position: relative;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
   margin-top: 16px;
   align-items: start;
   gap: 12px;
@@ -1219,11 +1224,27 @@ svg {
   font-size: 14px;
 }
 
-.activity-item button {
-  border: 0;
-  background: transparent;
+.activity-copy a {
+  display: inline-block;
   color: var(--fg-muted);
-  font-size: 18px;
+  font-size: 14px;
+}
+
+.activity-item time {
+  color: var(--fg-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.activity-group + .activity-group {
+  margin-top: 28px;
+}
+
+.activity-empty {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--fg-muted);
+  font-size: 14px;
 }
 
 .pagination {
@@ -1992,15 +2013,6 @@ article {
   .profile-avatar {
     width: 256px;
   }
-
-  .contribution-graph {
-    grid-template-rows: repeat(7, 9px);
-  }
-
-  .day {
-    width: 9px;
-    height: 9px;
-  }
 }
 
 @media (max-width: 1040px) {
@@ -2137,15 +2149,5 @@ article {
 
   .contribution-panel {
     padding: 12px;
-    overflow-x: auto;
-  }
-
-  .contribution-months,
-  .contribution-footer {
-    width: 720px;
-  }
-
-  .contribution-body {
-    width: 720px;
   }
 }

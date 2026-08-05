@@ -22,42 +22,31 @@
     <include src="latest-post-card.html"></include>
   </ul>
 
-  <div class="contrib-layout">
+  <div class="contrib-layout" data-contribution-root>
     <section class="contribution-area">
       <div class="section-heading compact">
-        <h2>36 contributions in the last year</h2>
-        <button class="settings-button" type="button">Contribution settings <span></span></button>
+        <h2 data-contribution-total>Loading contributions...</h2>
+        <span class="contribution-source">文章、瞬间、标签、分类和图库</span>
       </div>
       <div class="contribution-panel">
-        <div class="contribution-months">
-          <span>Aug</span>
-          <span>Sep</span>
-          <span>Oct</span>
-          <span>Nov</span>
-          <span>Dec</span>
-          <span>Jan</span>
-          <span>Feb</span>
-          <span>Mar</span>
-          <span>Apr</span>
-          <span>May</span>
-          <span>Jun</span>
-          <span>Jul</span>
-        </div>
-        <div class="contribution-body">
-          <div class="contribution-weekdays">
-            <span>Mon</span>
-            <span>Wed</span>
-            <span>Fri</span>
-          </div>
-          <div class="contribution-graph" aria-label="Contribution graph">
-            <span
-              th:each="i : ${#numbers.sequence(1, 371)}"
-              th:class="|day level-${(i > 330 || i == 305 || i == 319) ? i % 5 : 0}|"
-            ></span>
+        <div class="contribution-scroll">
+          <div class="contribution-months" data-contribution-months></div>
+          <div class="contribution-body">
+            <div class="contribution-weekdays" aria-hidden="true">
+              <span>Mon</span>
+              <span>Wed</span>
+              <span>Fri</span>
+            </div>
+            <div
+              class="contribution-graph"
+              data-contribution-graph
+              role="grid"
+              aria-label="Post contribution graph"
+            ></div>
           </div>
         </div>
         <div class="contribution-footer">
-          <a href="#">Learn how we count contributions</a>
+          <a th:href="@{/archives}">View all posts</a>
           <div class="contribution-legend">
             <span>Less</span>
             <span class="day level-0"></span>
@@ -70,31 +59,13 @@
         </div>
       </div>
     </section>
-    <aside class="year-nav" aria-label="Contribution years">
-      <a class="is-active" href="#">2026</a>
-      <a href="#">2025</a>
-      <a href="#">2024</a>
-      <a href="#">2023</a>
-    </aside>
+    <aside class="year-nav" data-contribution-years aria-label="Contribution years"></aside>
   </div>
 
   <section class="activity-section">
-    <h2>Contribution activity</h2>
-    <div class="activity-month">
-      <h3>August 2026</h3>
-      <span></span>
-    </div>
-    <div class="activity-item">
-      <div class="activity-icon">⇧</div>
-      <div class="activity-copy">
-        <h3>Created 5 commits in 1 repository</h3>
-        <p
-          th:text="|${theme.config.basic.description ?: 'dengchuanfu'} / ${theme.config.basic.title ?: site.title}|"
-        >
-          dengchuanfu / repo
-        </p>
-      </div>
-      <button type="button" aria-label="More">⌄</button>
+    <h2>站点动态</h2>
+    <div data-contribution-activity>
+      <p class="activity-empty">Loading activity...</p>
     </div>
   </section>
 

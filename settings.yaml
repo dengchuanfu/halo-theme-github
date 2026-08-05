@@ -88,6 +88,11 @@ spec:
           label: 关于图标（/about）
           value: "octicon:person-16"
           help: 对应后台菜单链接 /about，填写 Iconify 图标名称，例如 octicon:person-16
+        - $formkit: text
+          name: photos
+          label: 图库图标（/photos）
+          value: "lineicons:photos"
+          help: 对应后台菜单链接 /photos，填写 Iconify 图标名称，例如 lineicons:photos
         - $formkit: array
           name: custom_menu_icons
           label: 其他菜单栏自定义图标
