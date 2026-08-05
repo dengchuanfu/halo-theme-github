@@ -108,6 +108,7 @@
             isTagsMenu=${menuHref == '/tags' or menuHref == 'tags' or #strings.startsWith(menuHref, '/tags')},
             isAboutMenu=${menuHref == '/about' or menuHref == 'about'},
             isPhotosMenu=${menuHref == '/photos' or menuHref == 'photos' or #strings.startsWith(menuHref, '/photos')},
+            isMessageMenu=${menuHref == '/message' or menuHref == 'message' or #strings.startsWith(menuHref, '/message')},
             customMenuIcon=${theme.config.icons.custom_menu_icons != null ? theme.config.icons.custom_menu_icons.^[
               #this.path == menuHref or ('/' + #this.path) == menuHref or #this.path == ('/' + menuHref)
             ] : null}
@@ -127,7 +128,7 @@
             class="tab-icon"
             th:attr="icon=${
               isHomeMenu
-                ? (theme.config.icons.home ?: 'octicon:book-16')
+                ? (theme.config.icons.home ?: 'line-md:home')
                 : (isPostsMenu
                   ? (theme.config.icons.posts ?: 'octicon:repo-16')
                   : (isDefaultCategoryMenu
@@ -136,9 +137,11 @@
                       ? (theme.config.icons.about ?: 'octicon:person-16')
                       : (isPhotosMenu
                         ? (theme.config.icons.photos ?: 'lineicons:photos')
-                        : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
-                          ? customMenuIcon.icon
-                          : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16'))))))
+                        : (isMessageMenu
+                          ? (theme.config.icons.message ?: 'tabler:message')
+                          : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
+                            ? customMenuIcon.icon
+                            : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16')))))))
             }"
           ></iconify-icon>
           <span th:text="${item.status.displayName}">菜单</span>
@@ -150,7 +153,7 @@
         <a class="{{activeHome}}" th:href="@{/}">
           <iconify-icon
             class="tab-icon"
-            th:attr="icon=${theme.config.icons.home ?: 'octicon:book-16'}"
+            th:attr="icon=${theme.config.icons.home ?: 'line-md:home'}"
           ></iconify-icon>
           <span>首页</span>
         </a>

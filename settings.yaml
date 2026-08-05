@@ -71,8 +71,8 @@ spec:
         - $formkit: text
           name: home
           label: 首页图标（/）
-          value: "octicon:book-16"
-          help: 对应后台菜单链接 /，填写 Iconify 图标名称，例如 octicon:book-16
+          value: "line-md:home"
+          help: 对应后台菜单链接 /，填写 Iconify 图标名称，例如 line-md:home
         - $formkit: text
           name: posts
           label: 文章图标（/archives）
@@ -93,6 +93,11 @@ spec:
           label: 图库图标（/photos）
           value: "lineicons:photos"
           help: 对应后台菜单链接 /photos，填写 Iconify 图标名称，例如 lineicons:photos
+        - $formkit: text
+          name: message
+          label: 留言板图标（/message）
+          value: "tabler:message"
+          help: 对应后台菜单链接 /message，填写 Iconify 图标名称，例如 tabler:message
         - $formkit: array
           name: custom_menu_icons
           label: 其他菜单栏自定义图标

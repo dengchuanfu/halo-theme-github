@@ -73,11 +73,12 @@ pnpm build
 
 | 菜单     | 建议路径              | 默认图标              |
 | -------- | --------------------- | --------------------- |
-| 首页     | `/`                   | `octicon:book-16`     |
+| 首页     | `/`                   | `line-md:home`        |
 | 文章     | `/archives`           | `octicon:repo-16`     |
 | 默认分类 | `/categories/default` | `octicon:bookmark-16` |
 | 关于     | `/about`              | `octicon:person-16`   |
 | 图库     | `/photos`             | `lineicons:photos`    |
+| 留言板   | `/message`            | `tabler:message`      |
 
 在「图标配置」中可以修改这些默认值。其他菜单可通过「其他菜单栏自定义图标」添加路径与 Iconify 图标名称，例如：
 
@@ -85,7 +86,6 @@ pnpm build
 | ---------- | ------------------------------- |
 | `/links`   | `octicon:link-16`               |
 | `/moments` | `octicon:comment-discussion-16` |
-| `/message` | `octicon:comment-16`            |
 
 图标名称可在 [Iconify](https://icon-sets.iconify.design/) 查询。路径没有匹配规则时，主题使用「未匹配菜单默认图标」。
 
