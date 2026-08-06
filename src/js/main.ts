@@ -1,4 +1,5 @@
 import "../css/main.css";
+import "../css/about.css";
 import "iconify-icon";
 
 type SearchHit = {
@@ -77,6 +78,37 @@ const setupThemeToggle = () => {
       // The selected mode still applies for the current page when storage is unavailable.
     }
   });
+};
+
+const setupSiteTimeline = () => {
+  const timeline = document.querySelector<HTMLElement>("[data-site-timeline]");
+  const progress = timeline?.querySelector<HTMLElement>("[data-site-progress]");
+  const percent = timeline?.querySelector<HTMLElement>("[data-site-percent]");
+  const age = timeline?.querySelector<HTMLElement>("[data-site-age]");
+  const target = timeline?.querySelector<HTMLElement>("[data-site-target]");
+
+  if (!timeline || !progress || !percent || !age || !target) {
+    return;
+  }
+
+  const start = new Date(`${timeline.dataset.start}T00:00:00`);
+  const end = new Date(`${timeline.dataset.end}T00:00:00`);
+  const now = new Date();
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return;
+  }
+
+  const elapsed = Math.max(0, now.getTime() - start.getTime());
+  const duration = end.getTime() - start.getTime();
+  const elapsedDays = Math.floor(elapsed / 86_400_000);
+  const durationYears = duration / (365.2425 * 86_400_000);
+  const progressValue = Math.min(100, Math.max(0, (elapsed / duration) * 100));
+
+  progress.style.width = `${progressValue}%`;
+  percent.textContent = `${progressValue.toFixed(2)}%`;
+  age.textContent = `${elapsedDays} 天`;
+  target.textContent = `目标：${Number.isInteger(durationYears) ? durationYears : durationYears.toFixed(1)} 年`;
 };
 
 const normalizeMenuPath = (path: string | null | undefined) => {
@@ -515,6 +547,7 @@ const setupSearch = () => {
 
 setupCustomMenuIcons();
 setupThemeToggle();
+setupSiteTimeline();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
 setupNotificationIndicator();

@@ -230,12 +230,15 @@
     </div>
 
     <main class="site-main github-shell {{shellClass}}">
-      <aside class="profile-sidebar {{sidebarClass}}">
+      <aside
+        class="profile-sidebar {{sidebarClass}}"
+        th:with="isAboutPage=${singlePage != null and singlePage.spec.slug == 'about'}, aboutConfig=${isAboutPage ? theme.config.about : null}"
+      >
         <div class="profile-card">
           <img
             class="profile-avatar"
-            th:src="${site.logo ?: 'https://avatars.githubusercontent.com/u/9919?s=240&v=4'}"
-            th:alt="${theme.config.basic.name ?: site.title}"
+            th:src="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.avatar) ? aboutConfig.avatar : (site.logo ?: 'https://avatars.githubusercontent.com/u/9919?s=240&v=4')}"
+            th:alt="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.name) ? aboutConfig.name : (theme.config.basic.name ?: site.title)}"
           />
           <div
             class="profile-status"
@@ -248,8 +251,16 @@
           >
             <span th:text="${statusEmoji}">😊</span>
           </div>
-          <h1 class="profile-name" th:text="${theme.config.basic.name ?: site.title}">GitHub</h1>
-          <p class="profile-username" th:text="${theme.config.basic.description ?: 'halo-user'}">
+          <h1
+            class="profile-name"
+            th:text="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.name) ? aboutConfig.name : (theme.config.basic.name ?: site.title)}"
+          >
+            GitHub
+          </h1>
+          <p
+            class="profile-username"
+            th:text="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.subtitle) ? aboutConfig.subtitle : (theme.config.basic.description ?: 'halo-user')}"
+          >
             halo-user
           </p>
           <a class="profile-button" th:href="@{/console}" target="_blank" rel="noreferrer"
