@@ -206,6 +206,69 @@ const setupLinkLogoFallbacks = () => {
   });
 };
 
+const setupMomentImagePreview = () => {
+  const images = document.querySelectorAll<HTMLImageElement>("img[data-moment-image]");
+
+  if (!images.length) {
+    return;
+  }
+
+  let preview: HTMLElement | undefined;
+
+  const closePreview = () => {
+    preview?.remove();
+    preview = undefined;
+    document.documentElement.classList.remove("image-preview-open");
+  };
+
+  images.forEach((image) => {
+    image.addEventListener("click", () => {
+      const source = image.currentSrc || image.src;
+
+      if (!source) {
+        return;
+      }
+
+      closePreview();
+      preview = document.createElement("div");
+      preview.className = "image-preview";
+      preview.setAttribute("role", "dialog");
+      preview.setAttribute("aria-modal", "true");
+      preview.setAttribute("aria-label", "图片预览");
+
+      const previewImage = document.createElement("img");
+      previewImage.src = source;
+      previewImage.alt = image.alt;
+
+      const closeButton = document.createElement("button");
+      closeButton.className = "image-preview-close";
+      closeButton.type = "button";
+      closeButton.title = "关闭预览";
+      closeButton.setAttribute("aria-label", "关闭预览");
+      const closeIcon = document.createElement("iconify-icon");
+      closeIcon.setAttribute("icon", "material-symbols:close");
+      closeButton.append(closeIcon);
+      closeButton.addEventListener("click", closePreview);
+
+      preview.append(previewImage, closeButton);
+      preview.addEventListener("click", (event) => {
+        if (event.target === preview) {
+          closePreview();
+        }
+      });
+      document.body.append(preview);
+      document.documentElement.classList.add("image-preview-open");
+      closeButton.focus();
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && preview) {
+      closePreview();
+    }
+  });
+};
+
 const setupMomentUpvotes = () => {
   const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-moment-upvote]"));
 
@@ -991,6 +1054,7 @@ setupThemeToggle();
 setupSiteTimeline();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
+setupMomentImagePreview();
 setupMomentUpvotes();
 setupPostUpvotes();
 setupRepositoryFilters();

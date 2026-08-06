@@ -92,6 +92,7 @@
                 th:src="${medium.url}"
                 alt=""
                 loading="lazy"
+                data-moment-image
               />
               <video
                 th:if="${medium.type != null and medium.type.name() == 'VIDEO'}"
