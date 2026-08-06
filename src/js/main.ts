@@ -13,7 +13,71 @@ type SearchResult = {
   total?: number;
 };
 
+type CurrentUserDetail = {
+  user?: {
+    metadata?: {
+      name?: string;
+    };
+    spec?: {
+      avatar?: string;
+      displayName?: string;
+    };
+  };
+};
+
+type NotificationList = {
+  items?: unknown[];
+  total?: number;
+};
+
 const searchEndpoint = "/apis/api.halo.run/v1alpha1/indices/-/search";
+const currentUserEndpoint = "/apis/api.console.halo.run/v1alpha1/users/-";
+const colorSchemeStorageKey = "halo-theme-github-color-scheme";
+let currentUserRequest: Promise<CurrentUserDetail | undefined> | undefined;
+
+const getCurrentUser = () => {
+  currentUserRequest ??= fetch(currentUserEndpoint)
+    .then((response) => (response.ok ? (response.json() as Promise<CurrentUserDetail>) : undefined))
+    .catch(() => undefined);
+
+  return currentUserRequest;
+};
+
+const setupThemeToggle = () => {
+  const trigger = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
+
+  if (!trigger) {
+    return;
+  }
+
+  let colorScheme = "light";
+
+  try {
+    colorScheme = localStorage.getItem(colorSchemeStorageKey) === "dark" ? "dark" : "light";
+  } catch {
+    colorScheme = "light";
+  }
+
+  const applyColorScheme = (scheme: string) => {
+    const isDark = scheme === "dark";
+    document.documentElement.dataset.colorScheme = isDark ? "dark" : "light";
+    trigger.setAttribute("aria-pressed", String(isDark));
+    trigger.setAttribute("aria-label", isDark ? "切换到日间模式" : "切换到黑夜模式");
+  };
+
+  applyColorScheme(colorScheme);
+
+  trigger.addEventListener("click", () => {
+    colorScheme = colorScheme === "dark" ? "light" : "dark";
+    applyColorScheme(colorScheme);
+
+    try {
+      localStorage.setItem(colorSchemeStorageKey, colorScheme);
+    } catch {
+      // The selected mode still applies for the current page when storage is unavailable.
+    }
+  });
+};
 
 const normalizeMenuPath = (path: string | null | undefined) => {
   const value = (path || "").trim();
@@ -100,6 +164,212 @@ const setupLinkLogoFallbacks = () => {
 
     if (image.complete && image.naturalWidth === 0) {
       showFallback();
+    }
+  });
+};
+
+const setupNotificationIndicator = () => {
+  const link = document.querySelector<HTMLAnchorElement>("[data-notification-link]");
+  const dot = link?.querySelector<HTMLElement>("[data-notification-dot]");
+
+  if (!link || !dot) {
+    return;
+  }
+
+  let username: string | undefined;
+  let checking = false;
+
+  const setUnreadState = (hasUnread: boolean) => {
+    dot.hidden = !hasUnread;
+
+    if (hasUnread) {
+      link.title = "有未读消息";
+    } else {
+      link.removeAttribute("title");
+    }
+  };
+
+  const getCurrentUsername = async () => {
+    if (username) {
+      return username;
+    }
+
+    const currentUser = await getCurrentUser();
+    const name = currentUser?.user?.metadata?.name;
+
+    if (!name || name === "anonymousUser") {
+      return undefined;
+    }
+
+    username = name;
+    return username;
+  };
+
+  const checkUnreadNotifications = async () => {
+    if (checking) {
+      return;
+    }
+
+    checking = true;
+
+    try {
+      const currentUsername = await getCurrentUsername();
+      if (!currentUsername) {
+        setUnreadState(false);
+        return;
+      }
+
+      const endpoint =
+        `/apis/api.notification.halo.run/v1alpha1/userspaces/${encodeURIComponent(currentUsername)}` +
+        "/notifications?page=1&size=1&fieldSelector=spec.unread%3Dtrue";
+      const response = await fetch(endpoint);
+
+      if (!response.ok) {
+        setUnreadState(false);
+        return;
+      }
+
+      const notifications = (await response.json()) as NotificationList;
+      setUnreadState((notifications.total ?? notifications.items?.length ?? 0) > 0);
+    } catch {
+      setUnreadState(false);
+    } finally {
+      checking = false;
+    }
+  };
+
+  void checkUnreadNotifications();
+  window.setInterval(() => void checkUnreadNotifications(), 30_000);
+  window.addEventListener("focus", () => void checkUnreadNotifications());
+};
+
+const setupUserMenu = async () => {
+  const container = document.querySelector<HTMLElement>("[data-user-menu]");
+  const loginLink = container?.querySelector<HTMLAnchorElement>("[data-login-link]");
+  const trigger = container?.querySelector<HTMLButtonElement>("[data-user-menu-trigger]");
+  const menu = container?.querySelector<HTMLElement>("[data-user-menu-list]");
+  const avatar = trigger?.querySelector<HTMLImageElement>("[data-user-avatar]");
+
+  if (!container || !loginLink || !trigger || !menu || !avatar) {
+    return;
+  }
+
+  loginLink.href = `/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
+
+  const currentUser = await getCurrentUser();
+  const username = currentUser?.user?.metadata?.name;
+
+  if (!username || username === "anonymousUser") {
+    return;
+  }
+
+  const fallbackAvatar = avatar.currentSrc || avatar.src;
+  avatar.removeAttribute("srcset");
+  avatar.removeAttribute("sizes");
+  avatar.src = currentUser.user?.spec?.avatar || fallbackAvatar;
+  avatar.alt = currentUser.user?.spec?.displayName || username;
+  avatar.addEventListener("error", () => {
+    if (avatar.src !== fallbackAvatar) {
+      avatar.src = fallbackAvatar;
+    }
+  });
+  loginLink.hidden = true;
+  trigger.hidden = false;
+
+  let closeTimer = 0;
+
+  const closeMenu = (restoreFocus = false) => {
+    window.clearTimeout(closeTimer);
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+
+    if (restoreFocus) {
+      trigger.focus();
+    }
+  };
+
+  const openMenu = (focusFirstItem = false) => {
+    window.clearTimeout(closeTimer);
+    menu.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+
+    if (focusFirstItem) {
+      menu.querySelector<HTMLAnchorElement>("a")?.focus();
+    }
+  };
+
+  container.addEventListener("pointerenter", () => openMenu());
+  container.addEventListener("pointerleave", () => {
+    closeTimer = window.setTimeout(() => closeMenu(), 120);
+  });
+  trigger.addEventListener("click", () => {
+    if (menu.hidden) {
+      openMenu(true);
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!menu.hidden && event.target instanceof Node && !container.contains(event.target)) {
+      closeMenu();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) {
+      closeMenu(true);
+    }
+  });
+};
+
+const setupPublishMenu = () => {
+  const trigger = document.querySelector<HTMLButtonElement>("[data-publish-menu-trigger]");
+  const menu = document.querySelector<HTMLElement>("[data-publish-menu]");
+  const container = trigger?.closest<HTMLElement>(".publish-menu");
+
+  if (!trigger || !menu || !container) {
+    return;
+  }
+
+  let closeTimer = 0;
+
+  const closeMenu = (restoreFocus = false) => {
+    window.clearTimeout(closeTimer);
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+
+    if (restoreFocus) {
+      trigger.focus();
+    }
+  };
+
+  const openMenu = (focusFirstItem = false) => {
+    window.clearTimeout(closeTimer);
+    menu.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+
+    if (focusFirstItem) {
+      menu.querySelector<HTMLAnchorElement>("a")?.focus();
+    }
+  };
+
+  trigger.addEventListener("click", () => {
+    if (menu.hidden) {
+      openMenu(true);
+    }
+  });
+
+  container.addEventListener("pointerenter", () => openMenu());
+  container.addEventListener("pointerleave", () => {
+    closeTimer = window.setTimeout(() => closeMenu(), 120);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!menu.hidden && event.target instanceof Node && !container.contains(event.target)) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) {
+      closeMenu(true);
     }
   });
 };
@@ -244,6 +514,10 @@ const setupSearch = () => {
 };
 
 setupCustomMenuIcons();
+setupThemeToggle();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
+setupNotificationIndicator();
+setupPublishMenu();
+void setupUserMenu();
 setupSearch();

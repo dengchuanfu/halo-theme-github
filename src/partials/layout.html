@@ -9,7 +9,7 @@
     <script type="module" src="./js/main.ts"></script>
   </head>
   <body
-    th:style="|--page-bg: ${theme.config.styles.background_color ?: '#ffffff'}; --accent: ${theme.config.styles.accent_color ?: '#0969da'}|"
+    th:style="|--configured-page-bg: ${theme.config.styles.background_color ?: '#ffffff'}; --configured-accent: ${theme.config.styles.accent_color ?: '#0969da'}|"
   >
     <header class="github-header">
       <div class="header-inner">
@@ -38,33 +38,67 @@
           <span>Search or jump to...</span>
         </button>
         <div class="header-actions">
-          <button class="icon-button wide-icon" type="button" aria-label="Copilot">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path
-                d="M6.5 2.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 .75.75v.35A5.5 5.5 0 0 1 13.5 8v1.75A2.25 2.25 0 0 1 11.25 12h-.75v.75a.75.75 0 0 1-1.5 0V12H7v.75a.75.75 0 0 1-1.5 0V12h-.75A2.25 2.25 0 0 1 2.5 9.75V8a5.5 5.5 0 0 1 4-5.4ZM4 8v1.75c0 .41.34.75.75.75h6.5c.41 0 .75-.34.75-.75V8a4 4 0 0 0-8 0Zm2.25.5a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm3.5 0a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
-              />
-            </svg>
-            <span class="chevron"></span>
+          <button
+            class="icon-button theme-toggle"
+            type="button"
+            aria-label="切换到黑夜模式"
+            aria-pressed="false"
+            title="切换模式"
+            data-theme-toggle
+          >
+            <iconify-icon icon="line-md:switch" aria-hidden="true"></iconify-icon>
           </button>
-          <span class="divider"></span>
-          <button class="icon-button wide-icon" type="button" aria-label="Create new">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path
-                d="M7.25 2a.75.75 0 0 1 1.5 0v5.25H14a.75.75 0 0 1 0 1.5H8.75V14a.75.75 0 0 1-1.5 0V8.75H2a.75.75 0 0 1 0-1.5h5.25Z"
-              />
-            </svg>
-            <span class="chevron"></span>
-          </button>
-          <button class="icon-button" type="button" aria-label="Issues">●</button>
-          <button class="icon-button" type="button" aria-label="Pull requests">⑂</button>
-          <button class="icon-button" type="button" aria-label="Inbox">▱</button>
-          <a class="header-avatar" th:href="@{/console}" aria-label="Profile">
-            <span class="notification-dot"></span>
-            <img
-              th:src="${site.logo ?: 'https://github.com/dengchuanfu.png?size=80'}"
-              th:alt="${theme.config.basic.name ?: site.title}"
-            />
+          <div class="publish-menu">
+            <button
+              class="icon-button wide-icon"
+              type="button"
+              aria-label="Create new"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              data-publish-menu-trigger
+            >
+              <iconify-icon icon="line-md:plus" aria-hidden="true"></iconify-icon>
+              <span class="chevron"></span>
+            </button>
+            <div class="publish-menu-list" role="menu" data-publish-menu hidden>
+              <a th:href="@{/console/posts/editor}" role="menuitem">发布文章</a>
+              <a th:href="@{/console/moments}" role="menuitem">发布瞬间</a>
+              <a th:href="@{/console/photos}" role="menuitem">上传图库</a>
+            </div>
+          </div>
+          <a
+            class="icon-button notification-link"
+            th:href="@{/uc/notifications}"
+            aria-label="Notifications"
+            data-notification-link
+          >
+            <iconify-icon icon="ix:notifications" aria-hidden="true"></iconify-icon>
+            <span class="notification-dot" data-notification-dot hidden></span>
           </a>
+          <div class="user-menu" data-user-menu>
+            <a class="icon-button login-link" th:href="@{/login}" aria-label="登录" data-login-link>
+              <iconify-icon icon="material-symbols:login" aria-hidden="true"></iconify-icon>
+            </a>
+            <button
+              class="header-avatar"
+              type="button"
+              aria-label="用户菜单"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              data-user-menu-trigger
+              hidden
+            >
+              <img
+                th:src="${site.logo ?: 'https://github.com/dengchuanfu.png?size=80'}"
+                th:alt="${theme.config.basic.name ?: site.title}"
+                data-user-avatar
+              />
+            </button>
+            <div class="user-menu-list" role="menu" data-user-menu-list hidden>
+              <a th:href="@{/console}" role="menuitem">控制台</a>
+              <a th:href="@{/logout}" role="menuitem">退出</a>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -107,7 +141,9 @@
             isCategoryMenu=${menuHref == '/categories' or menuHref == 'categories' or #strings.startsWith(menuHref, '/categories')},
             isTagsMenu=${menuHref == '/tags' or menuHref == 'tags' or #strings.startsWith(menuHref, '/tags')},
             isAboutMenu=${menuHref == '/about' or menuHref == 'about'},
+            isLinksMenu=${menuHref == '/links' or menuHref == 'links' or #strings.startsWith(menuHref, '/links')},
             isPhotosMenu=${menuHref == '/photos' or menuHref == 'photos' or #strings.startsWith(menuHref, '/photos')},
+            isMomentsMenu=${menuHref == '/moments' or menuHref == 'moments' or #strings.startsWith(menuHref, '/moments')},
             isMessageMenu=${menuHref == '/message' or menuHref == 'message' or #strings.startsWith(menuHref, '/message')},
             customMenuIcon=${theme.config.icons.custom_menu_icons != null ? theme.config.icons.custom_menu_icons.^[
               #this.path == menuHref or ('/' + #this.path) == menuHref or #this.path == ('/' + menuHref)
@@ -135,13 +171,17 @@
                     ? (theme.config.icons.default_category ?: 'octicon:bookmark-16')
                     : (isAboutMenu
                       ? (theme.config.icons.about ?: 'octicon:person-16')
-                      : (isPhotosMenu
-                        ? (theme.config.icons.photos ?: 'lineicons:photos')
-                        : (isMessageMenu
-                          ? (theme.config.icons.message ?: 'tabler:message')
-                          : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
-                            ? customMenuIcon.icon
-                            : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16')))))))
+                      : (isLinksMenu
+                        ? (theme.config.icons.links ?: 'ri:links-line')
+                        : (isPhotosMenu
+                          ? (theme.config.icons.photos ?: 'lineicons:photos')
+                          : (isMomentsMenu
+                            ? (theme.config.icons.moments ?: 'mingcute:moment-line')
+                            : (isMessageMenu
+                              ? (theme.config.icons.message ?: 'tabler:message')
+                              : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
+                                ? customMenuIcon.icon
+                                : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16')))))))))
             }"
           ></iconify-icon>
           <span th:text="${item.status.displayName}">菜单</span>

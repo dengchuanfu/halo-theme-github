@@ -18,6 +18,8 @@
   --tab-active: #fd8c73;
   --button-bg: #f6f8fa;
   --button-hover: #f3f4f6;
+  --counter-bg: #eaeef2;
+  --overlay-bg: rgb(246 248 250 / 0.72);
   --green-0: #ebedf0;
   --green-1: #9be9a8;
   --green-2: #40c463;
@@ -25,7 +27,34 @@
   --green-4: #216e39;
 }
 
+html[data-color-scheme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-color-scheme="dark"] body {
+  --page-bg: #0d1117;
+  --accent: #58a6ff;
+  --canvas: #0d1117;
+  --canvas-subtle: #161b22;
+  --border: #30363d;
+  --border-muted: #21262d;
+  --fg: #e6edf3;
+  --fg-muted: #8b949e;
+  --fg-subtle: #6e7681;
+  --button-bg: #21262d;
+  --button-hover: #30363d;
+  --counter-bg: #21262d;
+  --overlay-bg: rgb(13 17 23 / 0.8);
+  --green-0: #161b22;
+  --green-1: #0e4429;
+  --green-2: #006d32;
+  --green-3: #26a641;
+  --green-4: #39d353;
+}
+
 body {
+  --page-bg: var(--configured-page-bg, #ffffff);
+  --accent: var(--configured-accent, #0969da);
   min-width: 320px;
   margin: 0;
   background: var(--page-bg);
@@ -79,7 +108,8 @@ svg {
   cursor: default;
 }
 
-.icon-button svg {
+.icon-button svg,
+.icon-button > iconify-icon {
   width: 16px;
   height: 16px;
 }
@@ -156,7 +186,7 @@ svg {
   inset: 0;
   z-index: 60;
   padding: 72px 16px 16px;
-  background: rgb(246 248 250 / 0.72);
+  background: var(--overlay-bg);
   backdrop-filter: blur(1px);
 }
 
@@ -273,11 +303,54 @@ svg {
   gap: 8px;
 }
 
-.divider {
-  width: 1px;
-  height: 20px;
-  margin: 0 4px;
-  background: var(--border);
+.theme-toggle {
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--fg);
+}
+
+.publish-menu {
+  position: relative;
+}
+
+.publish-menu-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  display: grid;
+  width: 136px;
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas);
+  box-shadow: 0 8px 24px rgb(31 35 40 / 0.12);
+}
+
+.publish-menu-list[hidden] {
+  display: none;
+}
+
+.publish-menu-list a {
+  display: flex;
+  min-height: 32px;
+  padding: 6px 12px;
+  align-items: center;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.publish-menu-list a:hover,
+.publish-menu-list a:focus-visible {
+  background: var(--canvas-subtle);
+  text-decoration: none;
+  outline: none;
+}
+
+.user-menu {
+  position: relative;
 }
 
 .header-avatar {
@@ -285,6 +358,17 @@ svg {
   display: block;
   width: 32px;
   height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.header-avatar[hidden],
+.login-link[hidden],
+.user-menu-list[hidden] {
+  display: none;
 }
 
 .header-avatar img {
@@ -296,15 +380,77 @@ svg {
   object-fit: cover;
 }
 
+.login-link {
+  cursor: pointer;
+}
+
+.login-link:hover {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.login-link iconify-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.user-menu-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  display: grid;
+  width: 112px;
+  padding: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas);
+  box-shadow: 0 8px 24px rgb(31 35 40 / 0.12);
+}
+
+.user-menu-list a {
+  display: flex;
+  min-height: 32px;
+  padding: 6px 12px;
+  align-items: center;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.user-menu-list a:hover,
+.user-menu-list a:focus-visible {
+  background: var(--canvas-subtle);
+  text-decoration: none;
+  outline: none;
+}
+
 .notification-dot {
   position: absolute;
-  top: -4px;
-  left: -2px;
+  top: -3px;
+  right: -3px;
   width: 10px;
   height: 10px;
   border: 2px solid var(--canvas-subtle);
   border-radius: 50%;
-  background: #0969da;
+  background: #1f883d;
+}
+
+.notification-dot[hidden] {
+  display: none;
+}
+
+.notification-link {
+  cursor: pointer;
+}
+
+.notification-link:hover {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.notification-link iconify-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .profile-tabs {
@@ -365,7 +511,7 @@ svg {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #eaeef2;
+  background: var(--counter-bg);
   color: var(--fg);
   font-size: 12px;
   font-weight: 600;
@@ -2326,8 +2472,7 @@ article {
 
 @media (max-width: 1040px) {
   .search-box,
-  .divider,
-  .header-actions .icon-button:not(.wide-icon) {
+  .header-actions .icon-button:not(.wide-icon):not(.login-link):not(.theme-toggle) {
     display: none;
   }
 

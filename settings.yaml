@@ -89,10 +89,20 @@ spec:
           value: "octicon:person-16"
           help: 对应后台菜单链接 /about，填写 Iconify 图标名称，例如 octicon:person-16
         - $formkit: text
+          name: links
+          label: 友链图标（/links）
+          value: "ri:links-line"
+          help: 对应后台菜单链接 /links，填写 Iconify 图标名称，例如 ri:links-line
+        - $formkit: text
           name: photos
           label: 图库图标（/photos）
           value: "lineicons:photos"
           help: 对应后台菜单链接 /photos，填写 Iconify 图标名称，例如 lineicons:photos
+        - $formkit: text
+          name: moments
+          label: 瞬间图标（/moments）
+          value: "mingcute:moment-line"
+          help: 对应后台菜单链接 /moments，填写 Iconify 图标名称，例如 mingcute:moment-line
         - $formkit: text
           name: message
           label: 留言板图标（/message）
@@ -104,7 +114,7 @@ spec:
           value: []
           addLabel: 添加菜单图标
           emptyText: 暂无自定义菜单图标，点击下方按钮添加
-          help: 根据后台菜单栏路径逐条设置 Iconify 图标，例如 /links 对应 octicon:link-16
+          help: 根据后台菜单栏路径逐条设置 Iconify 图标，例如 /tools 对应 octicon:tools-16
           itemLabels:
             - type: text
               label: "$value.path"
@@ -115,13 +125,13 @@ spec:
               name: path
               label: 菜单栏路径
               value: ""
-              placeholder: "/links"
+              placeholder: "/tools"
               help: 填写后台菜单项的链接路径，建议以 / 开头
             - $formkit: text
               name: icon
               label: Iconify 图标名称
               value: "octicon:star-16"
-              placeholder: "octicon:link-16"
+              placeholder: "octicon:tools-16"
         - $formkit: text
           name: fallback
           label: 未匹配菜单默认图标
