@@ -17,24 +17,8 @@
   <section
     class="about-page"
     th:if="${singlePage.spec.slug == 'about'}"
-    th:with="siteStats=${siteStatsFinder.getStats()}, aboutConfig=${theme.config.about}"
+    th:with="aboutConfig=${theme.config.about}"
   >
-    <header class="about-file-header">
-      <div class="about-file-name">
-        <iconify-icon icon="octicon:file-16"></iconify-icon>
-        <strong>README.md</strong>
-      </div>
-      <span class="about-visibility">Public</span>
-    </header>
-
-    <div class="about-readme-intro">
-      <span class="about-kicker">HELLO, I AM</span>
-      <h1 th:text="${aboutConfig.name ?: theme.config.basic.name ?: site.title}">Monster</h1>
-      <p th:text="${aboutConfig.subtitle ?: theme.config.basic.description ?: '不服就是不服'}">
-        不服就是不服
-      </p>
-    </div>
-
     <section class="about-section about-overview">
       <div
         class="about-section-copy"
@@ -65,20 +49,6 @@
           <p>本站一半记录生活碎片，一半分享一路走来踩过的运维坑与实操经验。</p>
         </div>
       </div>
-      <dl class="about-stats" th:if="${aboutConfig.show_stats == null or aboutConfig.show_stats}">
-        <div>
-          <dt th:text="${siteStats.post ?: 0}">0</dt>
-          <dd>篇文章</dd>
-        </div>
-        <div>
-          <dt th:text="${siteStats.comment ?: 0}">0</dt>
-          <dd>条评论</dd>
-        </div>
-        <div>
-          <dt th:text="${siteStats.visit ?: 0}">0</dt>
-          <dd>次访问</dd>
-        </div>
-      </dl>
     </section>
 
     <section

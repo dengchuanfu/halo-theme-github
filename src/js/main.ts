@@ -46,6 +46,7 @@ const getCurrentUser = () => {
 
 const setupThemeToggle = () => {
   const trigger = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
+  const icon = trigger?.querySelector<HTMLElement>("iconify-icon");
 
   if (!trigger) {
     return;
@@ -64,6 +65,8 @@ const setupThemeToggle = () => {
     document.documentElement.dataset.colorScheme = isDark ? "dark" : "light";
     trigger.setAttribute("aria-pressed", String(isDark));
     trigger.setAttribute("aria-label", isDark ? "切换到日间模式" : "切换到黑夜模式");
+    trigger.title = isDark ? "切换到日间模式" : "切换到黑夜模式";
+    icon?.setAttribute("icon", isDark ? "solar:moon-line-duotone" : "solar:sun-linear");
   };
 
   applyColorScheme(colorScheme);

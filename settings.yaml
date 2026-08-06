@@ -140,22 +140,6 @@ spec:
     - group: about
       label: 关于设置
       formSchema:
-        - $formkit: attachment
-          name: avatar
-          label: 关于页头像
-          value: ""
-          accept: "image/*"
-          help: 覆盖关于页左侧的大头像；留空时使用 Halo 站点 Logo
-        - $formkit: text
-          name: name
-          label: 名称
-          value: "Monster"
-          help: 显示在关于页左侧资料和右侧 README 标题中
-        - $formkit: text
-          name: subtitle
-          label: 签名
-          value: "不服就是不服"
-          help: 显示在关于页左侧名称下方和右侧 README 标题中
         - $formkit: checkbox
           name: show_tags
           label: 显示个人标签
@@ -193,11 +177,6 @@ spec:
 
             本站一半记录生活碎片，一半分享一路走来踩过的运维坑与实操经验。
           help: 支持换行；留空时显示 Halo 关于页正文
-        - $formkit: checkbox
-          name: show_stats
-          label: 显示站点统计
-          value: true
-          help: 显示文章、评论和访问数量
         - $formkit: checkbox
           name: show_skills
           label: 显示技能与认证

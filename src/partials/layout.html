@@ -13,13 +13,6 @@
   >
     <header class="github-header">
       <div class="header-inner">
-        <button class="icon-button menu-button" type="button" aria-label="Menu">
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path
-              d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75Zm.75 4.25a.75.75 0 0 0 0 1.5h12.5a.75.75 0 0 0 0-1.5H1.75Z"
-            />
-          </svg>
-        </button>
         <a class="octo-mark" th:href="@{/}" aria-label="Home">
           <img
             th:src="${site.logo ?: 'https://github.com/dengchuanfu.png?size=80'}"
@@ -43,10 +36,10 @@
             type="button"
             aria-label="切换到黑夜模式"
             aria-pressed="false"
-            title="切换模式"
+            title="切换到黑夜模式"
             data-theme-toggle
           >
-            <iconify-icon icon="line-md:switch" aria-hidden="true"></iconify-icon>
+            <iconify-icon icon="solar:sun-linear" aria-hidden="true"></iconify-icon>
           </button>
           <div class="publish-menu">
             <button
@@ -230,15 +223,12 @@
     </div>
 
     <main class="site-main github-shell {{shellClass}}">
-      <aside
-        class="profile-sidebar {{sidebarClass}}"
-        th:with="isAboutPage=${singlePage != null and singlePage.spec.slug == 'about'}, aboutConfig=${isAboutPage ? theme.config.about : null}"
-      >
+      <aside class="profile-sidebar {{sidebarClass}}">
         <div class="profile-card">
           <img
             class="profile-avatar"
-            th:src="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.avatar) ? aboutConfig.avatar : (site.logo ?: 'https://avatars.githubusercontent.com/u/9919?s=240&v=4')}"
-            th:alt="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.name) ? aboutConfig.name : (theme.config.basic.name ?: site.title)}"
+            th:src="${site.logo ?: 'https://avatars.githubusercontent.com/u/9919?s=240&v=4'}"
+            th:alt="${theme.config.basic.name ?: site.title}"
           />
           <div
             class="profile-status"
@@ -251,19 +241,72 @@
           >
             <span th:text="${statusEmoji}">😊</span>
           </div>
-          <h1
-            class="profile-name"
-            th:text="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.name) ? aboutConfig.name : (theme.config.basic.name ?: site.title)}"
-          >
-            GitHub
-          </h1>
-          <p
-            class="profile-username"
-            th:text="${isAboutPage and aboutConfig != null and not #strings.isEmpty(aboutConfig.subtitle) ? aboutConfig.subtitle : (theme.config.basic.description ?: 'halo-user')}"
-          >
+          <h1 class="profile-name" th:text="${theme.config.basic.name ?: site.title}">GitHub</h1>
+          <p class="profile-username" th:text="${theme.config.basic.description ?: 'halo-user'}">
             halo-user
           </p>
-          <a class="profile-button" th:href="@{/console}" target="_blank" rel="noreferrer"
+          <a
+            class="profile-button"
+            th:if="${singlePage != null and singlePage.spec.slug == 'about'}"
+            th:href="@{/console/theme/settings/about}"
+            target="_blank"
+            rel="noreferrer"
+            >编辑关于</a
+          >
+          <a
+            class="profile-button"
+            th:if="${singlePage != null and singlePage.spec.template == 'message.html'}"
+            th:href="@{/console/comments}"
+            target="_blank"
+            rel="noreferrer"
+            >管理留言</a
+          >
+          <a
+            class="profile-button"
+            th:if="${(singlePage == null or (singlePage.spec.slug != 'about' and singlePage.spec.template != 'message.html')) and linksTitle != null}"
+            th:href="@{/console/links}"
+            target="_blank"
+            rel="noreferrer"
+            >管理友链</a
+          >
+          <a
+            class="profile-button"
+            th:if="${linksTitle == null and (category != null or categories != null)}"
+            th:href="@{/console/posts/categories}"
+            target="_blank"
+            rel="noreferrer"
+            >管理分类</a
+          >
+          <a
+            class="profile-button"
+            th:if="${linksTitle == null and category == null and categories == null and (moment != null or moments != null)}"
+            th:href="@{/console/moments}"
+            target="_blank"
+            rel="noreferrer"
+            >发布瞬间</a
+          >
+          <a
+            class="profile-button"
+            th:if="${linksTitle == null and category == null and categories == null and moment == null and moments == null and (post != null or archives != null)}"
+            th:href="@{/console/posts/editor}"
+            target="_blank"
+            rel="noreferrer"
+            >发布文章</a
+          >
+          <a
+            class="profile-button"
+            th:if="${'{{activeHome}}' == 'is-active'}"
+            th:href="@{/console}"
+            target="_blank"
+            rel="noreferrer"
+            >后台管理</a
+          >
+          <a
+            class="profile-button"
+            th:unless="${(singlePage != null and (singlePage.spec.slug == 'about' or singlePage.spec.template == 'message.html')) or linksTitle != null or category != null or categories != null or moment != null or moments != null or post != null or archives != null or '{{activeHome}}' == 'is-active'}"
+            th:href="@{/console}"
+            target="_blank"
+            rel="noreferrer"
             >Edit profile</a
           >
           <ul class="profile-meta">
