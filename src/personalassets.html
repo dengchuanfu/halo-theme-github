@@ -9,7 +9,7 @@
   contentClass="content-column-full"
 >
   <template name="head">
-    <title th:text="|${title ?: '资产'} - ${theme.config.basic.title ?: site.title}|">资产</title>
+    <title th:text="|${title ?: '资产'} - ${site.title}|">资产</title>
     <th:block th:replace="~{plugin:personalassets:modules/style}"></th:block>
     <style>
       .github-personalassets {

@@ -8,11 +8,6 @@ spec:
       label: 基础设置
       formSchema:
         - $formkit: text
-          name: title
-          label: 站点信息设置 - 标题
-          value: "monster"
-          help: 显示在顶部站点 Logo 右侧
-        - $formkit: text
           name: name
           label: 站点信息设置 - 名称
           value: "Monster"
@@ -20,7 +15,7 @@ spec:
         - $formkit: textarea
           name: description
           label: 站点信息设置 - 描述
-          value: "dengchuanfu"
+          value: "我是真滴帅～"
           help: 显示在加粗名称下方的灰色文字
         - $formkit: text
           name: location
@@ -29,7 +24,7 @@ spec:
         - $formkit: text
           name: company
           label: 公司 / 学校
-          value: "EasySpeed"
+          value: "社会大学"
         - $formkit: text
           name: email
           label: 邮箱
@@ -330,7 +325,7 @@ spec:
           label: 友链默认头像
           value: ""
           accept: "image/*"
-          help: 当友链未设置 Logo 或 Logo 加载失败时显示，留空则保持默认占位样式
+          help: 当友链未设置 Logo 或 Logo 加载失败时显示；留空时使用默认头像图标
     - group: footer
       label: 底部设置
       formSchema:

@@ -9,9 +9,7 @@
   contentClass=""
 >
   <template name="head">
-    <title th:text="|${singlePage.spec.title} - ${theme.config.basic.title ?: site.title}|">
-      Page Title
-    </title>
+    <title th:text="|${singlePage.spec.title} - ${site.title}|">Page Title</title>
   </template>
 
   <section

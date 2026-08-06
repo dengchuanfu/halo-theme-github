@@ -9,9 +9,7 @@
   contentClass=""
 >
   <template name="head">
-    <title th:text="|${linksTitle ?: '友链'} - ${theme.config.basic.title ?: site.title}|">
-      友链
-    </title>
+    <title th:text="|${linksTitle ?: '友链'} - ${site.title}|">友链</title>
   </template>
 
   <section class="links-page">
@@ -49,6 +47,7 @@
             rel="noopener noreferrer"
           >
             <span class="link-logo">
+              <iconify-icon icon="clarity:avatar-line" aria-hidden="true"></iconify-icon>
               <img
                 th:if="${not #strings.isEmpty(link.spec.logo) or not #strings.isEmpty(theme.config.styles.link_default_avatar)}"
                 th:src="${not #strings.isEmpty(link.spec.logo) ? link.spec.logo : theme.config.styles.link_default_avatar}"

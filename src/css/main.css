@@ -1918,6 +1918,7 @@ article {
 }
 
 .link-logo {
+  position: relative;
   display: inline-flex;
   flex: none;
   --link-logo-size: 36px;
@@ -1935,7 +1936,15 @@ article {
     transform 0.16s ease;
 }
 
+.link-logo iconify-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--fg-muted);
+}
+
 .link-logo img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;

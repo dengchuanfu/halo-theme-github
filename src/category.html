@@ -9,9 +9,7 @@
   contentClass=""
 >
   <template name="head">
-    <title th:text="|${category.spec.displayName} - ${theme.config.basic.title ?: site.title}|">
-      Category Archive
-    </title>
+    <title th:text="|${category.spec.displayName} - ${site.title}|">Category Archive</title>
   </template>
 
   <h1 th:text="|Category: ${category.spec.displayName}|"></h1>

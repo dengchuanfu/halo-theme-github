@@ -9,9 +9,7 @@
   contentClass=""
 >
   <template name="head">
-    <title th:text="|${post.spec.title} - ${theme.config.basic.title ?: site.title}|">
-      Post Title
-    </title>
+    <title th:text="|${post.spec.title} - ${site.title}|">Post Title</title>
     <script type="module" src="./js/post.ts"></script>
   </template>
 

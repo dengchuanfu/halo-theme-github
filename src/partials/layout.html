@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <slot name="head">
-      <title th:text="${theme.config.basic.title ?: site.title}">Site Title</title>
+      <title th:text="${site.title}">Site Title</title>
     </slot>
     <script type="module" src="./js/main.ts"></script>
   </head>
@@ -16,12 +16,10 @@
         <a class="octo-mark" th:href="@{/}" aria-label="Home">
           <img
             th:src="${site.logo ?: 'https://github.com/dengchuanfu.png?size=80'}"
-            th:alt="${theme.config.basic.title ?: site.title}"
+            th:alt="${site.title}"
           />
         </a>
-        <a class="site-title" th:href="@{/}" th:text="${theme.config.basic.title ?: site.title}"
-          >monster</a
-        >
+        <a class="site-title" th:href="@{/}" th:text="${site.title}">monster</a>
         <button class="search-box" type="button" data-search-trigger aria-label="Search">
           <svg viewBox="0 0 16 16" aria-hidden="true">
             <path
@@ -359,7 +357,7 @@
           <span class="footer-copyright">
             <span aria-hidden="true">©</span>
             <span th:text="${#temporals.year(#temporals.createNow())}">2026</span>
-            <strong th:text="${theme.config.basic.title ?: site.title}">站点名称</strong>
+            <strong th:text="${site.title}">站点名称</strong>
             <span>保留所有权利</span>
           </span>
           <span class="footer-halo"><halo:footer /></span>

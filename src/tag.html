@@ -9,9 +9,7 @@
   contentClass=""
 >
   <template name="head">
-    <title th:text="|${tag.spec.displayName} - ${theme.config.basic.title ?: site.title}|">
-      Tag Archive
-    </title>
+    <title th:text="|${tag.spec.displayName} - ${site.title}|">Tag Archive</title>
   </template>
 
   <h1 th:text="|Tag: ${tag.spec.displayName}|"></h1>

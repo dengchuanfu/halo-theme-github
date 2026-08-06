@@ -9,9 +9,7 @@
   contentClass=""
 >
   <template name="head">
-    <title th:text="|${singlePage.spec.title} - ${theme.config.basic.title ?: site.title}|">
-      留言板
-    </title>
+    <title th:text="|${singlePage.spec.title} - ${site.title}|">留言板</title>
     <script type="module" src="./js/message.ts"></script>
   </template>
 
