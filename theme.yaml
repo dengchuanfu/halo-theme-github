@@ -6,7 +6,9 @@ spec:
   displayName: GitHub
   author:
     name: monster
-  description: A GitHub-inspired theme for Halo, developed by monster
+  description: 仿 GitHub 个人主页风格的 Halo 2 主题
+  repo: https://github.com/dengchuanfu/halo-theme-github
+  issues: https://github.com/dengchuanfu/halo-theme-github/issues
   settingName: "halo-theme-github-setting"
   configMapName: "halo-theme-github-configMap"
   customTemplates:
@@ -14,7 +16,7 @@ spec:
       - name: 留言板
         description: 带评论飘屏效果的留言板页面
         file: message.html
-  version: 1.1.0
+  version: 1.1.1
   requires: ">=2.0.0"
   license:
     - name: "GPL-3.0"

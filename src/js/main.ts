@@ -33,7 +33,10 @@ type NotificationList = {
 
 const searchEndpoint = "/apis/api.halo.run/v1alpha1/indices/-/search";
 const currentUserEndpoint = "/apis/api.console.halo.run/v1alpha1/users/-";
+const momentUpvoteEndpoint = "/apis/api.halo.run/v1alpha1/trackers/upvote";
 const colorSchemeStorageKey = "halo-theme-github-color-scheme";
+const momentUpvoteStorageKey = "halo.upvoted.moment.names";
+const postUpvoteStorageKey = "halo.upvoted.post.names";
 let currentUserRequest: Promise<CurrentUserDetail | undefined> | undefined;
 
 const getCurrentUser = () => {
@@ -201,6 +204,439 @@ const setupLinkLogoFallbacks = () => {
       showFallback();
     }
   });
+};
+
+const setupMomentUpvotes = () => {
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-moment-upvote]"));
+
+  if (!buttons.length) {
+    return;
+  }
+
+  let upvotedNames: string[] = [];
+
+  try {
+    const savedNames = JSON.parse(localStorage.getItem(momentUpvoteStorageKey) || "[]");
+    upvotedNames = Array.isArray(savedNames)
+      ? savedNames.filter((name): name is string => typeof name === "string")
+      : [];
+  } catch {
+    upvotedNames = [];
+  }
+
+  const setUpvotedState = (button: HTMLButtonElement, upvoted: boolean) => {
+    button.classList.toggle("is-upvoted", upvoted);
+    button.setAttribute("aria-pressed", String(upvoted));
+    button.setAttribute("aria-label", upvoted ? "已点赞" : "点赞瞬间");
+    button.title = upvoted ? "已点赞" : "点赞";
+  };
+
+  buttons.forEach((button) => {
+    const name = button.dataset.momentUpvote;
+
+    if (!name) {
+      return;
+    }
+
+    setUpvotedState(button, upvotedNames.includes(name));
+
+    button.addEventListener("click", async () => {
+      if (upvotedNames.includes(name) || button.disabled) {
+        return;
+      }
+
+      button.disabled = true;
+
+      try {
+        const response = await fetch(momentUpvoteEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            group: "moment.halo.run",
+            plural: "moments",
+            name,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Moment upvote failed: ${response.status}`);
+        }
+
+        upvotedNames = [...upvotedNames, name];
+
+        try {
+          localStorage.setItem(momentUpvoteStorageKey, JSON.stringify(upvotedNames));
+        } catch {
+          // The current page still reflects the successful upvote when storage is unavailable.
+        }
+
+        buttons
+          .filter((item) => item.dataset.momentUpvote === name)
+          .forEach((item) => {
+            const count = item.querySelector<HTMLElement>("[data-moment-upvote-count]");
+            const current = Number.parseInt(count?.textContent || "0", 10);
+
+            if (count) {
+              count.textContent = String(Number.isNaN(current) ? 1 : current + 1);
+            }
+
+            setUpvotedState(item, true);
+          });
+      } catch {
+        window.alert("点赞失败，请稍后再试");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+};
+
+const setupPostUpvotes = () => {
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-post-upvote]"));
+
+  if (!buttons.length) {
+    return;
+  }
+
+  let upvotedNames: string[] = [];
+
+  try {
+    const savedNames = JSON.parse(localStorage.getItem(postUpvoteStorageKey) || "[]");
+    upvotedNames = Array.isArray(savedNames)
+      ? savedNames.filter((name): name is string => typeof name === "string")
+      : [];
+  } catch {
+    upvotedNames = [];
+  }
+
+  const setUpvotedState = (button: HTMLButtonElement, upvoted: boolean) => {
+    button.classList.toggle("is-upvoted", upvoted);
+    button.setAttribute("aria-pressed", String(upvoted));
+    button.setAttribute("aria-label", upvoted ? "已点赞" : "点赞文章");
+    button.title = upvoted ? "已点赞" : "点赞";
+  };
+
+  buttons.forEach((button) => {
+    const name = button.dataset.postUpvote;
+
+    if (!name) {
+      return;
+    }
+
+    setUpvotedState(button, upvotedNames.includes(name));
+
+    button.addEventListener("click", async () => {
+      if (upvotedNames.includes(name) || button.disabled) {
+        return;
+      }
+
+      button.disabled = true;
+
+      try {
+        const response = await fetch(momentUpvoteEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            group: "content.halo.run",
+            plural: "posts",
+            name,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Post upvote failed: ${response.status}`);
+        }
+
+        upvotedNames = [...upvotedNames, name];
+
+        try {
+          localStorage.setItem(postUpvoteStorageKey, JSON.stringify(upvotedNames));
+        } catch {
+          // The current page still reflects the successful upvote when storage is unavailable.
+        }
+
+        buttons
+          .filter((item) => item.dataset.postUpvote === name)
+          .forEach((item) => {
+            const count = item.querySelector<HTMLElement>("[data-post-upvote-count]");
+            const current = Number.parseInt(count?.textContent || "0", 10);
+
+            if (count) {
+              count.textContent = String(Number.isNaN(current) ? 1 : current + 1);
+            }
+
+            setUpvotedState(item, true);
+          });
+      } catch {
+        window.alert("点赞失败，请稍后再试");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+};
+
+const setupRepositoryFilters = () => {
+  const list = document.querySelector<HTMLUListElement>(".repository-list");
+  const triggers = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-repository-filter]"),
+  );
+  const items = Array.from(list?.querySelectorAll<HTMLLIElement>("[data-repository-title]") || []);
+
+  if (!list || !triggers.length || !items.length) {
+    return;
+  }
+
+  type FilterKind = "category" | "tag" | "sort";
+  type SortOrder = "newest" | "oldest" | "title";
+  type TaxonomyListResult = {
+    items?: Array<{
+      spec?: {
+        displayName?: string;
+      };
+    }>;
+    totalPages?: number;
+  };
+  type RepositoryItem = {
+    categories: string[];
+    date: number;
+    element: HTMLLIElement;
+    tags: string[];
+    title: string;
+  };
+
+  const repositoryItems: RepositoryItem[] = items.map((element) => ({
+    categories: Array.from(
+      element.querySelectorAll<HTMLAnchorElement>(".repository-list-meta a"),
+    ).map((link) => link.textContent?.trim() || ""),
+    date: Date.parse(element.dataset.repositoryDate || "") || 0,
+    element,
+    tags: Array.from(element.querySelectorAll<HTMLAnchorElement>(".repository-title-tag")).map(
+      (link) => link.textContent?.trim() || "",
+    ),
+    title: element.dataset.repositoryTitle?.trim() || "",
+  }));
+  let categories = Array.from(
+    new Set(repositoryItems.flatMap(({ categories }) => categories).filter(Boolean)),
+  ).sort((left, right) => left.localeCompare(right, "zh-CN"));
+  let tags = Array.from(new Set(repositoryItems.flatMap(({ tags }) => tags).filter(Boolean))).sort(
+    (left, right) => left.localeCompare(right, "zh-CN"),
+  );
+  const labels: Record<FilterKind, string> = {
+    category: "分类",
+    sort: "排序",
+    tag: "标签",
+  };
+  const filters: { category?: string; sort: SortOrder; tag?: string } = { sort: "newest" };
+  let menu: HTMLElement | undefined;
+  let closeTimer = 0;
+
+  const fetchTaxonomyNames = async (endpoint: string) => {
+    const names: string[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    try {
+      do {
+        const response = await fetch(`${endpoint}?page=${page}&size=100`);
+
+        if (!response.ok) {
+          return [];
+        }
+
+        const result = (await response.json()) as TaxonomyListResult;
+        names.push(
+          ...(result.items || [])
+            .map((item) => item.spec?.displayName?.trim() || "")
+            .filter(Boolean),
+        );
+        totalPages = Math.max(1, result.totalPages || 1);
+        page += 1;
+      } while (page <= totalPages);
+    } catch {
+      return [];
+    }
+
+    return Array.from(new Set(names)).sort((left, right) => left.localeCompare(right, "zh-CN"));
+  };
+
+  void Promise.all([
+    fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/categories"),
+    fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/tags"),
+  ]).then(([loadedCategories, loadedTags]) => {
+    if (loadedCategories.length) {
+      categories = loadedCategories;
+    }
+
+    if (loadedTags.length) {
+      tags = loadedTags;
+    }
+  });
+
+  const closeMenu = () => {
+    window.clearTimeout(closeTimer);
+    menu?.remove();
+    menu = undefined;
+    triggers.forEach((trigger) => trigger.setAttribute("aria-expanded", "false"));
+  };
+
+  const scheduleClose = () => {
+    window.clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(closeMenu, 120);
+  };
+
+  const updateLabels = () => {
+    triggers.forEach((trigger) => {
+      const kind = trigger.dataset.repositoryFilter as FilterKind | undefined;
+      const label = trigger.querySelector<HTMLElement>("[data-repository-filter-label]");
+
+      if (!kind || !label) {
+        return;
+      }
+
+      if (kind === "category") {
+        label.textContent = filters.category || labels.category;
+      } else if (kind === "tag") {
+        label.textContent = filters.tag || labels.tag;
+      } else {
+        label.textContent =
+          filters.sort === "oldest"
+            ? "最早发布"
+            : filters.sort === "title"
+              ? "标题 A-Z"
+              : labels.sort;
+      }
+    });
+  };
+
+  const applyFilters = () => {
+    const sorted = [...repositoryItems].sort((left, right) => {
+      if (filters.sort === "oldest") {
+        return left.date - right.date;
+      }
+
+      if (filters.sort === "title") {
+        return left.title.localeCompare(right.title, "zh-CN");
+      }
+
+      return right.date - left.date;
+    });
+
+    sorted.forEach((item) => {
+      const categoryMatches = !filters.category || item.categories.includes(filters.category);
+      const tagMatches = !filters.tag || item.tags.includes(filters.tag);
+      item.element.hidden = !(categoryMatches && tagMatches);
+      list.append(item.element);
+    });
+
+    updateLabels();
+  };
+
+  const option = (label: string, value: string, active: boolean) => {
+    const button = document.createElement("button");
+    button.className = "repository-filter-option";
+    button.type = "button";
+    button.textContent = label;
+    button.dataset.value = value;
+    button.classList.toggle("is-active", active);
+    return button;
+  };
+
+  const openMenu = (trigger: HTMLButtonElement, kind: FilterKind) => {
+    window.clearTimeout(closeTimer);
+
+    if (menu && trigger.getAttribute("aria-expanded") === "true") {
+      return;
+    }
+
+    closeMenu();
+    menu = document.createElement("div");
+    menu.className = "repository-filter-menu";
+    menu.setAttribute("role", "menu");
+
+    const options =
+      kind === "category"
+        ? [
+            option("全部分类", "", !filters.category),
+            ...categories.map((name) => option(name, name, filters.category === name)),
+          ]
+        : kind === "tag"
+          ? [
+              option("全部标签", "", !filters.tag),
+              ...tags.map((name) => option(name, name, filters.tag === name)),
+            ]
+          : [
+              option("最新发布", "newest", filters.sort === "newest"),
+              option("最早发布", "oldest", filters.sort === "oldest"),
+              option("标题 A-Z", "title", filters.sort === "title"),
+            ];
+
+    menu.append(...options);
+    document.body.append(menu);
+    const rect = trigger.getBoundingClientRect();
+    menu.style.top = `${rect.bottom + 4}px`;
+    menu.style.left = `${Math.min(rect.left, window.innerWidth - menu.offsetWidth - 8)}px`;
+    trigger.setAttribute("aria-expanded", "true");
+
+    menu.addEventListener("pointerenter", () => window.clearTimeout(closeTimer));
+    menu.addEventListener("pointerleave", scheduleClose);
+
+    menu.addEventListener("click", (event) => {
+      const target = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-value]");
+
+      if (!target) {
+        return;
+      }
+
+      if (kind === "category") {
+        filters.category = target.dataset.value || undefined;
+      } else if (kind === "tag") {
+        filters.tag = target.dataset.value || undefined;
+      } else {
+        filters.sort = (target.dataset.value as SortOrder) || "newest";
+      }
+
+      applyFilters();
+      closeMenu();
+    });
+  };
+
+  triggers.forEach((trigger) => {
+    const openTriggerMenu = () => {
+      const kind = trigger.dataset.repositoryFilter as FilterKind | undefined;
+
+      if (kind) {
+        openMenu(trigger, kind);
+      }
+    };
+
+    trigger.addEventListener("pointerenter", openTriggerMenu);
+    trigger.addEventListener("pointerleave", scheduleClose);
+    trigger.addEventListener("focus", openTriggerMenu);
+  });
+  document.addEventListener("click", (event) => {
+    const clickTarget = event.target;
+
+    if (
+      menu &&
+      clickTarget instanceof Node &&
+      !menu.contains(clickTarget) &&
+      !triggers.some((trigger) => trigger.contains(clickTarget))
+    ) {
+      closeMenu();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu) {
+      closeMenu();
+    }
+  });
+
+  applyFilters();
 };
 
 const setupNotificationIndicator = () => {
@@ -435,7 +871,9 @@ const createResultItem = (hit: SearchHit) => {
 };
 
 const setupSearch = () => {
-  const trigger = document.querySelector<HTMLButtonElement>("[data-search-trigger]");
+  const triggers = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-search-trigger]"),
+  );
   const overlay = document.querySelector<HTMLElement>("[data-search-overlay]");
   const form = document.querySelector<HTMLFormElement>("[data-search-form]");
   const input = document.querySelector<HTMLInputElement>("[data-search-input]");
@@ -443,7 +881,7 @@ const setupSearch = () => {
   const status = document.querySelector<HTMLElement>("[data-search-status]");
   const results = document.querySelector<HTMLElement>("[data-search-results]");
 
-  if (!trigger || !overlay || !form || !input || !closeButton || !status || !results) {
+  if (!triggers.length || !overlay || !form || !input || !closeButton || !status || !results) {
     return;
   }
 
@@ -521,7 +959,7 @@ const setupSearch = () => {
     }
   };
 
-  trigger.addEventListener("click", openSearch);
+  triggers.forEach((trigger) => trigger.addEventListener("click", openSearch));
   closeButton.addEventListener("click", closeSearch);
   overlay.addEventListener("click", (event) => {
     if (event.target === overlay) {
@@ -553,6 +991,9 @@ setupThemeToggle();
 setupSiteTimeline();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
+setupMomentUpvotes();
+setupPostUpvotes();
+setupRepositoryFilters();
 setupNotificationIndicator();
 setupPublishMenu();
 void setupUserMenu();

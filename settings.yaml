@@ -17,23 +17,53 @@ spec:
           label: 站点信息设置 - 描述
           value: "我是真滴帅～"
           help: 显示在加粗名称下方的灰色文字
-        - $formkit: text
-          name: location
-          label: 所在地
-          value: "ShenZhen"
-        - $formkit: text
-          name: company
-          label: 公司 / 学校
-          value: "社会大学"
-        - $formkit: text
-          name: email
-          label: 邮箱
-          value: ""
+        - $formkit: array
+          name: profile_meta
+          label: 个人资料信息
+          value:
+            - text: "社会大学"
+              icon: "octicon:organization-16"
+              url: ""
+            - text: "ShenZhen"
+              icon: "octicon:location-16"
+              url: ""
+            - text: "monster@ffbf.top"
+              icon: "octicon:mail-16"
+              url: "mailto:monster@ffbf.top"
+          addLabel: 添加资料信息
+          emptyText: 暂无资料信息
+          help: 可自定义内容、Iconify 图标和链接，并拖动调整显示顺序
+          itemLabels:
+            - type: text
+              label: "$value.text"
+          children:
+            - $formkit: text
+              name: text
+              label: 内容
+              value: ""
+              placeholder: "社会大学"
+            - $formkit: text
+              name: icon
+              label: Iconify 图标
+              value: "octicon:info-16"
+              placeholder: "octicon:organization-16"
+            - $formkit: text
+              name: url
+              label: 链接（可选）
+              value: ""
+              placeholder: "mailto:monster@ffbf.top"
         - $formkit: checkbox
           name: show_stats
           label: 是否显示网站统计信息
-          value: false
+          value: true
           help: 开启后在前端大 Logo 资料区显示总文章数量、总评论数量和总访问量
+        - $formkit: number
+          name: activity_limit
+          label: 首页站点动态显示条数
+          value: 6
+          min: 1
+          max: 50
+          help: 首页“站点动态”默认展示的最新记录数量
         - $formkit: select
           name: status
           label: 状态 Emoji

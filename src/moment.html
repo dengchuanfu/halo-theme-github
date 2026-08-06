@@ -84,10 +84,17 @@
     </div>
 
     <footer class="moment-footer moment-detail-footer">
-      <span th:if="${moment.stats != null}">
+      <button
+        class="moment-upvote"
+        type="button"
+        th:if="${moment.stats != null}"
+        th:attr="data-moment-upvote=${moment.metadata.name}"
+        aria-label="点赞瞬间"
+        title="点赞"
+      >
         <iconify-icon icon="octicon:thumbsup-16"></iconify-icon>
-        <span th:text="${moment.stats.upvote ?: 0}">0</span>
-      </span>
+        <span data-moment-upvote-count th:text="${moment.stats.upvote ?: 0}">0</span>
+      </button>
       <span th:if="${moment.stats != null}">
         <iconify-icon icon="octicon:comment-16"></iconify-icon>
         <span th:text="${moment.stats.approvedComment ?: 0}">0</span>

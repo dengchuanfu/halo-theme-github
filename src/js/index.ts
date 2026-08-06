@@ -313,6 +313,7 @@ const renderActivity = (
   range: DateRange,
   selectedYear: number,
   currentYear: number,
+  limit: number,
   selectedDateKey?: string,
 ) => {
   const visible = activities.filter(
@@ -323,9 +324,10 @@ const renderActivity = (
       activity.date <= new Date() &&
       (selectedYear === currentYear || activity.date.getFullYear() === selectedYear),
   );
+  const displayed = visible.slice(0, limit);
   container.replaceChildren();
 
-  if (!visible.length) {
+  if (!displayed.length) {
     const empty = document.createElement("p");
     empty.className = "activity-empty";
     empty.textContent = selectedDateKey ? "该日期暂无站点动态。" : "这个时间段暂无站点动态。";
@@ -334,7 +336,7 @@ const renderActivity = (
   }
 
   const groups = new Map<string, SiteActivity[]>();
-  visible.forEach((activity) => {
+  displayed.forEach((activity) => {
     const key = `${activity.date.getFullYear()}-${activity.date.getMonth()}`;
     const group = groups.get(key) || [];
     group.push(activity);
@@ -447,6 +449,11 @@ const setupContributions = async () => {
     return;
   }
 
+  const configuredLimit = Number.parseInt(root.dataset.activityLimit || "6", 10);
+  const activityLimit = Number.isNaN(configuredLimit)
+    ? 6
+    : Math.min(Math.max(configuredLimit, 1), 50);
+
   try {
     const [posts, moments, tags, categories, photos] = await Promise.all([
       fetchAll<Post>(postsEndpoint),
@@ -484,7 +491,15 @@ const setupContributions = async () => {
           render();
         },
       );
-      renderActivity(activity, siteActivities, range, selectedYear, currentYear, selectedDateKey);
+      renderActivity(
+        activity,
+        siteActivities,
+        range,
+        selectedYear,
+        currentYear,
+        activityLimit,
+        selectedDateKey,
+      );
       if (selectedDateKey) {
         const [year, month, day] = selectedDateKey.split("-").map(Number);
         activityHeading.textContent = `${selectedDateFormatter.format(new Date(year, month - 1, day, 12))}站点动态`;

@@ -894,21 +894,61 @@ svg {
 .repository-filter-button {
   display: inline-flex;
   height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
   padding: 0 12px;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--button-bg);
   color: var(--fg);
+  cursor: default;
   font: inherit;
   font-size: 14px;
   font-weight: 500;
 }
 
+.repository-filter-button:hover,
+.repository-filter-button[aria-expanded="true"] {
+  color: var(--accent);
+}
+
 .repository-filter-button .chevron {
   border-top-color: var(--fg-muted);
+}
+
+.repository-filter-menu {
+  position: fixed;
+  z-index: 30;
+  min-width: 156px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--button-bg);
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
+}
+
+.repository-filter-option {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  padding: 6px 8px;
+  color: var(--fg);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.repository-filter-option:hover,
+.repository-filter-option.is-active {
+  background: var(--button-hover);
+  color: var(--accent);
 }
 
 .repository-list {
@@ -1033,11 +1073,14 @@ svg {
   display: inline-flex;
   height: 100%;
   min-width: 54px;
+  border: 0;
+  background: transparent;
   padding: 0 8px;
   align-items: center;
   justify-content: center;
   gap: 4px;
   color: var(--fg);
+  font: inherit;
   font-size: 12px;
   font-weight: 500;
   line-height: 20px;
@@ -1046,6 +1089,20 @@ svg {
 .repository-action-button:hover {
   background: var(--button-hover);
   text-decoration: none;
+}
+
+.post-upvote {
+  cursor: pointer;
+}
+
+.post-upvote.is-upvoted,
+.post-upvote.is-upvoted iconify-icon {
+  color: var(--accent);
+}
+
+.post-upvote:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .repository-action-button + .repository-action-button {
@@ -2186,11 +2243,30 @@ article {
 }
 
 .moment-footer > span,
-.moment-footer > a {
+.moment-footer > a,
+.moment-upvote {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   color: var(--fg-muted);
+}
+
+.moment-upvote {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.moment-upvote:hover:not(:disabled),
+.moment-upvote.is-upvoted {
+  color: var(--accent);
+}
+
+.moment-upvote:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .moment-footer iconify-icon {

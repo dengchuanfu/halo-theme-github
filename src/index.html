@@ -22,7 +22,11 @@
     <include src="latest-post-card.html"></include>
   </ul>
 
-  <div class="contrib-layout" data-contribution-root>
+  <div
+    class="contrib-layout"
+    data-contribution-root
+    th:attr="data-activity-limit=${theme.config.basic.activity_limit ?: 6}"
+  >
     <section class="contribution-area">
       <div class="section-heading compact">
         <h2 data-contribution-total>Loading contributions...</h2>

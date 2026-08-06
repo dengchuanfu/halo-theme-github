@@ -18,16 +18,31 @@
         Find an article...
       </button>
       <div class="repository-filters" aria-label="文章筛选">
-        <button class="repository-filter-button" type="button">
-          <span>Type</span>
+        <button
+          class="repository-filter-button"
+          type="button"
+          data-repository-filter="category"
+          aria-expanded="false"
+        >
+          <span data-repository-filter-label>分类</span>
           <span class="chevron"></span>
         </button>
-        <button class="repository-filter-button" type="button">
-          <span>Language</span>
+        <button
+          class="repository-filter-button"
+          type="button"
+          data-repository-filter="tag"
+          aria-expanded="false"
+        >
+          <span data-repository-filter-label>标签</span>
           <span class="chevron"></span>
         </button>
-        <button class="repository-filter-button" type="button">
-          <span>Sort</span>
+        <button
+          class="repository-filter-button"
+          type="button"
+          data-repository-filter="sort"
+          aria-expanded="false"
+        >
+          <span data-repository-filter-label>排序</span>
           <span class="chevron"></span>
         </button>
       </div>
@@ -36,7 +51,11 @@
     <ul class="repository-list">
       <th:block th:each="archive : ${archives.items}">
         <th:block th:each="month : ${archive.months}">
-          <li class="repository-list-item" th:each="post : ${month.posts}">
+          <li
+            class="repository-list-item"
+            th:each="post : ${month.posts}"
+            th:attr="data-repository-title=${post.spec.title}, data-repository-date=${post.spec.publishTime}"
+          >
             <div class="repository-list-copy">
               <div class="repository-list-heading">
                 <h2 class="repository-list-title">
@@ -67,17 +86,27 @@
                   ></a>
                 </span>
                 <span th:unless="${not #lists.isEmpty(post.categories)}">未分类</span>
-                <time th:text="|Updated ${#temporals.format(post.spec.publishTime, 'MMM d')}|">
+                <time
+                  th:datetime="${post.spec.publishTime}"
+                  th:text="|Updated ${#temporals.format(post.spec.publishTime, 'MMM d')}|"
+                >
                   Updated now
                 </time>
               </div>
             </div>
             <div class="repository-side">
               <div class="repository-action-group" aria-label="文章操作">
-                <a class="repository-action-button" th:href="@{${post.status.permalink}}">
+                <button
+                  class="repository-action-button post-upvote"
+                  type="button"
+                  th:attr="data-post-upvote=${post.metadata.name}"
+                  aria-label="点赞文章"
+                  title="点赞"
+                >
                   <iconify-icon icon="octicon:thumbsup-16"></iconify-icon>
                   <span>点赞</span>
-                </a>
+                  <span data-post-upvote-count th:text="${post.stats?.upvote ?: 0}">0</span>
+                </button>
                 <a
                   class="repository-action-button"
                   th:href="@{${post.status.permalink} + '#comments'}"

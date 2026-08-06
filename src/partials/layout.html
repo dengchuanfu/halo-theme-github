@@ -308,21 +308,38 @@
             >Edit profile</a
           >
           <ul class="profile-meta">
-            <li th:if="${theme.config.basic.company}">
-              <iconify-icon class="meta-icon" icon="octicon:organization-16"></iconify-icon>
-              <span th:text="${theme.config.basic.company}">Company</span>
-            </li>
-            <li th:if="${theme.config.basic.location}">
-              <iconify-icon class="meta-icon" icon="octicon:location-16"></iconify-icon>
-              <span th:text="${theme.config.basic.location}">Location</span>
-            </li>
-            <li th:if="${theme.config.basic.email}">
-              <iconify-icon class="meta-icon" icon="octicon:mail-16"></iconify-icon>
-              <a
-                th:href="|mailto:${theme.config.basic.email}|"
-                th:text="${theme.config.basic.email}"
-              ></a>
-            </li>
+            <th:block th:if="${not #lists.isEmpty(theme.config.basic.profile_meta)}">
+              <li th:each="item : ${theme.config.basic.profile_meta}" th:if="${item.text}">
+                <iconify-icon
+                  class="meta-icon"
+                  th:attr="icon=${item.icon ?: 'octicon:info-16'}"
+                ></iconify-icon>
+                <a
+                  th:if="${not #strings.isEmpty(item.url)}"
+                  th:href="${item.url}"
+                  th:attr="target=${#strings.startsWith(item.url, 'http') ? '_blank' : null}, rel=${#strings.startsWith(item.url, 'http') ? 'noreferrer' : null}"
+                  th:text="${item.text}"
+                ></a>
+                <span th:if="${#strings.isEmpty(item.url)}" th:text="${item.text}"></span>
+              </li>
+            </th:block>
+            <th:block th:if="${#lists.isEmpty(theme.config.basic.profile_meta)}">
+              <li th:if="${theme.config.basic.company}">
+                <iconify-icon class="meta-icon" icon="octicon:organization-16"></iconify-icon>
+                <span th:text="${theme.config.basic.company}">Company</span>
+              </li>
+              <li th:if="${theme.config.basic.location}">
+                <iconify-icon class="meta-icon" icon="octicon:location-16"></iconify-icon>
+                <span th:text="${theme.config.basic.location}">Location</span>
+              </li>
+              <li th:if="${theme.config.basic.email}">
+                <iconify-icon class="meta-icon" icon="octicon:mail-16"></iconify-icon>
+                <a
+                  th:href="|mailto:${theme.config.basic.email}|"
+                  th:text="${theme.config.basic.email}"
+                ></a>
+              </li>
+            </th:block>
             <li
               class="profile-stats-row"
               th:if="${theme.config.basic.show_stats}"
