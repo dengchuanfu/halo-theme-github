@@ -967,6 +967,10 @@ svg {
   border-bottom: 1px solid var(--border);
 }
 
+.repository-list-item[hidden] {
+  display: none;
+}
+
 .repository-list-copy {
   flex: 1 1 auto;
   min-width: 0;
@@ -1052,7 +1056,7 @@ svg {
 
 .repository-side {
   display: grid;
-  flex: 0 0 132px;
+  flex: 0 0 168px;
   justify-items: end;
   gap: 10px;
   padding-top: 2px;
@@ -1115,70 +1119,33 @@ svg {
   color: var(--fg-muted);
 }
 
-.repository-activity-wave {
-  display: flex;
-  width: 120px;
-  height: 28px;
-  align-items: flex-end;
-  justify-content: flex-end;
-  gap: 2px;
-}
-
-.wave-bar {
+.repository-activity-trend {
   display: block;
-  width: 8px;
-  border-radius: 2px 2px 0 0;
-  background: #1f883d;
-  opacity: 0.78;
+  width: 160px;
+  height: 30px;
 }
 
-.wave-1 {
-  height: 7px;
-  opacity: 0.35;
+.repository-activity-trend svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-.wave-2 {
-  height: 12px;
-  opacity: 0.52;
+.repository-activity-trend polyline {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
 }
 
-.wave-3 {
-  height: 9px;
-  opacity: 0.42;
+.repository-activity-history {
+  stroke: #9be9a8;
 }
 
-.wave-4 {
-  height: 18px;
-  opacity: 0.74;
-}
-
-.wave-5 {
-  height: 24px;
-}
-
-.wave-6 {
-  height: 15px;
-  opacity: 0.64;
-}
-
-.wave-7 {
-  height: 21px;
-  opacity: 0.86;
-}
-
-.wave-8 {
-  height: 10px;
-  opacity: 0.48;
-}
-
-.wave-9 {
-  height: 16px;
-  opacity: 0.68;
-}
-
-.wave-10 {
-  height: 6px;
-  opacity: 0.32;
+.repository-activity-current {
+  stroke: #1a7f37;
 }
 
 .contrib-layout {

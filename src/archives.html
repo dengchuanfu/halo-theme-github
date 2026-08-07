@@ -114,17 +114,18 @@
                   <span>评论</span>
                 </a>
               </div>
-              <div class="repository-activity-wave" aria-label="点赞和评论波动">
-                <span class="wave-bar wave-1"></span>
-                <span class="wave-bar wave-2"></span>
-                <span class="wave-bar wave-3"></span>
-                <span class="wave-bar wave-4"></span>
-                <span class="wave-bar wave-5"></span>
-                <span class="wave-bar wave-6"></span>
-                <span class="wave-bar wave-7"></span>
-                <span class="wave-bar wave-8"></span>
-                <span class="wave-bar wave-9"></span>
-                <span class="wave-bar wave-10"></span>
+              <div class="repository-activity-trend" role="img" aria-label="文章活动趋势">
+                <svg viewBox="0 0 160 30" aria-hidden="true" focusable="false">
+                  <polyline
+                    class="repository-activity-history"
+                    data-repository-activity-history
+                    points="0,26 160,26"
+                  ></polyline>
+                  <polyline
+                    class="repository-activity-current"
+                    data-repository-activity-current
+                  ></polyline>
+                </svg>
               </div>
             </div>
           </li>
