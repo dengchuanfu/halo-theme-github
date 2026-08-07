@@ -204,6 +204,8 @@ const setupLinkLogoFallbacks = () => {
   });
 };
 
+const formatEngagementCount = (count: number) => (count > 99 ? "99+" : String(Math.max(0, count)));
+
 const setupRepositoryEngagement = () => {
   const metrics = Array.from(
     document.querySelectorAll<HTMLElement>("[data-engagement-kind][data-engagement-count]"),
@@ -219,11 +221,17 @@ const setupRepositoryEngagement = () => {
   metrics.forEach((metric) => {
     const kind = metric.dataset.engagementKind || "";
     const count = Number.parseInt(metric.dataset.engagementCount || "0", 10);
+    const normalizedCount = Number.isNaN(count) ? 0 : count;
     const maximum = largestCount.get(kind) || 0;
     const level =
-      maximum && !Number.isNaN(count)
-        ? Math.ceil((Math.log1p(Math.max(0, count)) / Math.log1p(maximum)) * 4)
+      maximum && normalizedCount
+        ? Math.ceil((Math.log1p(Math.max(0, normalizedCount)) / Math.log1p(maximum)) * 4)
         : 0;
+    const value = metric.querySelector<HTMLElement>(".repository-engagement-value");
+
+    if (value) {
+      value.textContent = formatEngagementCount(normalizedCount);
+    }
 
     metric
       .querySelectorAll<HTMLElement>(".repository-engagement-heat i")
@@ -417,7 +425,7 @@ const setupPostUpvotes = () => {
               metric.dataset.engagementCount = String(upvotes);
               const value = metric.querySelector<HTMLElement>(".repository-engagement-value");
               if (value) {
-                value.textContent = String(upvotes);
+                value.textContent = formatEngagementCount(upvotes);
               }
             }
           });

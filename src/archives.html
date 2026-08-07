@@ -125,7 +125,9 @@
                   title="访问量"
                 >
                   <iconify-icon icon="octicon:eye-16" aria-hidden="true"></iconify-icon>
-                  <span class="repository-engagement-value" th:text="${post.stats?.visit ?: 0}"
+                  <span
+                    class="repository-engagement-value"
+                    th:text="${(post.stats?.visit ?: 0) > 99 ? '99+' : (post.stats?.visit ?: 0)}"
                     >0</span
                   >
                   <span class="repository-engagement-heat" aria-hidden="true"
@@ -139,7 +141,9 @@
                   title="评论数"
                 >
                   <iconify-icon icon="octicon:comment-16" aria-hidden="true"></iconify-icon>
-                  <span class="repository-engagement-value" th:text="${post.stats?.comment ?: 0}"
+                  <span
+                    class="repository-engagement-value"
+                    th:text="${(post.stats?.comment ?: 0) > 99 ? '99+' : (post.stats?.comment ?: 0)}"
                     >0</span
                   >
                   <span class="repository-engagement-heat" aria-hidden="true"
@@ -153,7 +157,9 @@
                   title="点赞数"
                 >
                   <iconify-icon icon="octicon:thumbsup-16" aria-hidden="true"></iconify-icon>
-                  <span class="repository-engagement-value" th:text="${post.stats?.upvote ?: 0}"
+                  <span
+                    class="repository-engagement-value"
+                    th:text="${(post.stats?.upvote ?: 0) > 99 ? '99+' : (post.stats?.upvote ?: 0)}"
                     >0</span
                   >
                   <span class="repository-engagement-heat" aria-hidden="true"
