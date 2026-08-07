@@ -35,8 +35,6 @@ const searchEndpoint = "/apis/api.halo.run/v1alpha1/indices/-/search";
 const currentUserEndpoint = "/apis/api.console.halo.run/v1alpha1/users/-";
 const momentUpvoteEndpoint = "/apis/api.halo.run/v1alpha1/trackers/upvote";
 const colorSchemeStorageKey = "halo-theme-github-color-scheme";
-const momentUpvoteStorageKey = "halo.upvoted.moment.names";
-const postUpvoteStorageKey = "halo.upvoted.post.names";
 let currentUserRequest: Promise<CurrentUserDetail | undefined> | undefined;
 
 const getCurrentUser = () => {
@@ -206,6 +204,33 @@ const setupLinkLogoFallbacks = () => {
   });
 };
 
+const setupRepositoryEngagement = () => {
+  const metrics = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-engagement-kind][data-engagement-count]"),
+  );
+  const largestCount = new Map<string, number>();
+
+  metrics.forEach((metric) => {
+    const kind = metric.dataset.engagementKind || "";
+    const count = Number.parseInt(metric.dataset.engagementCount || "0", 10);
+    largestCount.set(kind, Math.max(largestCount.get(kind) || 0, Number.isNaN(count) ? 0 : count));
+  });
+
+  metrics.forEach((metric) => {
+    const kind = metric.dataset.engagementKind || "";
+    const count = Number.parseInt(metric.dataset.engagementCount || "0", 10);
+    const maximum = largestCount.get(kind) || 0;
+    const level =
+      maximum && !Number.isNaN(count)
+        ? Math.ceil((Math.log1p(Math.max(0, count)) / Math.log1p(maximum)) * 4)
+        : 0;
+
+    metric
+      .querySelectorAll<HTMLElement>(".repository-engagement-heat i")
+      .forEach((bar, index) => bar.classList.toggle("is-active", index < level));
+  });
+};
+
 const setupMomentImagePreview = () => {
   const images = document.querySelectorAll<HTMLImageElement>("img[data-moment-image]");
 
@@ -276,24 +301,6 @@ const setupMomentUpvotes = () => {
     return;
   }
 
-  let upvotedNames: string[] = [];
-
-  try {
-    const savedNames = JSON.parse(localStorage.getItem(momentUpvoteStorageKey) || "[]");
-    upvotedNames = Array.isArray(savedNames)
-      ? savedNames.filter((name): name is string => typeof name === "string")
-      : [];
-  } catch {
-    upvotedNames = [];
-  }
-
-  const setUpvotedState = (button: HTMLButtonElement, upvoted: boolean) => {
-    button.classList.toggle("is-upvoted", upvoted);
-    button.setAttribute("aria-pressed", String(upvoted));
-    button.setAttribute("aria-label", upvoted ? "已点赞" : "点赞瞬间");
-    button.title = upvoted ? "已点赞" : "点赞";
-  };
-
   buttons.forEach((button) => {
     const name = button.dataset.momentUpvote;
 
@@ -301,10 +308,8 @@ const setupMomentUpvotes = () => {
       return;
     }
 
-    setUpvotedState(button, upvotedNames.includes(name));
-
     button.addEventListener("click", async () => {
-      if (upvotedNames.includes(name) || button.disabled) {
+      if (button.disabled) {
         return;
       }
 
@@ -327,14 +332,6 @@ const setupMomentUpvotes = () => {
           throw new Error(`Moment upvote failed: ${response.status}`);
         }
 
-        upvotedNames = [...upvotedNames, name];
-
-        try {
-          localStorage.setItem(momentUpvoteStorageKey, JSON.stringify(upvotedNames));
-        } catch {
-          // The current page still reflects the successful upvote when storage is unavailable.
-        }
-
         buttons
           .filter((item) => item.dataset.momentUpvote === name)
           .forEach((item) => {
@@ -345,7 +342,7 @@ const setupMomentUpvotes = () => {
               count.textContent = String(Number.isNaN(current) ? 1 : current + 1);
             }
 
-            setUpvotedState(item, true);
+            item.classList.add("is-upvoted");
           });
       } catch {
         window.alert("点赞失败，请稍后再试");
@@ -363,24 +360,6 @@ const setupPostUpvotes = () => {
     return;
   }
 
-  let upvotedNames: string[] = [];
-
-  try {
-    const savedNames = JSON.parse(localStorage.getItem(postUpvoteStorageKey) || "[]");
-    upvotedNames = Array.isArray(savedNames)
-      ? savedNames.filter((name): name is string => typeof name === "string")
-      : [];
-  } catch {
-    upvotedNames = [];
-  }
-
-  const setUpvotedState = (button: HTMLButtonElement, upvoted: boolean) => {
-    button.classList.toggle("is-upvoted", upvoted);
-    button.setAttribute("aria-pressed", String(upvoted));
-    button.setAttribute("aria-label", upvoted ? "已点赞" : "点赞文章");
-    button.title = upvoted ? "已点赞" : "点赞";
-  };
-
   buttons.forEach((button) => {
     const name = button.dataset.postUpvote;
 
@@ -388,10 +367,8 @@ const setupPostUpvotes = () => {
       return;
     }
 
-    setUpvotedState(button, upvotedNames.includes(name));
-
     button.addEventListener("click", async () => {
-      if (upvotedNames.includes(name) || button.disabled) {
+      if (button.disabled) {
         return;
       }
 
@@ -414,14 +391,6 @@ const setupPostUpvotes = () => {
           throw new Error(`Post upvote failed: ${response.status}`);
         }
 
-        upvotedNames = [...upvotedNames, name];
-
-        try {
-          localStorage.setItem(postUpvoteStorageKey, JSON.stringify(upvotedNames));
-        } catch {
-          // The current page still reflects the successful upvote when storage is unavailable.
-        }
-
         buttons
           .filter((item) => item.dataset.postUpvote === name)
           .forEach((item) => {
@@ -432,8 +401,27 @@ const setupPostUpvotes = () => {
               count.textContent = String(Number.isNaN(current) ? 1 : current + 1);
             }
 
-            setUpvotedState(item, true);
+            item.classList.add("is-upvoted");
           });
+
+        document
+          .querySelectorAll<HTMLElement>(
+            `.repository-engagement[data-repository-post-name="${CSS.escape(name)}"]`,
+          )
+          .forEach((summary) => {
+            const metric = summary.querySelector<HTMLElement>('[data-engagement-kind="upvote"]');
+            const count = Number.parseInt(metric?.dataset.engagementCount || "0", 10);
+
+            if (metric) {
+              const upvotes = Number.isNaN(count) ? 1 : count + 1;
+              metric.dataset.engagementCount = String(upvotes);
+              const value = metric.querySelector<HTMLElement>(".repository-engagement-value");
+              if (value) {
+                value.textContent = String(upvotes);
+              }
+            }
+          });
+        setupRepositoryEngagement();
       } catch {
         window.alert("点赞失败，请稍后再试");
       } finally {
@@ -1054,6 +1042,7 @@ setupThemeToggle();
 setupSiteTimeline();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
+setupRepositoryEngagement();
 setupMomentImagePreview();
 setupMomentUpvotes();
 setupPostUpvotes();

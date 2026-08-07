@@ -114,18 +114,52 @@
                   <span>评论</span>
                 </a>
               </div>
-              <div class="repository-activity-trend" role="img" aria-label="文章活动趋势">
-                <svg viewBox="0 0 160 30" aria-hidden="true" focusable="false">
-                  <polyline
-                    class="repository-activity-history"
-                    data-repository-activity-history
-                    points="0,26 160,26"
-                  ></polyline>
-                  <polyline
-                    class="repository-activity-current"
-                    data-repository-activity-current
-                  ></polyline>
-                </svg>
+              <div
+                class="repository-engagement"
+                th:attr="data-repository-post-name=${post.metadata.name}, aria-label=|文章互动：${post.stats?.visit ?: 0} 次访问，${post.stats?.comment ?: 0} 条评论，${post.stats?.upvote ?: 0} 个赞|"
+              >
+                <span
+                  class="repository-engagement-metric"
+                  data-engagement-kind="visit"
+                  th:attr="data-engagement-count=${post.stats?.visit ?: 0}"
+                  title="访问量"
+                >
+                  <iconify-icon icon="octicon:eye-16" aria-hidden="true"></iconify-icon>
+                  <span class="repository-engagement-value" th:text="${post.stats?.visit ?: 0}"
+                    >0</span
+                  >
+                  <span class="repository-engagement-heat" aria-hidden="true"
+                    ><i></i><i></i><i></i><i></i
+                  ></span>
+                </span>
+                <span
+                  class="repository-engagement-metric"
+                  data-engagement-kind="comment"
+                  th:attr="data-engagement-count=${post.stats?.comment ?: 0}"
+                  title="评论数"
+                >
+                  <iconify-icon icon="octicon:comment-16" aria-hidden="true"></iconify-icon>
+                  <span class="repository-engagement-value" th:text="${post.stats?.comment ?: 0}"
+                    >0</span
+                  >
+                  <span class="repository-engagement-heat" aria-hidden="true"
+                    ><i></i><i></i><i></i><i></i
+                  ></span>
+                </span>
+                <span
+                  class="repository-engagement-metric"
+                  data-engagement-kind="upvote"
+                  th:attr="data-engagement-count=${post.stats?.upvote ?: 0}"
+                  title="点赞数"
+                >
+                  <iconify-icon icon="octicon:thumbsup-16" aria-hidden="true"></iconify-icon>
+                  <span class="repository-engagement-value" th:text="${post.stats?.upvote ?: 0}"
+                    >0</span
+                  >
+                  <span class="repository-engagement-heat" aria-hidden="true"
+                    ><i></i><i></i><i></i><i></i
+                  ></span>
+                </span>
               </div>
             </div>
           </li>
