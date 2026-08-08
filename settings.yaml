@@ -356,6 +356,43 @@ spec:
           value: ""
           accept: "image/*"
           help: 当友链未设置 Logo 或 Logo 加载失败时显示；留空时使用默认头像图标
+        - $formkit: checkbox
+          name: music_player_enabled
+          label: 启用悬浮播放器
+          value: false
+          help: 开启并填写歌单 ID 后，在前台左下角显示播放器并尝试自动播放
+        - $formkit: select
+          name: music_source
+          label: 音乐数据源
+          value: "netease"
+          options:
+            - label: "网易云音乐（默认接口）"
+              value: "netease"
+            - label: "自定义 API"
+              value: "custom"
+          help: 默认使用兼容 Meting 格式的网易云歌单接口；其他平台请选择自定义 API
+        - $formkit: text
+          name: music_playlist_id
+          label: 歌单 ID
+          value: ""
+          placeholder: "例如 3778678"
+          help: "网易云音乐请填写歌单 ID；自定义 API 可在接口地址中使用 {id} 引用此值"
+        - $formkit: select
+          name: music_playback_mode
+          label: 默认播放模式
+          value: "sequence"
+          options:
+            - label: "顺序播放"
+              value: "sequence"
+            - label: "随机播放"
+              value: "shuffle"
+          help: 首次打开播放器时使用；用户在前台切换的模式会在当前标签页内保持
+        - $formkit: text
+          name: music_api
+          label: 音乐 API 地址
+          value: "https://api.i-meto.com/meting/api?server=netease&type=playlist&id={id}"
+          placeholder: "https://api.example.com/playlist?id={id}"
+          help: "{id} 会替换为歌单 ID。接口需返回歌曲数组，或 data 包装的数组；单曲字段支持 title/name、artist/author、url 和 cover/pic"
     - group: footer
       label: 底部设置
       formSchema:

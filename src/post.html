@@ -59,6 +59,37 @@
     </nav>
   </article>
 
+  <nav class="post-side-actions" aria-label="文章快捷操作">
+    <button
+      class="post-side-action post-back-to-top"
+      type="button"
+      data-post-back-to-top
+      aria-label="回到顶部"
+      title="回到顶部"
+      disabled
+    >
+      <iconify-icon icon="icon-park-outline:to-top" aria-hidden="true"></iconify-icon>
+    </button>
+    <button
+      class="post-side-action post-upvote"
+      type="button"
+      th:attr="data-post-upvote=${post.metadata.name}, aria-label=|点赞文章，当前 ${post.stats?.upvote ?: 0} 个赞|"
+      title="点赞"
+    >
+      <iconify-icon icon="octicon:thumbsup-16" aria-hidden="true"></iconify-icon>
+      <span data-post-upvote-count th:text="${post.stats?.upvote ?: 0}">0</span>
+    </button>
+    <a
+      class="post-side-action"
+      href="#comments"
+      th:attr="aria-label=|查看评论，当前 ${post.stats?.comment ?: 0} 条评论|"
+      title="评论"
+    >
+      <iconify-icon icon="octicon:comment-16" aria-hidden="true"></iconify-icon>
+      <span th:text="${post.stats?.comment ?: 0}">0</span>
+    </a>
+  </nav>
+
   <div id="comments">
     <halo:comment
       th:if="${haloCommentEnabled}"

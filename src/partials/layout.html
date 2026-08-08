@@ -368,6 +368,55 @@
       </div>
     </main>
 
+    <section
+      class="music-player"
+      data-music-player
+      th:if="${theme.config.styles.music_player_enabled == true and not #strings.isEmpty(theme.config.styles.music_playlist_id)}"
+      th:attr="data-music-source=${theme.config.styles.music_source ?: 'netease'}, data-music-playlist-id=${theme.config.styles.music_playlist_id}, data-music-playback-mode=${theme.config.styles.music_playback_mode ?: 'sequence'}, data-music-api=${theme.config.styles.music_api ?: 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id={id}'}"
+      aria-label="悬浮音乐播放器"
+    >
+      <div class="music-player-cover" aria-hidden="true">
+        <img data-music-cover alt="" hidden />
+        <iconify-icon data-music-cover-placeholder icon="octicon:music-16"></iconify-icon>
+      </div>
+      <div class="music-player-info" aria-live="polite">
+        <strong data-music-title>正在加载音乐</strong>
+        <span data-music-artist>请稍候</span>
+      </div>
+      <div class="music-player-controls" aria-label="播放控制">
+        <button type="button" data-music-previous aria-label="上一首" title="上一首" disabled>
+          <iconify-icon icon="lucide:skip-back" aria-hidden="true"></iconify-icon>
+        </button>
+        <button type="button" data-music-toggle aria-label="播放" title="播放" disabled>
+          <iconify-icon icon="octicon:play-16" aria-hidden="true"></iconify-icon>
+        </button>
+        <button type="button" data-music-next aria-label="下一首" title="下一首" disabled>
+          <iconify-icon icon="lucide:skip-forward" aria-hidden="true"></iconify-icon>
+        </button>
+        <button
+          type="button"
+          data-music-playback-mode
+          aria-label="顺序播放"
+          aria-pressed="false"
+          title="顺序播放"
+          disabled
+        >
+          <iconify-icon icon="lucide:list-ordered" aria-hidden="true"></iconify-icon>
+        </button>
+      </div>
+      <input
+        class="music-player-progress"
+        type="range"
+        min="0"
+        max="100"
+        value="0"
+        aria-label="播放进度"
+        data-music-progress
+        disabled
+      />
+      <audio data-music-audio preload="metadata"></audio>
+    </section>
+
     <footer class="site-footer">
       <div class="footer-inner" th:with="footerConfig=${theme.config.footer}">
         <div class="footer-primary">

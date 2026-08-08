@@ -207,36 +207,466 @@ const setupLinkLogoFallbacks = () => {
 const formatEngagementCount = (count: number) => (count > 99 ? "99+" : String(Math.max(0, count)));
 
 const setupRepositoryEngagement = () => {
-  const metrics = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-engagement-kind][data-engagement-count]"),
-  );
-  const largestCount = new Map<string, number>();
+  document
+    .querySelectorAll<HTMLElement>("[data-engagement-kind][data-engagement-count]")
+    .forEach((metric) => {
+      const count = Number.parseInt(metric.dataset.engagementCount || "0", 10);
+      const normalizedCount = Number.isNaN(count) ? 0 : count;
+      const value = metric.querySelector<HTMLElement>(".repository-engagement-value");
 
-  metrics.forEach((metric) => {
-    const kind = metric.dataset.engagementKind || "";
-    const count = Number.parseInt(metric.dataset.engagementCount || "0", 10);
-    largestCount.set(kind, Math.max(largestCount.get(kind) || 0, Number.isNaN(count) ? 0 : count));
-  });
+      if (value) {
+        value.textContent = formatEngagementCount(normalizedCount);
+      }
+    });
+};
 
-  metrics.forEach((metric) => {
-    const kind = metric.dataset.engagementKind || "";
-    const count = Number.parseInt(metric.dataset.engagementCount || "0", 10);
-    const normalizedCount = Number.isNaN(count) ? 0 : count;
-    const maximum = largestCount.get(kind) || 0;
-    const level =
-      maximum && normalizedCount
-        ? Math.ceil((Math.log1p(Math.max(0, normalizedCount)) / Math.log1p(maximum)) * 4)
-        : 0;
-    const value = metric.querySelector<HTMLElement>(".repository-engagement-value");
+type MusicTrack = {
+  artist: string;
+  cover: string;
+  title: string;
+  url: string;
+};
 
-    if (value) {
-      value.textContent = formatEngagementCount(normalizedCount);
+type MusicPlaybackMode = "sequence" | "shuffle";
+
+type MusicPlayerState = {
+  api: string;
+  index: number;
+  mode: MusicPlaybackMode;
+  playlistId: string;
+  time: number;
+  track: Pick<MusicTrack, "artist" | "title">;
+  wasPlaying: boolean;
+};
+
+const musicFallbackApi = "https://api.i-meto.com/meting/api?server=netease&type=playlist&id={id}";
+const musicPlayerStorageKey = "halo-theme-github-music-player";
+
+const getRecord = (value: unknown): Record<string, unknown> | undefined =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+
+const getText = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
     }
 
-    metric
-      .querySelectorAll<HTMLElement>(".repository-engagement-heat i")
-      .forEach((bar, index) => bar.classList.toggle("is-active", index < level));
+    if (typeof value === "number") {
+      return String(value);
+    }
+  }
+
+  return "";
+};
+
+const getMusicPlayerState = (): MusicPlayerState | undefined => {
+  try {
+    const value = getRecord(JSON.parse(sessionStorage.getItem(musicPlayerStorageKey) || ""));
+    const track = getRecord(value?.track);
+    const index = Number(value?.index);
+    const time = Number(value?.time);
+
+    if (
+      !value ||
+      !track ||
+      !Number.isInteger(index) ||
+      !Number.isFinite(time) ||
+      typeof value.api !== "string" ||
+      typeof value.playlistId !== "string" ||
+      typeof value.wasPlaying !== "boolean" ||
+      typeof track.artist !== "string" ||
+      typeof track.title !== "string"
+    ) {
+      return undefined;
+    }
+
+    return {
+      api: value.api,
+      index,
+      mode: value.mode === "shuffle" ? "shuffle" : "sequence",
+      playlistId: value.playlistId,
+      time: Math.max(0, time),
+      track: {
+        artist: track.artist,
+        title: track.title,
+      },
+      wasPlaying: value.wasPlaying,
+    };
+  } catch {
+    return undefined;
+  }
+};
+
+const getArtistName = (value: unknown) => {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => getText(getRecord(item)?.name, getRecord(item)?.title, item))
+      .filter(Boolean)
+      .join(" / ");
+  }
+
+  const artist = getRecord(value);
+  return getText(artist?.name, artist?.title);
+};
+
+const getMusicItems = (payload: unknown): unknown[] => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  const data = getRecord(payload);
+  if (!data) {
+    return [];
+  }
+
+  for (const key of ["data", "list", "songs", "tracks", "playlist", "result"]) {
+    const candidate = data[key];
+
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+
+    const nested = getRecord(candidate);
+    if (nested) {
+      const items = getMusicItems(nested);
+      if (items.length) {
+        return items;
+      }
+    }
+  }
+
+  return [];
+};
+
+const normalizeMusicTrack = (value: unknown): MusicTrack | undefined => {
+  const track = getRecord(value);
+  if (!track) {
+    return undefined;
+  }
+
+  const album = getRecord(track.al);
+  const nestedAlbum = getRecord(track.album);
+  const url = getText(track.url, track.src, track.audio);
+
+  if (!url) {
+    return undefined;
+  }
+
+  return {
+    title: getText(track.title, track.name, track.songname) || "未命名歌曲",
+    artist:
+      getArtistName(track.artist ?? track.author ?? track.ar ?? track.artists ?? track.singer) ||
+      "未知歌手",
+    url,
+    cover: getText(
+      track.cover,
+      track.coverUrl,
+      track.image,
+      track.pic,
+      track.picUrl,
+      album?.picUrl,
+      nestedAlbum?.picUrl,
+    ),
+  };
+};
+
+const setupMusicPlayer = () => {
+  const player = document.querySelector<HTMLElement>("[data-music-player]");
+  const audio = player?.querySelector<HTMLAudioElement>("[data-music-audio]");
+  const title = player?.querySelector<HTMLElement>("[data-music-title]");
+  const artist = player?.querySelector<HTMLElement>("[data-music-artist]");
+  const cover = player?.querySelector<HTMLImageElement>("[data-music-cover]");
+  const coverPlaceholder = player?.querySelector<HTMLElement>("[data-music-cover-placeholder]");
+  const progress = player?.querySelector<HTMLInputElement>("[data-music-progress]");
+  const previous = player?.querySelector<HTMLButtonElement>("[data-music-previous]");
+  const toggle = player?.querySelector<HTMLButtonElement>("[data-music-toggle]");
+  const next = player?.querySelector<HTMLButtonElement>("[data-music-next]");
+  const playbackMode = player?.querySelector<HTMLButtonElement>("[data-music-playback-mode]");
+  const toggleIcon = toggle?.querySelector<HTMLElement>("iconify-icon");
+  const playbackModeIcon = playbackMode?.querySelector<HTMLElement>("iconify-icon");
+  const playlistId = player?.dataset.musicPlaylistId?.trim();
+
+  if (
+    !player ||
+    !audio ||
+    !title ||
+    !artist ||
+    !cover ||
+    !coverPlaceholder ||
+    !progress ||
+    !previous ||
+    !toggle ||
+    !next ||
+    !playbackMode ||
+    !playlistId
+  ) {
+    return;
+  }
+
+  const configuredApi = player.dataset.musicApi?.trim();
+  const sourceApi =
+    configuredApi || (player.dataset.musicSource === "netease" ? musicFallbackApi : "");
+  const defaultPlaybackMode: MusicPlaybackMode =
+    player.dataset.musicPlaybackMode === "shuffle" ? "shuffle" : "sequence";
+  let tracks: MusicTrack[] = [];
+  let index = 0;
+  let playbackModeValue: MusicPlaybackMode = "sequence";
+  let playbackHistory: number[] = [];
+  let resumeOnInteraction = false;
+  let interactionListenerBound = false;
+
+  const setControlsEnabled = (enabled: boolean) => {
+    previous.disabled = !enabled;
+    toggle.disabled = !enabled;
+    next.disabled = !enabled;
+    playbackMode.disabled = !enabled;
+    progress.disabled = !enabled;
+  };
+
+  if (!sourceApi) {
+    title.textContent = "请填写音乐 API 地址";
+    artist.textContent = "自定义数据源需要返回可播放歌曲列表";
+    setControlsEnabled(false);
+    return;
+  }
+
+  const api = sourceApi.includes("{id}")
+    ? sourceApi.replaceAll("{id}", encodeURIComponent(playlistId))
+    : sourceApi;
+  const savedState = getMusicPlayerState();
+  const canRestore =
+    savedState?.api === api && savedState.playlistId === playlistId ? savedState : undefined;
+  playbackModeValue = canRestore?.mode || defaultPlaybackMode;
+  let lastPersistedTime = -1;
+
+  const persistState = () => {
+    const track = tracks[index];
+
+    if (!track) {
+      return;
+    }
+
+    try {
+      const state: MusicPlayerState = {
+        api,
+        index,
+        mode: playbackModeValue,
+        playlistId,
+        time: Number.isFinite(audio.currentTime) ? Math.max(0, audio.currentTime) : 0,
+        track: {
+          artist: track.artist,
+          title: track.title,
+        },
+        wasPlaying: !audio.paused,
+      };
+      sessionStorage.setItem(musicPlayerStorageKey, JSON.stringify(state));
+      lastPersistedTime = state.time;
+    } catch {
+      // The player remains usable when browser storage is unavailable.
+    }
+  };
+
+  const updatePlayState = () => {
+    const isPlaying = !audio.paused;
+    toggle.setAttribute("aria-label", isPlaying ? "暂停" : "播放");
+    toggle.title = isPlaying ? "暂停" : "播放";
+    toggleIcon?.setAttribute("icon", isPlaying ? "octicon:pause-16" : "octicon:play-16");
+  };
+
+  const updatePlaybackMode = () => {
+    const isShuffle = playbackModeValue === "shuffle";
+    playbackMode.setAttribute("aria-label", isShuffle ? "随机播放" : "顺序播放");
+    playbackMode.setAttribute("aria-pressed", String(isShuffle));
+    playbackMode.title = isShuffle ? "随机播放" : "顺序播放";
+    playbackModeIcon?.setAttribute("icon", isShuffle ? "lucide:shuffle" : "lucide:list-ordered");
+  };
+
+  const play = async () => {
+    try {
+      await audio.play();
+      resumeOnInteraction = false;
+      updatePlayState();
+    } catch {
+      resumeOnInteraction = true;
+      artist.textContent = "浏览器限制自动播放，点击页面后继续";
+      updatePlayState();
+
+      if (!interactionListenerBound) {
+        interactionListenerBound = true;
+        document.addEventListener(
+          "pointerdown",
+          () => {
+            interactionListenerBound = false;
+            if (resumeOnInteraction && audio.paused) {
+              void play();
+            }
+          },
+          { once: true },
+        );
+      }
+    }
+  };
+
+  const loadTrack = (nextIndex: number, shouldPlay = true, resumeAt = 0) => {
+    if (!tracks.length) {
+      return;
+    }
+
+    index = (nextIndex + tracks.length) % tracks.length;
+    const track = tracks[index];
+    title.textContent = track.title;
+    artist.textContent = track.artist;
+    progress.value = "0";
+
+    if (track.cover) {
+      cover.src = track.cover;
+      cover.hidden = false;
+      coverPlaceholder.hidden = true;
+    } else {
+      cover.removeAttribute("src");
+      cover.hidden = true;
+      coverPlaceholder.hidden = false;
+    }
+
+    if (resumeAt > 0) {
+      audio.addEventListener(
+        "loadedmetadata",
+        () => {
+          if (Number.isFinite(audio.duration)) {
+            audio.currentTime = Math.min(resumeAt, Math.max(0, audio.duration - 0.25));
+          }
+        },
+        { once: true },
+      );
+    }
+
+    audio.src = track.url;
+    audio.load();
+    lastPersistedTime = -1;
+    persistState();
+
+    if (shouldPlay) {
+      void play();
+    }
+  };
+
+  const goToPrevious = () => {
+    if (playbackModeValue === "shuffle" && playbackHistory.length) {
+      const previousIndex = playbackHistory.pop();
+
+      if (previousIndex !== undefined) {
+        loadTrack(previousIndex);
+        return;
+      }
+    }
+
+    loadTrack(index - 1);
+  };
+
+  const goToNext = () => {
+    if (playbackModeValue !== "shuffle" || tracks.length < 2) {
+      loadTrack(index + 1);
+      return;
+    }
+
+    let nextIndex = index;
+    while (nextIndex === index) {
+      nextIndex = Math.floor(Math.random() * tracks.length);
+    }
+
+    playbackHistory.push(index);
+    loadTrack(nextIndex);
+  };
+
+  previous.addEventListener("click", goToPrevious);
+  next.addEventListener("click", goToNext);
+  playbackMode.addEventListener("click", () => {
+    playbackModeValue = playbackModeValue === "sequence" ? "shuffle" : "sequence";
+    playbackHistory = [];
+    updatePlaybackMode();
+    persistState();
   });
+  toggle.addEventListener("click", () => {
+    if (audio.paused) {
+      void play();
+    } else {
+      audio.pause();
+    }
+  });
+  progress.addEventListener("input", () => {
+    if (Number.isFinite(audio.duration)) {
+      audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+      persistState();
+    }
+  });
+  audio.addEventListener("play", () => {
+    updatePlayState();
+    persistState();
+  });
+  audio.addEventListener("pause", () => {
+    updatePlayState();
+    persistState();
+  });
+  audio.addEventListener("ended", goToNext);
+  audio.addEventListener("timeupdate", () => {
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      progress.value = String((audio.currentTime / audio.duration) * 100);
+
+      if (audio.currentTime - lastPersistedTime >= 1) {
+        lastPersistedTime = audio.currentTime;
+        persistState();
+      }
+    }
+  });
+  audio.addEventListener("error", () => {
+    artist.textContent = "当前歌曲无法播放，正在切换";
+    if (tracks.length > 1) {
+      window.setTimeout(goToNext, 500);
+    }
+  });
+  window.addEventListener("pagehide", persistState);
+  void fetch(api, { headers: { Accept: "application/json" } })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Music API failed: ${response.status}`);
+      }
+
+      return response.json() as Promise<unknown>;
+    })
+    .then((payload) => {
+      tracks = getMusicItems(payload)
+        .map(normalizeMusicTrack)
+        .filter((track): track is MusicTrack => Boolean(track));
+
+      if (!tracks.length) {
+        throw new Error("Music API returned no playable tracks");
+      }
+
+      setControlsEnabled(true);
+      updatePlaybackMode();
+      const matchingTrackIndex = canRestore
+        ? tracks.findIndex(
+            (track) =>
+              track.title === canRestore.track.title && track.artist === canRestore.track.artist,
+          )
+        : -1;
+      const restoredIndex =
+        matchingTrackIndex >= 0
+          ? matchingTrackIndex
+          : Math.min(Math.max(canRestore?.index || 0, 0), tracks.length - 1);
+      loadTrack(restoredIndex, canRestore?.wasPlaying ?? true, canRestore?.time || 0);
+    })
+    .catch(() => {
+      title.textContent = "音乐暂时不可用";
+      artist.textContent = "请检查播放器 API 配置";
+      setControlsEnabled(false);
+    });
 };
 
 const setupMomentImagePreview = () => {
@@ -1051,6 +1481,7 @@ setupSiteTimeline();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
 setupRepositoryEngagement();
+setupMusicPlayer();
 setupMomentImagePreview();
 setupMomentUpvotes();
 setupPostUpvotes();
