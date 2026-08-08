@@ -2745,7 +2745,21 @@ article {
 
 .footer-provider {
   min-height: 22px;
+  gap: 5px 10px;
+}
+
+.footer-provider-service,
+.footer-runtime {
+  display: inline-flex;
+  align-items: center;
   gap: 5px;
+}
+
+.footer-provider iconify-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  font-size: 14px;
 }
 
 .footer-provider a,
@@ -2761,6 +2775,18 @@ article {
   max-width: 120px;
   height: 20px;
   object-fit: contain;
+}
+
+.footer-provider-service + .footer-runtime::before {
+  margin-right: 5px;
+  color: var(--fg-subtle);
+  content: "·";
+}
+
+.footer-runtime strong {
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 @media (max-width: 1360px) {

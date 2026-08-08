@@ -468,42 +468,61 @@
 
         <div
           class="footer-provider"
-          th:if="${footerConfig != null and (not #strings.isEmpty(footerConfig.provider_name) or not #strings.isEmpty(footerConfig.provider_logo))}"
+          th:if="${footerConfig != null and (not #strings.isEmpty(footerConfig.provider_name) or not #strings.isEmpty(footerConfig.provider_logo) or not #strings.isEmpty(footerConfig.site_start_time))}"
         >
-          <span>本站由</span>
-          <a
-            th:if="${not #strings.isEmpty(footerConfig.provider_url)}"
-            th:href="${footerConfig.provider_url}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              th:if="${not #strings.isEmpty(footerConfig.provider_logo)}"
-              th:src="${footerConfig.provider_logo}"
-              th:alt="${footerConfig.provider_name ?: '云服务商'}"
-            />
-            <span
-              th:if="${#strings.isEmpty(footerConfig.provider_logo)}"
-              th:text="${footerConfig.provider_name}"
-              >云服务商</span
-            >
-          </a>
           <span
-            class="footer-provider-static"
-            th:if="${#strings.isEmpty(footerConfig.provider_url)}"
+            class="footer-provider-service"
+            th:if="${not #strings.isEmpty(footerConfig.provider_name) or not #strings.isEmpty(footerConfig.provider_logo)}"
           >
-            <img
-              th:if="${not #strings.isEmpty(footerConfig.provider_logo)}"
-              th:src="${footerConfig.provider_logo}"
-              th:alt="${footerConfig.provider_name ?: '云服务商'}"
-            />
+            <iconify-icon icon="material-symbols:cloud-outline" aria-hidden="true"></iconify-icon>
+            <span>本站由</span>
+            <a
+              th:if="${not #strings.isEmpty(footerConfig.provider_url)}"
+              th:href="${footerConfig.provider_url}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                th:if="${not #strings.isEmpty(footerConfig.provider_logo)}"
+                th:src="${footerConfig.provider_logo}"
+                th:alt="${footerConfig.provider_name ?: '云服务商'}"
+              />
+              <span
+                th:if="${#strings.isEmpty(footerConfig.provider_logo)}"
+                th:text="${footerConfig.provider_name}"
+                >云服务商</span
+              >
+            </a>
             <span
-              th:if="${#strings.isEmpty(footerConfig.provider_logo)}"
-              th:text="${footerConfig.provider_name}"
-              >云服务商</span
+              class="footer-provider-static"
+              th:if="${#strings.isEmpty(footerConfig.provider_url)}"
+            >
+              <img
+                th:if="${not #strings.isEmpty(footerConfig.provider_logo)}"
+                th:src="${footerConfig.provider_logo}"
+                th:alt="${footerConfig.provider_name ?: '云服务商'}"
+              />
+              <span
+                th:if="${#strings.isEmpty(footerConfig.provider_logo)}"
+                th:text="${footerConfig.provider_name}"
+                >云服务商</span
+              >
+            </span>
+            <span>提供服务</span>
+          </span>
+          <span
+            class="footer-runtime"
+            th:if="${not #strings.isEmpty(footerConfig.site_start_time)}"
+          >
+            <iconify-icon icon="mingcute:time-line" aria-hidden="true"></iconify-icon>
+            <span>本站已运行</span>
+            <strong
+              data-site-runtime
+              th:attr="data-start=${footerConfig.site_start_time}"
+              aria-live="off"
+              >0 天 00 时 00 分 00 秒</strong
             >
           </span>
-          <span>提供服务</span>
         </div>
       </div>
     </footer>

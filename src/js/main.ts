@@ -115,6 +115,35 @@ const setupSiteTimeline = () => {
   target.textContent = `目标：${Number.isInteger(durationYears) ? durationYears : durationYears.toFixed(1)} 年`;
 };
 
+const setupSiteRuntime = () => {
+  const runtime = document.querySelector<HTMLElement>("[data-site-runtime]");
+  const startValue = runtime?.dataset.start?.trim();
+
+  if (!runtime || !startValue) {
+    return;
+  }
+
+  const start = new Date(startValue);
+
+  if (Number.isNaN(start.getTime())) {
+    return;
+  }
+
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const updateRuntime = () => {
+    const totalSeconds = Math.max(0, Math.floor((Date.now() - start.getTime()) / 1_000));
+    const days = Math.floor(totalSeconds / 86_400);
+    const hours = Math.floor((totalSeconds % 86_400) / 3_600);
+    const minutes = Math.floor((totalSeconds % 3_600) / 60);
+    const seconds = totalSeconds % 60;
+
+    runtime.textContent = `${days} 天 ${pad(hours)} 时 ${pad(minutes)} 分 ${pad(seconds)} 秒`;
+  };
+
+  updateRuntime();
+  window.setInterval(updateRuntime, 1_000);
+};
+
 const normalizeMenuPath = (path: string | null | undefined) => {
   const value = (path || "").trim();
 
@@ -1478,6 +1507,7 @@ const setupSearch = () => {
 setupCustomMenuIcons();
 setupThemeToggle();
 setupSiteTimeline();
+setupSiteRuntime();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
 setupRepositoryEngagement();

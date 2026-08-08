@@ -148,9 +148,9 @@
         th:text="${aboutConfig.history}"
       ></p>
       <p class="about-config-text" th:if="${#strings.isEmpty(aboutConfig.history)}">
-        始建于 2021 年，纯个人兴趣建站，记录技术与生活。
-        记录生活中的点滴，分享技术探索的心得，收藏有趣的发现。
-        经历了多次改版、换主题、折腾服务器，一直热爱支撑，毕竟它承载着成长和回忆。
+        最开始搭建这个博客，初衷很简单，只是为了存档工作里遇到的各类问题。
+        日常运维工作总会碰到各式各样的故障、踩不完的坑，很多问题解决过后隔段时间就容易遗忘。于是便想着把排查思路、处理步骤、踩过的弯路全部记录下来。
+        慢慢写着写着，博客不再仅仅是工作问题的知识库。
       </p>
     </section>
 
@@ -164,8 +164,10 @@
         <iconify-icon icon="octicon:heart-16"></iconify-icon>
         <div>
           <h2 th:text="${aboutConfig.promise_title ?: '十年之约'}">十年之约</h2>
-          <p th:text="${aboutConfig.promise_subtitle ?: '一个人的寂寞，一群人的狂欢'}">
-            一个人的寂寞，一群人的狂欢
+          <p
+            th:text="${aboutConfig.promise_subtitle ?: '十年之约，写给这座博客，也写给未来的自己。'}"
+          >
+            十年之约，写给这座博客，也写给未来的自己。
           </p>
         </div>
       </div>
