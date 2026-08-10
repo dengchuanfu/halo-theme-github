@@ -313,7 +313,8 @@ const renderActivity = (
   range: DateRange,
   selectedYear: number,
   currentYear: number,
-  limit: number,
+  page: number,
+  pageSize: number,
   selectedDateKey?: string,
 ) => {
   const visible = activities.filter(
@@ -324,7 +325,9 @@ const renderActivity = (
       activity.date <= new Date() &&
       (selectedYear === currentYear || activity.date.getFullYear() === selectedYear),
   );
-  const displayed = visible.slice(0, limit);
+  const totalPages = Math.max(1, Math.ceil(visible.length / pageSize));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
+  const displayed = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   container.replaceChildren();
 
   if (!displayed.length) {
@@ -332,7 +335,7 @@ const renderActivity = (
     empty.className = "activity-empty";
     empty.textContent = selectedDateKey ? "该日期暂无站点动态。" : "这个时间段暂无站点动态。";
     container.append(empty);
-    return;
+    return { currentPage: 1, totalPages: 1, totalItems: 0 };
   }
 
   const groups = new Map<string, SiteActivity[]>();
@@ -357,6 +360,8 @@ const renderActivity = (
     section.append(month, ...items.map(createActivityItem));
     container.append(section);
   });
+
+  return { currentPage, totalPages, totalItems: visible.length };
 };
 
 const renderContributionGraph = (
@@ -444,8 +449,24 @@ const setupContributions = async () => {
   const years = root?.querySelector<HTMLElement>("[data-contribution-years]");
   const activityHeading = root?.querySelector<HTMLElement>("[data-activity-heading]");
   const activity = document.querySelector<HTMLElement>("[data-contribution-activity]");
+  const pagination = root?.querySelector<HTMLElement>("[data-activity-pagination]");
+  const previousButton = pagination?.querySelector<HTMLButtonElement>("[data-activity-previous]");
+  const nextButton = pagination?.querySelector<HTMLButtonElement>("[data-activity-next]");
+  const pageLabel = pagination?.querySelector<HTMLElement>("[data-activity-page]");
 
-  if (!root || !graph || !months || !total || !years || !activityHeading || !activity) {
+  if (
+    !root ||
+    !graph ||
+    !months ||
+    !total ||
+    !years ||
+    !activityHeading ||
+    !activity ||
+    !pagination ||
+    !previousButton ||
+    !nextButton ||
+    !pageLabel
+  ) {
     return;
   }
 
@@ -474,6 +495,7 @@ const setupContributions = async () => {
     );
     let selectedYear = currentYear;
     let selectedDateKey: string | undefined;
+    let activityPage = 1;
 
     const render = () => {
       const range = getRange(selectedYear, currentYear);
@@ -488,18 +510,25 @@ const setupContributions = async () => {
         selectedDateKey,
         (key) => {
           selectedDateKey = selectedDateKey === key ? undefined : key;
+          activityPage = 1;
           render();
         },
       );
-      renderActivity(
+      const pageResult = renderActivity(
         activity,
         siteActivities,
         range,
         selectedYear,
         currentYear,
+        activityPage,
         activityLimit,
         selectedDateKey,
       );
+      activityPage = pageResult.currentPage;
+      pagination.hidden = pageResult.totalPages <= 1;
+      previousButton.disabled = activityPage <= 1;
+      nextButton.disabled = activityPage >= pageResult.totalPages;
+      pageLabel.textContent = `${activityPage} / ${pageResult.totalPages}`;
       if (selectedDateKey) {
         const [year, month, day] = selectedDateKey.split("-").map(Number);
         activityHeading.textContent = `${selectedDateFormatter.format(new Date(year, month - 1, day, 12))}站点动态`;
@@ -521,9 +550,21 @@ const setupContributions = async () => {
       button.addEventListener("click", () => {
         selectedYear = year;
         selectedDateKey = undefined;
+        activityPage = 1;
         render();
       });
       years.append(button);
+    });
+
+    previousButton.addEventListener("click", () => {
+      activityPage -= 1;
+      render();
+      activityHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    nextButton.addEventListener("click", () => {
+      activityPage += 1;
+      render();
+      activityHeading.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
     render();

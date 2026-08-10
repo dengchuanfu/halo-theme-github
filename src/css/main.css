@@ -1644,12 +1644,29 @@ svg {
 }
 
 .pagination a,
-.pagination span {
+.pagination span,
+.pagination button {
   min-height: 32px;
   padding: 5px 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--canvas);
+}
+
+.pagination button {
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+}
+
+.pagination button:disabled {
+  color: var(--fg-muted);
+  cursor: default;
+  opacity: 0.55;
+}
+
+.activity-pagination[hidden] {
+  display: none;
 }
 
 article {
