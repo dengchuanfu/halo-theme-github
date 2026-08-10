@@ -357,10 +357,48 @@ spec:
           accept: "image/*"
           help: 当友链未设置 Logo 或 Logo 加载失败时显示；留空时使用默认头像图标
         - $formkit: checkbox
+          name: weather_enabled
+          label: 启用天气显示
+          value: false
+          help: 开启后在顶部搜索框之后显示实时天气，数据来自无需密钥的 Open-Meteo
+        - $formkit: checkbox
+          name: weather_auto_location
+          label: 优先使用访客定位
+          value: true
+          help: 首次访问会请求浏览器定位权限；拒绝或定位失败时使用下方预设城市
+        - $formkit: text
+          name: weather_location
+          label: 天气城市名称
+          value: "深圳"
+          placeholder: "深圳"
+          help: 访客定位不可用时显示的备用城市
+        - $formkit: text
+          name: weather_latitude
+          label: 天气纬度
+          value: "22.5431"
+          placeholder: "22.5431"
+          help: 例如深圳为 22.5431，可从地图服务查询城市坐标
+        - $formkit: text
+          name: weather_longitude
+          label: 天气经度
+          value: "114.0579"
+          placeholder: "114.0579"
+          help: 例如深圳为 114.0579，可从地图服务查询城市坐标
+        - $formkit: checkbox
           name: music_player_enabled
           label: 启用悬浮播放器
           value: false
-          help: 开启并填写歌单 ID 后，在前台左下角显示播放器并尝试自动播放
+          help: 开启并填写歌单 ID 后，在前台显示播放器并尝试自动播放
+        - $formkit: select
+          name: music_player_position
+          label: 播放器显示位置
+          value: "bottom-left"
+          options:
+            - label: "左下角"
+              value: "bottom-left"
+            - label: "右上角"
+              value: "top-right"
+          help: 选择右上角后，播放器显示在顶部搜索框之后，采用紧凑的 macOS 音乐播放器样式
         - $formkit: select
           name: music_source
           label: 音乐数据源

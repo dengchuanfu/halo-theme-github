@@ -31,11 +31,154 @@ type NotificationList = {
   total?: number;
 };
 
+type OpenMeteoResponse = {
+  current?: {
+    temperature_2m?: number;
+    weather_code?: number;
+  };
+};
+
+type WeatherCoordinates = {
+  label: string;
+  latitude: number;
+  longitude: number;
+};
+
 const searchEndpoint = "/apis/api.halo.run/v1alpha1/indices/-/search";
 const currentUserEndpoint = "/apis/api.console.halo.run/v1alpha1/users/-";
 const momentUpvoteEndpoint = "/apis/api.halo.run/v1alpha1/trackers/upvote";
 const colorSchemeStorageKey = "halo-theme-github-color-scheme";
 let currentUserRequest: Promise<CurrentUserDetail | undefined> | undefined;
+
+const getWeatherMeta = (code: number) => {
+  if (code === 0) {
+    return { icon: "solar:sun-2-linear", label: "晴" };
+  }
+
+  if ([1, 2].includes(code)) {
+    return { icon: "solar:cloud-sun-2-linear", label: "少云" };
+  }
+
+  if (code === 3) {
+    return { icon: "solar:cloud-linear", label: "阴" };
+  }
+
+  if ([45, 48].includes(code)) {
+    return { icon: "solar:cloud-fog-linear", label: "雾" };
+  }
+
+  if ([51, 53, 55, 56, 57].includes(code)) {
+    return { icon: "solar:cloud-sun-rain-linear", label: "毛毛雨" };
+  }
+
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) {
+    return { icon: "solar:cloud-rain-linear", label: "雨" };
+  }
+
+  if ([71, 73, 75, 77, 85, 86].includes(code)) {
+    return { icon: "solar:cloud-snowfall-linear", label: "雪" };
+  }
+
+  if ([95, 96, 99].includes(code)) {
+    return { icon: "solar:cloud-bolt-linear", label: "雷雨" };
+  }
+
+  return { icon: "solar:cloud-linear", label: "多云" };
+};
+
+const setupWeather = () => {
+  const widget = document.querySelector<HTMLElement>("[data-weather-widget]");
+  const icon = widget?.querySelector<HTMLElement>("[data-weather-icon]");
+  const location = widget?.querySelector<HTMLElement>("[data-weather-location-label]");
+  const temperature = widget?.querySelector<HTMLElement>("[data-weather-temperature]");
+
+  if (!widget || !icon || !location || !temperature) {
+    widget?.setAttribute("hidden", "");
+    return;
+  }
+
+  const fallback: WeatherCoordinates = {
+    label: widget.dataset.weatherLocation?.trim() || "天气",
+    latitude: Number(widget.dataset.weatherLatitude),
+    longitude: Number(widget.dataset.weatherLongitude),
+  };
+  const preferVisitorLocation = widget.dataset.weatherAutoLocation !== "false";
+
+  if (!Number.isFinite(fallback.latitude) || !Number.isFinite(fallback.longitude)) {
+    widget.setAttribute("hidden", "");
+    return;
+  }
+
+  const loadWeather = (coordinates: WeatherCoordinates, fallBackOnFailure: boolean) => {
+    location.textContent = coordinates.label;
+    const params = new URLSearchParams({
+      current: "temperature_2m,weather_code",
+      latitude: String(coordinates.latitude),
+      longitude: String(coordinates.longitude),
+      timezone: "auto",
+    });
+
+    void fetch(`https://api.open-meteo.com/v1/forecast?${params}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Weather API failed: ${response.status}`);
+        }
+
+        return response.json() as Promise<OpenMeteoResponse>;
+      })
+      .then((payload) => {
+        const value = payload.current?.temperature_2m;
+        const code = payload.current?.weather_code;
+
+        if (
+          typeof value !== "number" ||
+          typeof code !== "number" ||
+          !Number.isFinite(value) ||
+          !Number.isFinite(code)
+        ) {
+          throw new Error("Weather API returned incomplete data");
+        }
+
+        const weather = getWeatherMeta(code);
+        const roundedTemperature = Math.round(value);
+        icon.setAttribute("icon", weather.icon);
+        temperature.textContent = `${roundedTemperature}°`;
+        widget.setAttribute(
+          "aria-label",
+          `${coordinates.label}，${weather.label}，${roundedTemperature} 摄氏度`,
+        );
+      })
+      .catch(() => {
+        if (fallBackOnFailure) {
+          loadWeather(fallback, false);
+          return;
+        }
+
+        widget.setAttribute("hidden", "");
+      });
+  };
+
+  if (!preferVisitorLocation || !("geolocation" in navigator)) {
+    loadWeather(fallback, false);
+    return;
+  }
+
+  location.textContent = "定位中";
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        loadWeather(fallback, false);
+        return;
+      }
+
+      loadWeather({ label: "当前位置", latitude, longitude }, true);
+    },
+    () => loadWeather(fallback, false),
+    { enableHighAccuracy: false, maximumAge: 900000, timeout: 6000 },
+  );
+};
 
 const getCurrentUser = () => {
   currentUserRequest ??= fetch(currentUserEndpoint)
@@ -252,11 +395,17 @@ const setupRepositoryEngagement = () => {
 type MusicTrack = {
   artist: string;
   cover: string;
+  lyric: string;
   title: string;
   url: string;
 };
 
 type MusicPlaybackMode = "sequence" | "shuffle";
+
+type MusicLyricLine = {
+  text: string;
+  time: number;
+};
 
 type MusicPlayerState = {
   api: string;
@@ -288,6 +437,51 @@ const getText = (...values: unknown[]) => {
   }
 
   return "";
+};
+
+const getLyricsFromPayload = (payload: unknown) => {
+  if (typeof payload === "string") {
+    return payload.trim();
+  }
+
+  const data = getRecord(payload);
+  const lrc = getRecord(data?.lrc);
+  const lyric = getRecord(data?.lyric);
+
+  return getText(
+    data?.lrc,
+    data?.lyric,
+    data?.lyrics,
+    lrc?.lyric,
+    lrc?.lrc,
+    lyric?.lyric,
+    lyric?.lrc,
+  );
+};
+
+const parseTimedLyrics = (source: string): MusicLyricLine[] => {
+  const timestamp = /\[(\d{1,2}):(\d{2}(?:\.\d{1,3})?)\]/g;
+  const lines: MusicLyricLine[] = [];
+
+  for (const sourceLine of source.split(/\r?\n/)) {
+    const matches = [...sourceLine.matchAll(timestamp)];
+    const text = sourceLine.replace(timestamp, "").trim();
+
+    if (!text || !matches.length) {
+      continue;
+    }
+
+    for (const match of matches) {
+      const minutes = Number(match[1]);
+      const seconds = Number(match[2]);
+
+      if (Number.isFinite(minutes) && Number.isFinite(seconds)) {
+        lines.push({ text, time: minutes * 60 + seconds });
+      }
+    }
+  }
+
+  return lines.sort((left, right) => left.time - right.time);
 };
 
 const getMusicPlayerState = (): MusicPlayerState | undefined => {
@@ -392,6 +586,7 @@ const normalizeMusicTrack = (value: unknown): MusicTrack | undefined => {
     artist:
       getArtistName(track.artist ?? track.author ?? track.ar ?? track.artists ?? track.singer) ||
       "未知歌手",
+    lyric: getText(track.lrc, track.lyric, track.lyrics),
     url,
     cover: getText(
       track.cover,
@@ -410,6 +605,7 @@ const setupMusicPlayer = () => {
   const audio = player?.querySelector<HTMLAudioElement>("[data-music-audio]");
   const title = player?.querySelector<HTMLElement>("[data-music-title]");
   const artist = player?.querySelector<HTMLElement>("[data-music-artist]");
+  const lyrics = player?.querySelector<HTMLElement>("[data-music-lyrics]");
   const cover = player?.querySelector<HTMLImageElement>("[data-music-cover]");
   const coverPlaceholder = player?.querySelector<HTMLElement>("[data-music-cover-placeholder]");
   const progress = player?.querySelector<HTMLInputElement>("[data-music-progress]");
@@ -426,6 +622,7 @@ const setupMusicPlayer = () => {
     !audio ||
     !title ||
     !artist ||
+    !lyrics ||
     !cover ||
     !coverPlaceholder ||
     !progress ||
@@ -449,6 +646,9 @@ const setupMusicPlayer = () => {
   let playbackHistory: number[] = [];
   let resumeOnInteraction = false;
   let interactionListenerBound = false;
+  let lyricLines: MusicLyricLine[] = [];
+  let lyricRequestId = 0;
+  let displayedLyric = "";
 
   const setControlsEnabled = (enabled: boolean) => {
     previous.disabled = !enabled;
@@ -516,6 +716,65 @@ const setupMusicPlayer = () => {
     playbackModeIcon?.setAttribute("icon", isShuffle ? "lucide:shuffle" : "lucide:list-ordered");
   };
 
+  const setLyrics = (value: string) => {
+    if (value !== displayedLyric) {
+      lyrics.textContent = value;
+      displayedLyric = value;
+    }
+  };
+
+  const updateLyrics = () => {
+    const fallback = tracks[index]?.title || "正在加载歌词";
+    const currentTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    let currentLine: MusicLyricLine | undefined;
+
+    for (const line of lyricLines) {
+      if (line.time > currentTime) {
+        break;
+      }
+
+      currentLine = line;
+    }
+
+    setLyrics(currentLine?.text || fallback);
+  };
+
+  const loadLyrics = async (track: MusicTrack) => {
+    const requestId = ++lyricRequestId;
+    lyricLines = [];
+    displayedLyric = "";
+    setLyrics(track.lyric ? "正在加载歌词" : track.title);
+
+    try {
+      const source = track.lyric;
+      const lyricSource = /^https?:\/\//i.test(source)
+        ? await fetch(source, { headers: { Accept: "application/json, text/plain" } }).then(
+            async (response) => {
+              if (!response.ok) {
+                throw new Error(`Lyrics API failed: ${response.status}`);
+              }
+
+              const contentType = response.headers.get("content-type") || "";
+              return contentType.includes("application/json")
+                ? getLyricsFromPayload(await response.json())
+                : await response.text();
+            },
+          )
+        : source;
+
+      if (requestId !== lyricRequestId) {
+        return;
+      }
+
+      lyricLines = parseTimedLyrics(lyricSource);
+      updateLyrics();
+    } catch {
+      if (requestId === lyricRequestId) {
+        setLyrics(track.title);
+      }
+    }
+  };
+
   const play = async () => {
     try {
       await audio.play();
@@ -551,6 +810,7 @@ const setupMusicPlayer = () => {
     const track = tracks[index];
     title.textContent = track.title;
     artist.textContent = track.artist;
+    void loadLyrics(track);
     progress.value = "0";
 
     if (track.cover) {
@@ -569,6 +829,7 @@ const setupMusicPlayer = () => {
         () => {
           if (Number.isFinite(audio.duration)) {
             audio.currentTime = Math.min(resumeAt, Math.max(0, audio.duration - 0.25));
+            updateLyrics();
           }
         },
         { once: true },
@@ -631,6 +892,7 @@ const setupMusicPlayer = () => {
   progress.addEventListener("input", () => {
     if (Number.isFinite(audio.duration)) {
       audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+      updateLyrics();
       persistState();
     }
   });
@@ -644,6 +906,8 @@ const setupMusicPlayer = () => {
   });
   audio.addEventListener("ended", goToNext);
   audio.addEventListener("timeupdate", () => {
+    updateLyrics();
+
     if (Number.isFinite(audio.duration) && audio.duration > 0) {
       progress.value = String((audio.currentTime / audio.duration) * 100);
 
@@ -1511,6 +1775,7 @@ setupSiteRuntime();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
 setupRepositoryEngagement();
+setupWeather();
 setupMusicPlayer();
 setupMomentImagePreview();
 setupMomentUpvotes();
