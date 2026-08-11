@@ -90,6 +90,25 @@ spec:
               value: "🔥"
             - label: "✨ 灵感"
               value: "✨"
+    - group: announcement
+      label: 公告
+      formSchema:
+        - $formkit: checkbox
+          name: enabled
+          label: 显示公告
+          value: false
+          help: 开启并填写公告内容后，在前端菜单栏下方显示全宽公告横幅
+        - $formkit: checkbox
+          name: prayer_mode
+          label: 开启哀悼模式
+          value: false
+          help: 开启后全站以灰色效果显示，可用于发布哀悼公告
+        - $formkit: textarea
+          name: content
+          label: 公告内容
+          value: ""
+          placeholder: "请输入要发布的公告内容"
+          help: 支持多行文本，内容会以纯文本方式显示
     - group: icons
       label: 图标配置
       formSchema:

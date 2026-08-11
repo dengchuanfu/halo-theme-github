@@ -1795,13 +1795,14 @@ const setupPublishMenu = () => {
   });
 };
 
-const isTypingTarget = (target: EventTarget | null) => {
-  if (!(target instanceof HTMLElement)) {
-    return false;
-  }
-
-  return ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || target.isContentEditable;
-};
+const isTypingEvent = (event: KeyboardEvent) =>
+  event
+    .composedPath()
+    .some(
+      (target) =>
+        target instanceof HTMLElement &&
+        (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || target.isContentEditable),
+    );
 
 const createResultItem = (hit: SearchHit) => {
   const link = document.createElement("a");
@@ -1929,7 +1930,14 @@ const setupSearch = () => {
       closeSearch();
     }
 
-    if (event.key === "/" && overlay.hidden && !isTypingTarget(event.target)) {
+    if (
+      event.key === "/" &&
+      overlay.hidden &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !isTypingEvent(event)
+    ) {
       event.preventDefault();
       openSearch();
     }

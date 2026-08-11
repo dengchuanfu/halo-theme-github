@@ -65,6 +65,10 @@ body {
   line-height: 1.5;
 }
 
+body.is-prayer-mode {
+  filter: grayscale(1);
+}
+
 a {
   color: var(--accent);
   text-decoration: none;
@@ -519,6 +523,35 @@ svg {
   height: 2px;
   background: var(--tab-active);
   content: "";
+}
+
+.site-announcement {
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 10%, var(--canvas));
+}
+
+.site-announcement-inner {
+  display: flex;
+  max-width: 1280px;
+  min-height: 42px;
+  margin: 0 auto;
+  padding: 10px 24px;
+  align-items: center;
+  gap: 10px;
+  color: var(--fg);
+  font-size: 13px;
+}
+
+.site-announcement iconify-icon {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 16px;
+}
+
+.site-announcement p {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 .tab-icon {
@@ -3232,6 +3265,10 @@ article {
 
   .profile-tabs a {
     font-size: 14px;
+  }
+
+  .site-announcement-inner {
+    padding: 10px 16px;
   }
 
   .github-shell {

@@ -10,6 +10,7 @@
   </head>
   <body
     th:style="|--configured-page-bg: ${theme.config.styles.background_color ?: '#ffffff'}; --configured-accent: ${theme.config.styles.accent_color ?: '#0969da'}|"
+    th:classappend="${theme.config.announcement.prayer_mode == true ? 'is-prayer-mode' : ''}"
   >
     <header class="github-header">
       <div class="header-inner">
@@ -279,6 +280,17 @@
         </a>
       </th:block>
     </nav>
+
+    <aside
+      class="site-announcement"
+      role="status"
+      th:if="${theme.config.announcement.enabled != false and not #strings.isEmpty(theme.config.announcement.content)}"
+    >
+      <div class="site-announcement-inner">
+        <iconify-icon icon="octicon:megaphone-16" aria-hidden="true"></iconify-icon>
+        <p th:text="${theme.config.announcement.content}">公告内容</p>
+      </div>
+    </aside>
 
     <div data-menu-icon-rules hidden th:if="${theme.config.icons.custom_menu_icons != null}">
       <span
