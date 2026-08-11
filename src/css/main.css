@@ -1560,7 +1560,7 @@ svg {
   height: 40px;
   align-items: center;
   gap: 8px;
-  animation: message-drift var(--message-duration) linear var(--message-delay) infinite;
+  animation: message-drift var(--message-duration) linear var(--message-delay) 1 both;
   white-space: nowrap;
   will-change: left, transform;
 }
@@ -2165,6 +2165,168 @@ article {
 .links-group {
   display: grid;
   gap: 10px;
+}
+
+.link-application {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas);
+}
+
+.link-application-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.link-application-heading h2 {
+  margin: 0;
+  color: var(--fg);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.link-application-heading p:last-child {
+  max-width: 620px;
+  margin: 6px 0 0;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+.link-application-trigger,
+.link-application-form-actions button {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgb(27 31 36 / 0.15);
+  border-radius: 6px;
+  background: #1f883d;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.link-application-trigger:hover,
+.link-application-form-actions button:hover {
+  background: #1a7f37;
+}
+
+.link-application-profile {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.link-application-profile div {
+  display: grid;
+  min-width: 0;
+  padding: 10px 12px;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
+  background: var(--canvas-subtle);
+}
+
+.link-application-profile div:nth-child(2n) {
+  border-left: 1px solid var(--border);
+}
+
+.link-application-profile div:nth-child(n + 3) {
+  border-top: 1px solid var(--border);
+}
+
+.link-application-profile dt {
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.link-application-profile dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--fg);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.link-application-form {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.link-application-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.link-application-fields label {
+  display: grid;
+  gap: 6px;
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.link-application-fields input,
+.link-application-fields textarea {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  background: var(--canvas);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.link-application-fields input:focus,
+.link-application-fields textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.link-application-field-wide {
+  grid-column: 1 / -1;
+}
+
+.link-application-form-actions {
+  display: flex;
+  min-height: 32px;
+  margin-top: 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.link-application-form-actions p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.link-application-form-actions p.is-error {
+  color: #cf222e;
+}
+
+.link-application-form-actions p.is-success {
+  padding: 7px 10px;
+  border: 1px solid #1a7f37;
+  border-radius: 6px;
+  background: #dafbe1;
+  color: #1a7f37;
+  font-weight: 600;
 }
 
 .links-group + .links-group {
@@ -3098,9 +3260,23 @@ article {
   }
 
   .links-hero,
-  .links-group-heading {
+  .links-group-heading,
+  .link-application-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .link-application-profile,
+  .link-application-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .link-application-profile div:nth-child(2n) {
+    border-left: 0;
+  }
+
+  .link-application-profile div + div {
+    border-top: 1px solid var(--border);
   }
 
   .link-card {

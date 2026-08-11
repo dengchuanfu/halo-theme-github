@@ -64,16 +64,16 @@ const fetchComments = async (name: string) => {
   return comments.filter((comment) => comment.spec?.approved !== false && !comment.spec?.hidden);
 };
 
-const createMessage = (comment: HaloComment, index: number, isDuplicate: boolean) => {
+const commentKey = (comment: HaloComment) =>
+  comment.metadata?.name || `${comment.owner?.displayName}:${comment.spec?.creationTime}`;
+
+const createMessage = (comment: HaloComment, lane: number, delay: number) => {
   const message = document.createElement("div");
   message.className = "floating-message";
-  message.style.setProperty("--message-lane", String(index % 6));
-  message.style.setProperty("--message-duration", `${16 + (index % 5) * 2}s`);
-  message.style.setProperty("--message-delay", `${-(index * 3.7)}s`);
-
-  if (isDuplicate) {
-    message.setAttribute("aria-hidden", "true");
-  }
+  message.dataset.commentKey = commentKey(comment);
+  message.style.setProperty("--message-lane", String(lane));
+  message.style.setProperty("--message-duration", `${18 + Math.floor(Math.random() * 5)}s`);
+  message.style.setProperty("--message-delay", `${delay}s`);
 
   const avatar = document.createElement("span");
   avatar.className = "floating-message-avatar";
@@ -108,6 +108,12 @@ const createMessage = (comment: HaloComment, index: number, isDuplicate: boolean
   body.append(owner, content, time);
   message.append(avatar, body);
   return message;
+};
+
+const randomComment = (comments: HaloComment[], excludedKeys: Set<string>) => {
+  const candidates = comments.filter((comment) => !excludedKeys.has(commentKey(comment)));
+  const source = candidates.length ? candidates : comments;
+  return source[Math.floor(Math.random() * source.length)];
 };
 
 const setupMessageWall = () => {
@@ -149,11 +155,28 @@ const setupMessageWall = () => {
       }
 
       signature = nextSignature;
-      const messageCount = Math.max(8, comments.length);
-      const messages = Array.from({ length: messageCount }, (_, index) => {
-        const comment = comments[index % comments.length];
-        return createMessage(comment, index, index >= comments.length);
-      });
+      const messageCount = comments.length === 1 ? 1 : Math.min(4, comments.length - 1);
+      const initialComments = [...comments].sort(() => Math.random() - 0.5).slice(0, messageCount);
+      const createLoopingMessage = (comment: HaloComment, index: number): HTMLElement => {
+        const lane =
+          messageCount === 1 ? 2 : Math.round((index * 5) / Math.max(1, messageCount - 1));
+        const message = createMessage(comment, lane, index * 2.5);
+
+        message.addEventListener("animationend", () => {
+          const activeKeys = new Set(
+            Array.from(stage.querySelectorAll<HTMLElement>("[data-comment-key]"))
+              .filter((item) => item !== message)
+              .map((item) => item.dataset.commentKey || ""),
+          );
+          const nextComment = randomComment(comments, activeKeys);
+          message.replaceWith(createLoopingMessage(nextComment, index));
+        });
+
+        return message;
+      };
+      const messages = initialComments.map((comment, index) =>
+        createLoopingMessage(comment, index),
+      );
       stage.replaceChildren(...messages);
     } catch {
       count.textContent = "留言暂不可用";

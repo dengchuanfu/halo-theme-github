@@ -49,11 +49,11 @@
             <span class="link-logo">
               <iconify-icon icon="clarity:avatar-line" aria-hidden="true"></iconify-icon>
               <img
-                th:if="${not #strings.isEmpty(link.spec.logo) or not #strings.isEmpty(theme.config.styles.link_default_avatar)}"
-                th:src="${not #strings.isEmpty(link.spec.logo) ? link.spec.logo : theme.config.styles.link_default_avatar}"
+                th:if="${not #strings.isEmpty(link.spec.logo) or not #strings.isEmpty(theme.config.links.link_default_avatar)}"
+                th:src="${not #strings.isEmpty(link.spec.logo) ? link.spec.logo : theme.config.links.link_default_avatar}"
                 th:alt="${link.spec.displayName}"
                 data-link-logo
-                th:attr="data-link-fallback=${theme.config.styles.link_default_avatar ?: ''}"
+                th:attr="data-link-fallback=${theme.config.links.link_default_avatar ?: ''}"
               />
             </span>
             <span class="link-card-body">
@@ -70,5 +70,120 @@
         </div>
       </section>
     </div>
+
+    <section
+      class="link-application"
+      th:if="${theme.config.links.link_application_enabled != false}"
+      data-friend-link-application
+    >
+      <div class="link-application-heading">
+        <div>
+          <p class="links-eyebrow">Exchange links</p>
+          <h2>添加我的友链</h2>
+          <p
+            th:text="${theme.config.links.link_application_note ?: '请先在贵站添加本站友链，提交后会作为留言发送，站长会手动审核。'}"
+          >
+            请先在贵站添加本站友链，提交后会作为留言发送，站长会手动审核。
+          </p>
+        </div>
+        <button class="link-application-trigger" type="button" data-friend-link-open>
+          申请友链
+        </button>
+      </div>
+
+      <dl class="link-application-profile">
+        <div>
+          <dt>网站名称</dt>
+          <dd
+            th:text="${theme.config.links.link_application_site_name ?: theme.config.basic.name ?: site.title}"
+          >
+            网站名称
+          </dd>
+        </div>
+        <div>
+          <dt>网站地址</dt>
+          <dd th:text="${theme.config.links.link_application_site_url ?: site.url}">
+            https://example.com
+          </dd>
+        </div>
+        <div>
+          <dt>网站头像</dt>
+          <dd th:text="${theme.config.links.link_application_site_logo ?: site.logo ?: ''}">
+            https://example.com/avatar.png
+          </dd>
+        </div>
+        <div>
+          <dt>网站描述</dt>
+          <dd
+            th:text="${theme.config.links.link_application_site_description ?: theme.config.basic.description ?: site.title}"
+          >
+            网站描述
+          </dd>
+        </div>
+        <div>
+          <dt>友链页面</dt>
+          <dd
+            th:text="${theme.config.links.link_application_site_link_page ?: (site.url + 'links')}"
+          >
+            https://example.com/links
+          </dd>
+        </div>
+        <div>
+          <dt>RSS 订阅</dt>
+          <dd
+            th:text="${theme.config.links.link_application_site_rss_url ?: (site.url + 'rss.xml')}"
+          >
+            https://example.com/rss.xml
+          </dd>
+        </div>
+      </dl>
+
+      <form class="link-application-form" data-friend-link-form hidden>
+        <div class="link-application-fields">
+          <label>
+            <span>网站名称</span>
+            <input name="siteName" type="text" maxlength="80" required />
+          </label>
+          <label>
+            <span>网站地址</span>
+            <input name="url" type="url" placeholder="https://" maxlength="300" required />
+          </label>
+          <label>
+            <span>网站头像</span>
+            <input name="logo" type="url" placeholder="https://" maxlength="300" />
+          </label>
+          <label>
+            <span>联系邮箱</span>
+            <input name="email" type="email" maxlength="160" required />
+          </label>
+          <label class="link-application-field-wide">
+            <span>网站描述</span>
+            <textarea name="description" rows="3" maxlength="240" required></textarea>
+          </label>
+          <label>
+            <span>友链页面</span>
+            <input
+              name="backlinkUrl"
+              type="url"
+              placeholder="https://example.com/links"
+              maxlength="300"
+            />
+          </label>
+          <label>
+            <span>RSS 订阅地址</span>
+            <input
+              name="rssUrl"
+              type="url"
+              placeholder="https://example.com/rss.xml"
+              maxlength="300"
+            />
+          </label>
+        </div>
+        <div class="link-application-form-actions">
+          <p data-friend-link-status aria-live="polite"></p>
+          <button type="submit" data-friend-link-submit>提交到留言板</button>
+        </div>
+      </form>
+    </section>
   </section>
 </include>

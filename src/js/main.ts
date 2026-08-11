@@ -376,6 +376,174 @@ const setupLinkLogoFallbacks = () => {
   });
 };
 
+const commentEndpoint = "/apis/api.halo.run/v1alpha1/comments";
+const singlePageEndpoint = "/apis/api.content.halo.run/v1alpha1/singlepages?page=1&size=1000";
+
+type SinglePageSummary = {
+  metadata?: { name?: string };
+  spec?: { template?: string };
+};
+
+const escapeCommentHtml = (value: string) =>
+  value.replace(/[&<>'"]/g, (character) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;",
+    };
+    return entities[character];
+  });
+
+const normalizeHttpUrl = (value: string, label: string) => {
+  if (!value) {
+    return "";
+  }
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error();
+    }
+    return url.toString();
+  } catch {
+    throw new Error(`${label}必须是有效的 HTTP 或 HTTPS 地址。`);
+  }
+};
+
+const formatFriendLinkApplication = (payload: {
+  siteName: string;
+  url: string;
+  logo: string;
+  email: string;
+  description: string;
+  backlinkUrl: string;
+  rssUrl: string;
+}) => {
+  const row = (label: string, value: string) =>
+    value ? `<p><strong>${label}：</strong>${escapeCommentHtml(value)}</p>` : "";
+  const safeUrl = escapeCommentHtml(payload.url);
+
+  return [
+    "<p><strong>[友链申请]</strong></p>",
+    row("网站名称", payload.siteName),
+    `<p><strong>网站地址：</strong>${safeUrl}</p>`,
+    row("网站头像", payload.logo),
+    row("网站描述", payload.description),
+    row("联系邮箱", payload.email),
+    row("友链页面", payload.backlinkUrl),
+    row("RSS 订阅地址", payload.rssUrl),
+  ]
+    .filter(Boolean)
+    .join("");
+};
+
+const findMessageBoardName = async () => {
+  const response = await fetch(singlePageEndpoint, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error("无法获取留言板信息，请稍后再试。");
+  }
+
+  const result = (await response.json()) as { items?: SinglePageSummary[] };
+  const messageBoard = result.items?.find((page) => page.spec?.template === "message.html");
+  if (!messageBoard?.metadata?.name) {
+    throw new Error("未找到留言板页面，请先创建使用 message.html 模板的页面。");
+  }
+  return messageBoard.metadata.name;
+};
+
+const setupFriendLinkApplication = () => {
+  const root = document.querySelector<HTMLElement>("[data-friend-link-application]");
+  const trigger = root?.querySelector<HTMLButtonElement>("[data-friend-link-open]");
+  const form = root?.querySelector<HTMLFormElement>("[data-friend-link-form]");
+  const submit = root?.querySelector<HTMLButtonElement>("[data-friend-link-submit]");
+  const status = root?.querySelector<HTMLElement>("[data-friend-link-status]");
+
+  if (!root || !trigger || !form || !submit || !status) {
+    return;
+  }
+
+  trigger.addEventListener("click", () => {
+    form.hidden = false;
+    trigger.hidden = true;
+    form.querySelector<HTMLInputElement>('input[name="siteName"]')?.focus();
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const values = new FormData(form);
+    const valueOf = (name: string) => {
+      const value = values.get(name);
+      return typeof value === "string" ? value.trim() : "";
+    };
+    const payload = {
+      siteName: valueOf("siteName"),
+      url: valueOf("url"),
+      logo: valueOf("logo"),
+      email: valueOf("email"),
+      description: valueOf("description"),
+      backlinkUrl: valueOf("backlinkUrl"),
+      rssUrl: valueOf("rssUrl"),
+    };
+
+    submit.disabled = true;
+    status.classList.remove("is-error");
+    status.classList.remove("is-success");
+    status.textContent = "正在提交...";
+
+    void Promise.resolve()
+      .then(() => {
+        payload.url = normalizeHttpUrl(payload.url, "网站地址");
+        payload.logo = normalizeHttpUrl(payload.logo, "网站头像");
+        payload.backlinkUrl = normalizeHttpUrl(payload.backlinkUrl, "友链页面");
+        payload.rssUrl = normalizeHttpUrl(payload.rssUrl, "RSS 订阅地址");
+        return findMessageBoardName();
+      })
+      .then((messageBoardName) => {
+        const content = formatFriendLinkApplication(payload);
+        return fetch(commentEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            raw: content,
+            content,
+            allowNotification: false,
+            subjectRef: {
+              group: "content.halo.run",
+              kind: "SinglePage",
+              name: messageBoardName,
+              version: "",
+            },
+            owner: {
+              displayName: payload.siteName,
+              email: payload.email,
+              website: payload.url,
+            },
+          }),
+        });
+      })
+      .then(async (response) => {
+        if (!response.ok) {
+          const body = (await response.json().catch(() => undefined)) as
+            | { detail?: string; message?: string }
+            | undefined;
+          throw new Error(body?.message || body?.detail || "提交失败，请稍后再试。");
+        }
+
+        form.reset();
+        status.classList.add("is-success");
+        status.textContent = "申请已提交到留言板，等待站长审核。";
+      })
+      .catch((error: unknown) => {
+        status.classList.add("is-error");
+        status.textContent = error instanceof Error ? error.message : "提交失败，请稍后再试。";
+      })
+      .finally(() => {
+        submit.disabled = false;
+      });
+  });
+};
+
 const formatEngagementCount = (count: number) => (count > 99 ? "99+" : String(Math.max(0, count)));
 
 const setupRepositoryEngagement = () => {
@@ -1774,6 +1942,7 @@ setupSiteTimeline();
 setupSiteRuntime();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
+setupFriendLinkApplication();
 setupRepositoryEngagement();
 setupWeather();
 setupMusicPlayer();

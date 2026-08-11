@@ -350,12 +350,6 @@ spec:
           name: accent_color
           label: 强调色
           value: "#0969da"
-        - $formkit: attachment
-          name: link_default_avatar
-          label: 友链默认头像
-          value: ""
-          accept: "image/*"
-          help: 当友链未设置 Logo 或 Logo 加载失败时显示；留空时使用默认头像图标
         - $formkit: checkbox
           name: weather_enabled
           label: 启用天气显示
@@ -431,6 +425,59 @@ spec:
           value: "https://api.i-meto.com/meting/api?server=netease&type=playlist&id={id}"
           placeholder: "https://api.example.com/playlist?id={id}"
           help: "{id} 会替换为歌单 ID。接口需返回歌曲数组，或 data 包装的数组；单曲字段支持 title/name、artist/author、url 和 cover/pic"
+    - group: links
+      label: 友链设置
+      formSchema:
+        - $formkit: attachment
+          name: link_default_avatar
+          label: 友链默认头像
+          value: ""
+          accept: "image/*"
+          help: 当友链未设置 Logo 或 Logo 加载失败时显示；留空时使用默认头像图标
+        - $formkit: text
+          name: link_application_site_name
+          label: 本站友链名称
+          value: ""
+          placeholder: "留空时使用站点名称"
+        - $formkit: text
+          name: link_application_site_url
+          label: 本站友链地址
+          value: ""
+          placeholder: "https://example.com"
+          help: 留空时使用站点地址
+        - $formkit: attachment
+          name: link_application_site_logo
+          label: 本站友链头像
+          value: ""
+          accept: "image/*"
+          help: 留空时使用站点 Logo
+        - $formkit: textarea
+          name: link_application_site_description
+          label: 本站友链描述
+          value: ""
+          placeholder: "留空时使用站点描述"
+        - $formkit: text
+          name: link_application_site_link_page
+          label: 本站友链页面
+          value: ""
+          placeholder: "https://example.com/links"
+          help: 留空时使用本站 /links 页面
+        - $formkit: text
+          name: link_application_site_rss_url
+          label: 本站 RSS 订阅地址
+          value: ""
+          placeholder: "https://example.com/rss.xml"
+          help: 留空时使用本站 /rss.xml 地址
+        - $formkit: checkbox
+          name: link_application_enabled
+          label: 启用友链申请
+          value: true
+          help: 在友链页面显示本站友链资料和自助申请表单；申请会提交为留言板评论
+        - $formkit: textarea
+          name: link_application_note
+          label: 友链申请说明
+          value: "请先在贵站添加本站友链，提交后会作为留言发送，站长会手动审核。"
+          help: 显示在友链申请区域，可填写审核规则或补充说明
     - group: footer
       label: 底部设置
       formSchema:
