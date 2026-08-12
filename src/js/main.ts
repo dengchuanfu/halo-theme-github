@@ -1944,6 +1944,185 @@ const setupSearch = () => {
   });
 };
 
+const setupSidebarTags = () => {
+  const root = document.querySelector<HTMLElement>("[data-sidebar-tags]");
+  const cloud = root?.querySelector<HTMLElement>("[data-sidebar-tag-cloud]");
+  const empty = root?.querySelector<HTMLElement>("[data-sidebar-tags-empty]");
+
+  if (!root || !cloud || !empty) {
+    return;
+  }
+
+  const endpoint = "/apis/api.content.halo.run/v1alpha1/tags";
+
+  const loadTags = async () => {
+    const tags: { name: string; permalink: string; postCount: number }[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    try {
+      do {
+        const response = await fetch(`${endpoint}?page=${page}&size=100`);
+
+        if (!response.ok) {
+          throw new Error(`Unable to load tags: ${response.status}`);
+        }
+
+        const result = (await response.json()) as {
+          items?: {
+            postCount?: number;
+            spec?: { displayName?: string };
+            status?: { permalink?: string; postCount?: number };
+          }[];
+          totalPages?: number;
+        };
+        tags.push(
+          ...(result.items || [])
+            .map((tag) => ({
+              name: tag.spec?.displayName?.trim() || "",
+              permalink: tag.status?.permalink || "/tags",
+              postCount: tag.status?.postCount ?? tag.postCount ?? 0,
+            }))
+            .filter((tag) => tag.name),
+        );
+        totalPages = Math.max(1, result.totalPages || 1);
+        page += 1;
+      } while (page <= totalPages);
+    } catch {
+      root.hidden = true;
+      return;
+    }
+
+    if (!tags.length) {
+      return;
+    }
+
+    const popularTags = tags
+      .sort(
+        (left, right) =>
+          right.postCount - left.postCount || left.name.localeCompare(right.name, "zh-CN"),
+      )
+      .slice(0, 40);
+    const tagPoints = popularTags.map((tag, index) => {
+      const phi = Math.acos(1 - (2 * (index + 0.5)) / tags.length);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+      return {
+        ...tag,
+        x: Math.sin(phi) * Math.cos(theta),
+        y: Math.cos(phi),
+        z: Math.sin(phi) * Math.sin(theta),
+      };
+    });
+    const links = tagPoints.map((tag) => {
+      const link = document.createElement("a");
+      link.href = tag.permalink;
+      link.textContent = tag.name;
+      cloud.append(link);
+      return link;
+    });
+
+    let paused = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let rotation = 0;
+    const render = () => {
+      if (!paused) {
+        rotation += 0.003;
+      }
+
+      tagPoints.forEach((tag, index) => {
+        const sin = Math.sin(rotation);
+        const cos = Math.cos(rotation);
+        const x = tag.x * cos - tag.z * sin;
+        const z = tag.x * sin + tag.z * cos;
+        const y = tag.y * 0.9 + z * 0.18;
+        const depth = (z + 1) / 2;
+        const scale = 0.72 + depth * 0.48;
+        const link = links[index];
+        link.style.left = `${50 + x * 39}%`;
+        link.style.top = `${50 - y * 38}%`;
+        link.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        link.style.opacity = String(0.24 + depth * 0.76);
+        link.style.zIndex = String(Math.round(depth * 100));
+      });
+      window.requestAnimationFrame(render);
+    };
+
+    root.addEventListener("pointerenter", () => {
+      paused = true;
+    });
+    root.addEventListener("pointerleave", () => {
+      paused = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    });
+    render();
+    empty.hidden = true;
+  };
+
+  void loadTags();
+};
+
+const setupSidebarCategories = () => {
+  const root = document.querySelector<HTMLElement>("[data-sidebar-categories]");
+  const list = root?.querySelector<HTMLUListElement>("[data-sidebar-category-list]");
+  const empty = root?.querySelector<HTMLElement>("[data-sidebar-categories-empty]");
+
+  if (!root || !list || !empty) {
+    return;
+  }
+
+  const loadCategories = async () => {
+    try {
+      const response = await fetch(
+        "/apis/api.content.halo.run/v1alpha1/categories?page=1&size=100",
+      );
+
+      if (!response.ok) {
+        throw new Error(`Unable to load categories: ${response.status}`);
+      }
+
+      const result = (await response.json()) as {
+        items?: {
+          postCount?: number;
+          spec?: { displayName?: string; hideFromList?: boolean };
+          status?: { permalink?: string; postCount?: number };
+        }[];
+      };
+      const categories = (result.items || []).filter(
+        (category) => category.spec?.displayName?.trim() && !category.spec?.hideFromList,
+      );
+
+      if (!categories.length) {
+        return;
+      }
+
+      list.replaceChildren(
+        ...categories
+          .sort(
+            (left, right) =>
+              (right.status?.postCount ?? right.postCount ?? 0) -
+                (left.status?.postCount ?? left.postCount ?? 0) ||
+              (left.spec?.displayName || "").localeCompare(right.spec?.displayName || "", "zh-CN"),
+          )
+          .slice(0, 20)
+          .map((category) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            const name = document.createElement("span");
+            name.textContent = category.spec?.displayName?.trim() || "未命名分类";
+            link.href = category.status?.permalink || "/categories";
+            link.append(name);
+
+            item.append(link);
+            return item;
+          }),
+      );
+      empty.hidden = true;
+    } catch {
+      root.hidden = true;
+    }
+  };
+
+  void loadCategories();
+};
+
 setupCustomMenuIcons();
 setupThemeToggle();
 setupSiteTimeline();
@@ -1962,3 +2141,5 @@ setupNotificationIndicator();
 setupPublishMenu();
 void setupUserMenu();
 setupSearch();
+setupSidebarTags();
+setupSidebarCategories();

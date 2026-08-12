@@ -440,6 +440,41 @@
               </span>
             </li>
           </ul>
+          <section
+            class="sidebar-wechat"
+            th:if="${not #strings.isEmpty(theme.config.sidebar.wechat_official_account_qrcode)}"
+          >
+            <img
+              th:src="${theme.config.sidebar.wechat_official_account_qrcode}"
+              alt="公众号二维码"
+            />
+          </section>
+          <section
+            class="sidebar-tags"
+            th:if="${theme.config.sidebar.show_site_tags == true}"
+            data-sidebar-tags
+          >
+            <div class="sidebar-tags-heading">
+              <iconify-icon icon="octicon:tag-16" aria-hidden="true"></iconify-icon>
+              <strong>站点标签</strong>
+            </div>
+            <div class="sidebar-tag-sphere" aria-label="动态站点标签">
+              <div class="sidebar-tag-cloud" data-sidebar-tag-cloud></div>
+            </div>
+            <p class="sidebar-tags-empty" data-sidebar-tags-empty>暂无标签</p>
+          </section>
+          <section
+            class="sidebar-categories"
+            th:if="${theme.config.sidebar.show_site_categories == true}"
+            data-sidebar-categories
+          >
+            <div class="sidebar-tags-heading sidebar-categories-heading">
+              <iconify-icon icon="octicon:tag-16" aria-hidden="true"></iconify-icon>
+              <strong>站点分类</strong>
+            </div>
+            <ul class="sidebar-category-list" data-sidebar-category-list></ul>
+            <p class="sidebar-tags-empty" data-sidebar-categories-empty>暂无分类</p>
+          </section>
         </div>
       </aside>
       <div class="content-column {{contentClass}}">

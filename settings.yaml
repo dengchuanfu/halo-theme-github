@@ -109,6 +109,25 @@ spec:
           value: ""
           placeholder: "请输入要发布的公告内容"
           help: 支持多行文本，内容会以纯文本方式显示
+    - group: sidebar
+      label: 侧边栏
+      formSchema:
+        - $formkit: attachment
+          name: wechat_official_account_qrcode
+          label: 公众号二维码
+          value: ""
+          accept: "image/*"
+          help: 上传或选择公众号二维码图片，上传后自动显示在前端侧边栏
+        - $formkit: checkbox
+          name: show_site_tags
+          label: 显示站点标签
+          value: false
+          help: 开启后在前端左侧边栏显示全部文章标签
+        - $formkit: checkbox
+          name: show_site_categories
+          label: 显示站点分类
+          value: false
+          help: 开启后在前端左侧边栏显示全部文章分类
     - group: icons
       label: 图标配置
       formSchema:
