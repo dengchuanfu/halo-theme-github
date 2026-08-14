@@ -18,7 +18,7 @@ spec:
       - name: 留言板
         description: 带评论飘屏效果的留言板页面
         file: message.html
-  version: 1.1.20
+  version: 1.1.11
   requires: ">=2.0.0"
   license:
     - name: "GPL-3.0"
