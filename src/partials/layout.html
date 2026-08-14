@@ -450,8 +450,50 @@
             />
           </section>
           <section
+            class="sidebar-love"
+            th:if="${theme.config.sidebar.love != null and theme.config.sidebar.love.enabled == true and not #strings.isEmpty(theme.config.sidebar.love.start_date)}"
+            th:with="love=${theme.config.sidebar.love}"
+            th:attr="data-love-start=${love.start_date}"
+            data-love-counter
+          >
+            <div class="sidebar-love-heading">
+              <iconify-icon icon="octicon:heart-16" aria-hidden="true"></iconify-icon>
+              <strong>恩爱计时</strong>
+            </div>
+            <div class="love-people">
+              <figure
+                class="love-person"
+                th:with="avatar=${not #strings.isEmpty(love.person_one_qq) ? 'https://q1.qlogo.cn/g?b=qq&nk=' + love.person_one_qq + '&s=640' : (love.person_one_avatar ?: (site.logo ?: 'https://github.com/dengchuanfu.png?size=160'))}"
+              >
+                <img
+                  class="love-person-avatar"
+                  th:src="${avatar}"
+                  th:alt="${love.person_one_name ?: '第一位'}"
+                />
+                <figcaption th:text="${love.person_one_name ?: '第一位'}">第一位</figcaption>
+              </figure>
+              <span class="love-heart" aria-label="相爱">
+                <iconify-icon icon="octicon:heart-fill-16" aria-hidden="true"></iconify-icon>
+              </span>
+              <figure
+                class="love-person"
+                th:with="avatar=${not #strings.isEmpty(love.person_two_qq) ? 'https://q1.qlogo.cn/g?b=qq&nk=' + love.person_two_qq + '&s=640' : (love.person_two_avatar ?: (site.logo ?: 'https://github.com/dengchuanfu.png?size=160'))}"
+              >
+                <img
+                  class="love-person-avatar"
+                  th:src="${avatar}"
+                  th:alt="${love.person_two_name ?: '第二位'}"
+                />
+                <figcaption th:text="${love.person_two_name ?: '第二位'}">第二位</figcaption>
+              </figure>
+            </div>
+            <p class="love-duration-label">我们已经在一起</p>
+            <time class="love-duration" data-love-elapsed aria-live="polite">正在计算...</time>
+          </section>
+          <section
             class="sidebar-tags"
             th:if="${theme.config.sidebar.show_site_tags == true}"
+            th:attr="data-tag-animation=${theme.config.sidebar.tag_animation ?: 'globe'},data-tag-limit=${theme.config.sidebar.site_tag_limit ?: 40}"
             data-sidebar-tags
           >
             <div class="sidebar-tags-heading">
@@ -466,6 +508,7 @@
           <section
             class="sidebar-categories"
             th:if="${theme.config.sidebar.show_site_categories == true}"
+            th:attr="data-category-limit=${theme.config.sidebar.site_category_limit ?: 20}"
             data-sidebar-categories
           >
             <div class="sidebar-tags-heading sidebar-categories-heading">
@@ -481,6 +524,20 @@
         <slot />
       </div>
     </main>
+
+    <button
+      class="back-to-top"
+      type="button"
+      aria-label="返回顶部"
+      title="返回顶部"
+      hidden
+      data-back-to-top
+      th:if="${moment != null or moments != null or linksTitle != null or singlePage != null}"
+    >
+      <span class="back-to-top-icon" aria-hidden="true">
+        <iconify-icon icon="icon-park-outline:to-top"></iconify-icon>
+      </span>
+    </button>
 
     <footer class="site-footer">
       <div class="footer-inner" th:with="footerConfig=${theme.config.footer}">

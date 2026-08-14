@@ -118,16 +118,119 @@ spec:
           value: ""
           accept: "image/*"
           help: 上传或选择公众号二维码图片，上传后自动显示在前端侧边栏
+        - $formkit: group
+          name: love
+          label: 恩爱设置
+          value:
+            enabled: false
+            start_date: ""
+            person_one_name: ""
+            person_one_avatar: ""
+            person_one_qq: ""
+            person_two_name: ""
+            person_two_avatar: ""
+            person_two_qq: ""
+          children:
+            - $formkit: checkbox
+              name: enabled
+              id: sidebar_love_enabled
+              label: 显示恩爱计时
+              value: false
+              help: 开启后在前端侧边栏显示两人的头像、名称和相恋计时
+            - $formkit: datetime-local
+              name: start_date
+              if: $get(sidebar_love_enabled).value
+              label: 开始在一起的日期和时间
+              value: ""
+              step: 1
+              validation: required
+              help: 计时会从此时间开始，前端精确显示到秒
+            - $formkit: text
+              name: person_one_name
+              if: $get(sidebar_love_enabled).value
+              label: 第一位的名称
+              value: ""
+              placeholder: "例如：小明"
+              validation: required
+            - $formkit: attachment
+              name: person_one_avatar
+              if: $get(sidebar_love_enabled).value
+              label: 第一位的头像
+              value: ""
+              accept: "image/*"
+              help: 可上传或选择头像；填写 QQ 号时会优先使用 QQ 头像
+            - $formkit: text
+              name: person_one_qq
+              if: $get(sidebar_love_enabled).value
+              label: 第一位的 QQ 号
+              value: ""
+              placeholder: "例如：12345678"
+              validation: number
+              help: 可选。填写后自动通过 QQ 号获取头像
+            - $formkit: text
+              name: person_two_name
+              if: $get(sidebar_love_enabled).value
+              label: 第二位的名称
+              value: ""
+              placeholder: "例如：小红"
+              validation: required
+            - $formkit: attachment
+              name: person_two_avatar
+              if: $get(sidebar_love_enabled).value
+              label: 第二位的头像
+              value: ""
+              accept: "image/*"
+              help: 可上传或选择头像；填写 QQ 号时会优先使用 QQ 头像
+            - $formkit: text
+              name: person_two_qq
+              if: $get(sidebar_love_enabled).value
+              label: 第二位的 QQ 号
+              value: ""
+              placeholder: "例如：87654321"
+              validation: number
+              help: 可选。填写后自动通过 QQ 号获取头像
         - $formkit: checkbox
           name: show_site_tags
           label: 显示站点标签
           value: false
-          help: 开启后在前端左侧边栏显示全部文章标签
+          help: 开启后在前端左侧边栏显示文章数最多的 40 个标签
+        - $formkit: number
+          name: site_tag_limit
+          label: 标签显示数量
+          value: 40
+          min: 1
+          max: 80
+          step: 1
+          help: 按文章数量排序，建议设置 20 至 40 个
+        - $formkit: select
+          name: tag_animation
+          label: 标签展示效果
+          value: "globe"
+          options:
+            - label: "缓慢漂浮（推荐）"
+              value: "float"
+            - label: "地球仪旋转"
+              value: "globe"
+            - label: "环形跑马灯"
+              value: "marquee"
+            - label: "波浪浮动"
+              value: "wave"
+            - label: "自动换位"
+              value: "shuffle"
+          help: 地球仪旋转会持续计算动画，较吃设备性能；性能较弱的 Windows 设备建议选择缓慢漂浮、波浪浮动等 CSS 动画
         - $formkit: checkbox
           name: show_site_categories
           label: 显示站点分类
           value: false
-          help: 开启后在前端左侧边栏显示全部文章分类
+          help: 开启后在前端左侧边栏显示文章数最多的分类
+        - $formkit: number
+          name: site_category_limit
+          label: 分类显示数量
+          value: 20
+          min: 1
+          max: 50
+          step: 1
+          help: 按文章数量排序，建议设置 10 至 20 个
     - group: icons
       label: 图标配置
       formSchema:

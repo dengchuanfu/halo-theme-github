@@ -1953,6 +1953,19 @@ const setupSidebarTags = () => {
     return;
   }
 
+  const tagLimit = Math.min(
+    80,
+    Math.max(1, Number.parseInt(root.dataset.tagLimit || "40", 10) || 40),
+  );
+  const configuredAnimation = root.dataset.tagAnimation;
+  const animation = ["globe", "float", "marquee", "wave", "shuffle"].includes(
+    configuredAnimation || "",
+  )
+    ? configuredAnimation!
+    : "globe";
+  root.dataset.tagAnimation = animation;
+  cloud.classList.add(`sidebar-tag-cloud--${animation}`);
+
   const endpoint = "/apis/api.content.halo.run/v1alpha1/tags";
 
   const loadTags = async () => {
@@ -2002,25 +2015,50 @@ const setupSidebarTags = () => {
         (left, right) =>
           right.postCount - left.postCount || left.name.localeCompare(right.name, "zh-CN"),
       )
-      .slice(0, 40);
-    const tagPoints = popularTags.map((tag, index) => {
-      const phi = Math.acos(1 - (2 * (index + 0.5)) / tags.length);
+      .slice(0, tagLimit);
+    const links = popularTags.map((tag, index) => {
+      const link = document.createElement("a");
+      link.href = tag.permalink;
+      link.textContent = tag.name;
+      link.style.setProperty("--tag-index", String(index));
+      link.style.setProperty("--tag-delay", `${(index % 10) * -0.42}s`);
+      cloud.append(link);
+      return link;
+    });
+
+    if (animation !== "globe") {
+      if (animation === "marquee") {
+        links.forEach((link, index) => {
+          const angle = (Math.PI * 2 * index) / links.length - Math.PI / 2;
+          link.style.left = `${50 + Math.cos(angle) * 41}%`;
+          link.style.top = `${50 + Math.sin(angle) * 41}%`;
+        });
+      }
+
+      if (animation === "shuffle") {
+        const shuffle = () => {
+          cloud.classList.add("is-shuffling");
+          window.setTimeout(() => {
+            [...links].sort(() => Math.random() - 0.5).forEach((link) => cloud.append(link));
+            cloud.classList.remove("is-shuffling");
+          }, 180);
+        };
+        window.setInterval(shuffle, 6000);
+      }
+
+      empty.hidden = true;
+      return;
+    }
+
+    const tagPoints = popularTags.map((_, index) => {
+      const phi = Math.acos(1 - (2 * (index + 0.5)) / popularTags.length);
       const theta = Math.PI * (1 + Math.sqrt(5)) * index;
       return {
-        ...tag,
         x: Math.sin(phi) * Math.cos(theta),
         y: Math.cos(phi),
         z: Math.sin(phi) * Math.sin(theta),
       };
     });
-    const links = tagPoints.map((tag) => {
-      const link = document.createElement("a");
-      link.href = tag.permalink;
-      link.textContent = tag.name;
-      cloud.append(link);
-      return link;
-    });
-
     let paused = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let rotation = 0;
     const render = () => {
@@ -2068,6 +2106,10 @@ const setupSidebarCategories = () => {
     return;
   }
 
+  const categoryLimit = Math.min(
+    50,
+    Math.max(1, Number.parseInt(root.dataset.categoryLimit || "20", 10) || 20),
+  );
   const loadCategories = async () => {
     try {
       const response = await fetch(
@@ -2101,7 +2143,7 @@ const setupSidebarCategories = () => {
                 (left.status?.postCount ?? left.postCount ?? 0) ||
               (left.spec?.displayName || "").localeCompare(right.spec?.displayName || "", "zh-CN"),
           )
-          .slice(0, 20)
+          .slice(0, categoryLimit)
           .map((category) => {
             const item = document.createElement("li");
             const link = document.createElement("a");
@@ -2121,6 +2163,70 @@ const setupSidebarCategories = () => {
   };
 
   void loadCategories();
+};
+
+const setupLoveCounter = () => {
+  const root = document.querySelector<HTMLElement>("[data-love-counter]");
+  const elapsed = root?.querySelector<HTMLElement>("[data-love-elapsed]");
+  const rawStart = root?.dataset.loveStart?.trim();
+
+  if (!root || !elapsed || !rawStart) {
+    return;
+  }
+
+  const parts = rawStart.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  const start = parts
+    ? new Date(
+        Number(parts[1]),
+        Number(parts[2]) - 1,
+        Number(parts[3]),
+        Number(parts[4] || 0),
+        Number(parts[5] || 0),
+        Number(parts[6] || 0),
+      )
+    : new Date(rawStart);
+
+  if (Number.isNaN(start.getTime())) {
+    root.hidden = true;
+    return;
+  }
+
+  const update = () => {
+    const totalSeconds = Math.floor((Date.now() - start.getTime()) / 1000);
+
+    if (totalSeconds < 0) {
+      elapsed.textContent = "即将开始";
+      return;
+    }
+
+    const days = Math.floor(totalSeconds / 86_400);
+    const hours = Math.floor((totalSeconds % 86_400) / 3_600);
+    const minutes = Math.floor((totalSeconds % 3_600) / 60);
+    const seconds = totalSeconds % 60;
+    elapsed.textContent = `${days} 天 ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
+
+  update();
+  window.setInterval(update, 1_000);
+};
+
+const setupBackToTop = () => {
+  const button = document.querySelector<HTMLButtonElement>("[data-back-to-top]");
+
+  if (!button) {
+    return;
+  }
+
+  const updateVisibility = () => {
+    button.hidden = window.scrollY < 320;
+  };
+
+  updateVisibility();
+  window.addEventListener("scroll", updateVisibility, { passive: true });
+  button.addEventListener("click", () => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  });
 };
 
 setupCustomMenuIcons();
@@ -2143,3 +2249,5 @@ void setupUserMenu();
 setupSearch();
 setupSidebarTags();
 setupSidebarCategories();
+setupLoveCounter();
+setupBackToTop();
