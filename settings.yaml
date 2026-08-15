@@ -64,6 +64,11 @@ spec:
           min: 1
           max: 50
           help: 首页“站点动态”默认展示的最新记录数量
+        - $formkit: checkbox
+          name: contribution_graph_english
+          label: 动态贡献图开启英文显示
+          value: false
+          help: 默认使用中文；开启后，首页动态贡献图及站点动态的月份、提示和操作文案使用英文显示
         - $formkit: select
           name: status
           label: 状态 Emoji
@@ -112,12 +117,19 @@ spec:
     - group: sidebar
       label: 侧边栏
       formSchema:
+        - $formkit: checkbox
+          name: wechat_official_account_enabled
+          id: sidebar_wechat_official_account_enabled
+          label: 显示公众号二维码
+          value: false
+          help: 开启后可在侧边栏展示公众号二维码
         - $formkit: attachment
           name: wechat_official_account_qrcode
           label: 公众号二维码
           value: ""
           accept: "image/*"
-          help: 上传或选择公众号二维码图片，上传后自动显示在前端侧边栏
+          if: $get(sidebar_wechat_official_account_enabled).value
+          help: 上传或选择公众号二维码图片
         - $formkit: group
           name: love
           label: 恩爱设置
@@ -491,6 +503,11 @@ spec:
           name: accent_color
           label: 强调色
           value: "#0969da"
+        - $formkit: checkbox
+          name: header_clock_enabled
+          label: 显示顶部时间
+          value: false
+          help: 开启后，在前台右上角显示当前本地时间，例如“8月15日 周五 10:30”
         - $formkit: checkbox
           name: weather_enabled
           label: 启用天气显示

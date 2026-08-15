@@ -157,23 +157,28 @@ svg {
   text-decoration: none;
 }
 
-.search-box {
+.header-tools {
   display: flex;
-  width: 240px;
-  height: 32px;
+  min-width: 0;
   margin-left: auto;
-  padding: 0 12px;
   align-items: center;
   gap: 8px;
+}
+
+.search-box {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  margin-left: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--canvas-subtle);
   color: var(--fg-muted);
-  font-size: 14px;
-  font-weight: 500;
-  font-family: inherit;
-  text-align: left;
   cursor: pointer;
+  order: 1;
 }
 
 .search-box:hover {
@@ -192,6 +197,7 @@ svg {
   background: var(--canvas-subtle);
   color: var(--fg-muted);
   font-size: 12px;
+  order: 3;
   white-space: nowrap;
 }
 
@@ -206,6 +212,22 @@ svg {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+.header-clock {
+  display: inline-flex;
+  height: 32px;
+  padding: 0 8px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas-subtle);
+  color: var(--fg);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  order: 4;
+  white-space: nowrap;
 }
 
 .search-open {
@@ -332,6 +354,7 @@ svg {
   display: flex;
   align-items: center;
   gap: 8px;
+  order: 5;
 }
 
 .theme-toggle {
@@ -2207,6 +2230,7 @@ article {
   padding: 3px 6px;
   background: var(--canvas-subtle);
   box-shadow: none;
+  order: 2;
 }
 
 .music-player--header .music-player-cover {
@@ -2378,6 +2402,11 @@ article {
   display: none;
 }
 
+.back-to-top.page-anchor-action {
+  top: calc(66.667vh + 52px);
+  text-decoration: none;
+}
+
 .back-to-top:hover,
 .back-to-top:focus-visible {
   border-color: var(--accent);
@@ -2476,6 +2505,11 @@ article {
   list-style: none;
 }
 
+.taxonomy-list-empty {
+  margin: 16px 0 0;
+  color: var(--fg-muted);
+}
+
 .post-item {
   padding: 16px;
   border: 1px solid var(--border);
@@ -2492,11 +2526,172 @@ article {
   font-size: 16px;
 }
 
-.tag-list,
+.tag-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.tag-list .taxonomy-card {
+  display: flex;
+  min-height: 96px;
+  margin: 0;
+  padding: 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas);
+  color: var(--fg);
+  box-shadow: 0 1px 2px rgb(31 35 40 / 5%);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.tag-list .taxonomy-card:hover,
+.tag-list .taxonomy-card:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 8px 18px rgb(31 35 40 / 10%);
+  color: var(--fg);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.taxonomy-card-title {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taxonomy-card-meta {
+  color: var(--fg-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .category-list {
+  display: grid;
+  gap: 0;
+  margin-top: 16px;
+}
+
+.category-directory-item {
+  border-bottom: 1px solid var(--border-muted);
+}
+
+.category-directory-item:first-child {
+  border-top: 1px solid var(--border-muted);
+}
+
+.category-directory-card {
+  display: grid;
+  min-height: 144px;
+  padding: 20px 0;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.category-directory-card:hover,
+.category-directory-card:focus-visible {
+  color: var(--fg);
+  outline: none;
+}
+
+.category-directory-card:focus-visible .category-directory-cover,
+.category-directory-card:hover .category-directory-cover {
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgb(31 35 40 / 12%);
+}
+
+.category-directory-cover {
+  display: grid;
+  width: 160px;
+  height: 104px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas-subtle);
+  color: var(--accent);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.category-directory-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category-directory-cover-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: var(--canvas-subtle);
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.category-directory-content {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 9px;
+}
+
+.category-directory-title {
+  overflow: hidden;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-directory-description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--fg-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.category-directory-metrics {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 8px 16px;
+  color: var(--fg-subtle);
+  font-size: 13px;
+}
+
+.category-directory-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.category-directory-metric iconify-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--fg-muted);
 }
 
 .links-page {
@@ -3500,6 +3695,7 @@ article {
 @media (max-width: 1040px) {
   .search-box,
   .weather-widget,
+  .header-clock,
   .header-actions .icon-button:not(.wide-icon):not(.login-link):not(.theme-toggle) {
     display: none;
   }
@@ -3635,6 +3831,10 @@ article {
     width: 40px;
     height: 40px;
   }
+
+  .back-to-top.page-anchor-action {
+    top: calc(66.667dvh + 48px);
+  }
 }
 
 @media (max-width: 720px) {
@@ -3694,6 +3894,31 @@ article {
 
   .profile-username {
     font-size: 20px;
+  }
+
+  .category-directory-card {
+    min-height: 0;
+    padding: 16px 0;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .category-directory-cover {
+    width: 112px;
+    height: 88px;
+  }
+
+  .category-directory-title {
+    font-size: 18px;
+  }
+
+  .category-directory-description {
+    font-size: 13px;
+  }
+
+  .category-directory-metrics {
+    gap: 6px 10px;
+    font-size: 12px;
   }
 
   .links-hero,

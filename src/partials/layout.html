@@ -21,141 +21,155 @@
           />
         </a>
         <a class="site-title" th:href="@{/}" th:text="${site.title}">monster</a>
-        <button class="search-box" type="button" data-search-trigger aria-label="Search">
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path
-              d="M10.68 11.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z"
-            />
-          </svg>
-          <span>Search or jump to...</span>
-        </button>
-        <div
-          class="weather-widget"
-          data-weather-widget
-          th:if="${theme.config.styles.weather_enabled == true}"
-          th:attr="data-weather-location=${theme.config.styles.weather_location ?: '深圳'}, data-weather-latitude=${theme.config.styles.weather_latitude ?: '22.5431'}, data-weather-longitude=${theme.config.styles.weather_longitude ?: '114.0579'}, data-weather-auto-location=${theme.config.styles.weather_auto_location != false}"
-          aria-label="正在获取天气"
-        >
-          <iconify-icon
-            data-weather-icon
-            icon="solar:cloud-linear"
-            aria-hidden="true"
-          ></iconify-icon>
-          <span data-weather-location-label>深圳</span>
-          <strong data-weather-temperature>--°</strong>
-        </div>
-        <section
-          class="music-player"
-          data-music-player
-          th:if="${theme.config.styles.music_player_enabled == true and not #strings.isEmpty(theme.config.styles.music_playlist_id)}"
-          th:classappend="${theme.config.styles.music_player_position == 'top-right' ? 'music-player--header' : ''}"
-          th:attr="data-music-source=${theme.config.styles.music_source ?: 'netease'}, data-music-playlist-id=${theme.config.styles.music_playlist_id}, data-music-playback-mode=${theme.config.styles.music_playback_mode ?: 'sequence'}, data-music-api=${theme.config.styles.music_api ?: 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id={id}'}"
-          aria-label="音乐播放器"
-        >
-          <div class="music-player-cover" aria-hidden="true">
-            <img data-music-cover alt="" hidden />
-            <iconify-icon data-music-cover-placeholder icon="octicon:music-16"></iconify-icon>
-          </div>
-          <div class="music-player-info" aria-live="polite">
-            <strong data-music-title>正在加载音乐</strong>
-            <span data-music-artist>请稍候</span>
-            <span class="music-player-lyrics" data-music-lyrics aria-hidden="true"
-              >正在加载歌词</span
-            >
-          </div>
-          <div class="music-player-controls" aria-label="播放控制">
-            <button type="button" data-music-previous aria-label="上一首" title="上一首" disabled>
-              <iconify-icon icon="lucide:skip-back" aria-hidden="true"></iconify-icon>
-            </button>
-            <button type="button" data-music-toggle aria-label="播放" title="播放" disabled>
-              <iconify-icon icon="octicon:play-16" aria-hidden="true"></iconify-icon>
-            </button>
-            <button type="button" data-music-next aria-label="下一首" title="下一首" disabled>
-              <iconify-icon icon="lucide:skip-forward" aria-hidden="true"></iconify-icon>
-            </button>
-            <button
-              type="button"
-              data-music-playback-mode
-              aria-label="顺序播放"
-              aria-pressed="false"
-              title="顺序播放"
-              disabled
-            >
-              <iconify-icon icon="lucide:list-ordered" aria-hidden="true"></iconify-icon>
-            </button>
-          </div>
-          <input
-            class="music-player-progress"
-            type="range"
-            min="0"
-            max="100"
-            value="0"
-            aria-label="播放进度"
-            data-music-progress
-            disabled
-          />
-          <audio data-music-audio preload="metadata"></audio>
-        </section>
-        <div class="header-actions">
-          <button
-            class="icon-button theme-toggle"
-            type="button"
-            aria-label="切换到黑夜模式"
-            aria-pressed="false"
-            title="切换到黑夜模式"
-            data-theme-toggle
-          >
-            <iconify-icon icon="solar:sun-linear" aria-hidden="true"></iconify-icon>
-          </button>
-          <div class="publish-menu">
-            <button
-              class="icon-button wide-icon"
-              type="button"
-              aria-label="Create new"
-              aria-haspopup="menu"
-              aria-expanded="false"
-              data-publish-menu-trigger
-            >
-              <iconify-icon icon="line-md:plus" aria-hidden="true"></iconify-icon>
-              <span class="chevron"></span>
-            </button>
-            <div class="publish-menu-list" role="menu" data-publish-menu hidden>
-              <a th:href="@{/console/posts/editor}" role="menuitem">发布文章</a>
-              <a th:href="@{/console/moments}" role="menuitem">发布瞬间</a>
-              <a th:href="@{/console/photos}" role="menuitem">上传图库</a>
-            </div>
-          </div>
-          <a
-            class="icon-button notification-link"
-            th:href="@{/uc/notifications}"
-            aria-label="Notifications"
-            data-notification-link
-          >
-            <iconify-icon icon="ix:notifications" aria-hidden="true"></iconify-icon>
-            <span class="notification-dot" data-notification-dot hidden></span>
-          </a>
-          <div class="user-menu" data-user-menu>
-            <a class="icon-button login-link" th:href="@{/login}" aria-label="登录" data-login-link>
-              <iconify-icon icon="material-symbols:login" aria-hidden="true"></iconify-icon>
-            </a>
-            <button
-              class="header-avatar"
-              type="button"
-              aria-label="用户菜单"
-              aria-haspopup="menu"
-              aria-expanded="false"
-              data-user-menu-trigger
-              hidden
-            >
-              <img
-                th:src="${site.logo ?: 'https://github.com/dengchuanfu.png?size=80'}"
-                th:alt="${theme.config.basic.name ?: site.title}"
-                data-user-avatar
+        <div class="header-tools">
+          <button class="search-box" type="button" data-search-trigger aria-label="搜索">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M10.68 11.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z"
               />
+            </svg>
+          </button>
+          <div
+            class="weather-widget"
+            data-weather-widget
+            th:if="${theme.config.styles.weather_enabled == true}"
+            th:attr="data-weather-location=${theme.config.styles.weather_location ?: '深圳'}, data-weather-latitude=${theme.config.styles.weather_latitude ?: '22.5431'}, data-weather-longitude=${theme.config.styles.weather_longitude ?: '114.0579'}, data-weather-auto-location=${theme.config.styles.weather_auto_location != false}"
+            aria-label="正在获取天气"
+          >
+            <iconify-icon
+              data-weather-icon
+              icon="solar:cloud-linear"
+              aria-hidden="true"
+            ></iconify-icon>
+            <span data-weather-location-label>深圳</span>
+            <strong data-weather-temperature>--°</strong>
+          </div>
+          <time
+            class="header-clock"
+            data-header-clock
+            th:if="${theme.config.styles.header_clock_enabled == true}"
+            aria-label="当前时间"
+          >
+            8月15日 周五 10:30
+          </time>
+          <section
+            class="music-player"
+            data-music-player
+            th:if="${theme.config.styles.music_player_enabled == true and not #strings.isEmpty(theme.config.styles.music_playlist_id)}"
+            th:classappend="${theme.config.styles.music_player_position == 'top-right' ? 'music-player--header' : ''}"
+            th:attr="data-music-source=${theme.config.styles.music_source ?: 'netease'}, data-music-playlist-id=${theme.config.styles.music_playlist_id}, data-music-playback-mode=${theme.config.styles.music_playback_mode ?: 'sequence'}, data-music-api=${theme.config.styles.music_api ?: 'https://api.i-meto.com/meting/api?server=netease&type=playlist&id={id}'}"
+            aria-label="音乐播放器"
+          >
+            <div class="music-player-cover" aria-hidden="true">
+              <img data-music-cover alt="" hidden />
+              <iconify-icon data-music-cover-placeholder icon="octicon:music-16"></iconify-icon>
+            </div>
+            <div class="music-player-info" aria-live="polite">
+              <strong data-music-title>正在加载音乐</strong>
+              <span data-music-artist>请稍候</span>
+              <span class="music-player-lyrics" data-music-lyrics aria-hidden="true"
+                >正在加载歌词</span
+              >
+            </div>
+            <div class="music-player-controls" aria-label="播放控制">
+              <button type="button" data-music-previous aria-label="上一首" title="上一首" disabled>
+                <iconify-icon icon="lucide:skip-back" aria-hidden="true"></iconify-icon>
+              </button>
+              <button type="button" data-music-toggle aria-label="播放" title="播放" disabled>
+                <iconify-icon icon="octicon:play-16" aria-hidden="true"></iconify-icon>
+              </button>
+              <button type="button" data-music-next aria-label="下一首" title="下一首" disabled>
+                <iconify-icon icon="lucide:skip-forward" aria-hidden="true"></iconify-icon>
+              </button>
+              <button
+                type="button"
+                data-music-playback-mode
+                aria-label="顺序播放"
+                aria-pressed="false"
+                title="顺序播放"
+                disabled
+              >
+                <iconify-icon icon="lucide:list-ordered" aria-hidden="true"></iconify-icon>
+              </button>
+            </div>
+            <input
+              class="music-player-progress"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              aria-label="播放进度"
+              data-music-progress
+              disabled
+            />
+            <audio data-music-audio preload="metadata"></audio>
+          </section>
+          <div class="header-actions">
+            <button
+              class="icon-button theme-toggle"
+              type="button"
+              aria-label="切换到黑夜模式"
+              aria-pressed="false"
+              title="切换到黑夜模式"
+              data-theme-toggle
+            >
+              <iconify-icon icon="solar:sun-linear" aria-hidden="true"></iconify-icon>
             </button>
-            <div class="user-menu-list" role="menu" data-user-menu-list hidden>
-              <a th:href="@{/console}" role="menuitem">控制台</a>
-              <a th:href="@{/logout}" role="menuitem">退出</a>
+            <div class="publish-menu">
+              <button
+                class="icon-button wide-icon"
+                type="button"
+                aria-label="Create new"
+                aria-haspopup="menu"
+                aria-expanded="false"
+                data-publish-menu-trigger
+              >
+                <iconify-icon icon="line-md:plus" aria-hidden="true"></iconify-icon>
+                <span class="chevron"></span>
+              </button>
+              <div class="publish-menu-list" role="menu" data-publish-menu hidden>
+                <a th:href="@{/console/posts/editor}" role="menuitem">发布文章</a>
+                <a th:href="@{/console/moments}" role="menuitem">发布瞬间</a>
+                <a th:href="@{/console/photos}" role="menuitem">上传图库</a>
+              </div>
+            </div>
+            <a
+              class="icon-button notification-link"
+              th:href="@{/uc/notifications}"
+              aria-label="Notifications"
+              data-notification-link
+            >
+              <iconify-icon icon="ix:notifications" aria-hidden="true"></iconify-icon>
+              <span class="notification-dot" data-notification-dot hidden></span>
+            </a>
+            <div class="user-menu" data-user-menu>
+              <a
+                class="icon-button login-link"
+                th:href="@{/login}"
+                aria-label="登录"
+                data-login-link
+              >
+                <iconify-icon icon="material-symbols:login" aria-hidden="true"></iconify-icon>
+              </a>
+              <button
+                class="header-avatar"
+                type="button"
+                aria-label="用户菜单"
+                aria-haspopup="menu"
+                aria-expanded="false"
+                data-user-menu-trigger
+                hidden
+              >
+                <img
+                  th:src="${site.logo ?: 'https://github.com/dengchuanfu.png?size=80'}"
+                  th:alt="${theme.config.basic.name ?: site.title}"
+                  data-user-avatar
+                />
+              </button>
+              <div class="user-menu-list" role="menu" data-user-menu-list hidden>
+                <a th:href="@{/console}" role="menuitem">控制台</a>
+                <a th:href="@{/logout}" role="menuitem">退出</a>
+              </div>
             </div>
           </div>
         </div>
@@ -442,7 +456,7 @@
           </ul>
           <section
             class="sidebar-wechat"
-            th:if="${not #strings.isEmpty(theme.config.sidebar.wechat_official_account_qrcode)}"
+            th:if="${theme.config.sidebar.wechat_official_account_enabled == true and not #strings.isEmpty(theme.config.sidebar.wechat_official_account_qrcode)}"
           >
             <img
               th:src="${theme.config.sidebar.wechat_official_account_qrcode}"
@@ -532,12 +546,45 @@
       title="返回顶部"
       hidden
       data-back-to-top
-      th:if="${moment != null or moments != null or linksTitle != null or singlePage != null}"
+      th:if="${moment != null or moments != null or linksTitle != null or singlePage != null or '{{showBackToTop}}' == 'true'}"
     >
       <span class="back-to-top-icon" aria-hidden="true">
         <iconify-icon icon="icon-park-outline:to-top"></iconify-icon>
       </span>
     </button>
+    <a
+      class="back-to-top page-anchor-action"
+      th:if="${singlePage != null and singlePage.spec.template == 'message.html' and haloCommentEnabled and singlePage.spec.allowComment}"
+      href="#message-comments"
+      aria-label="前往评论"
+      title="前往评论"
+    >
+      <span class="back-to-top-icon" aria-hidden="true">
+        <iconify-icon icon="octicon:comment-discussion-16"></iconify-icon>
+      </span>
+    </a>
+    <a
+      class="back-to-top page-anchor-action"
+      th:if="${singlePage != null and singlePage.spec.slug == 'about' and haloCommentEnabled}"
+      href="#page-comments"
+      aria-label="前往评论"
+      title="前往评论"
+    >
+      <span class="back-to-top-icon" aria-hidden="true">
+        <iconify-icon icon="octicon:comment-discussion-16"></iconify-icon>
+      </span>
+    </a>
+    <a
+      class="back-to-top page-anchor-action"
+      th:if="${linksTitle != null and theme.config.links.link_application_enabled != false}"
+      href="#link-application"
+      aria-label="申请友链"
+      title="申请友链"
+    >
+      <span class="back-to-top-icon" aria-hidden="true">
+        <iconify-icon icon="octicon:link-16"></iconify-icon>
+      </span>
+    </a>
 
     <footer class="site-footer">
       <div class="footer-inner" th:with="footerConfig=${theme.config.footer}">

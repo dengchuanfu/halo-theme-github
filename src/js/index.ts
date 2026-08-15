@@ -74,26 +74,39 @@ type DateRange = {
   start: Date;
 };
 
+type ContributionFormatters = {
+  activityMonth: Intl.DateTimeFormat;
+  displayDate: Intl.DateTimeFormat;
+  month: Intl.DateTimeFormat;
+  selectedDate: Intl.DateTimeFormat;
+};
+
 const postsEndpoint = "/apis/api.content.halo.run/v1alpha1/posts";
 const tagsEndpoint = "/apis/api.content.halo.run/v1alpha1/tags";
 const categoriesEndpoint = "/apis/api.content.halo.run/v1alpha1/categories";
 const momentsEndpoint = "/apis/api.moment.halo.run/v1alpha1/moments";
 const photosEndpoint = "/apis/api.photo.halo.run/v1alpha1/photos";
-const monthFormatter = new Intl.DateTimeFormat("en", { month: "short" });
-const activityMonthFormatter = new Intl.DateTimeFormat("en", {
-  month: "long",
-  year: "numeric",
-});
-const displayDateFormatter = new Intl.DateTimeFormat("en", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-const selectedDateFormatter = new Intl.DateTimeFormat("zh-CN", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
+const getContributionFormatters = (isChinese: boolean): ContributionFormatters => {
+  const locale = isChinese ? "zh-CN" : "en";
+
+  return {
+    month: new Intl.DateTimeFormat(locale, { month: "short" }),
+    activityMonth: new Intl.DateTimeFormat(locale, {
+      month: "long",
+      year: "numeric",
+    }),
+    displayDate: new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
+    selectedDate: new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+  };
+};
 
 const atNoon = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
 
@@ -177,13 +190,13 @@ const fetchOptional = async <T>(endpoint: string) => {
   }
 };
 
-const getMomentTitle = (moment: Moment) => {
+const getMomentTitle = (moment: Moment, isChinese: boolean) => {
   const container = document.createElement("div");
   container.innerHTML = moment.spec?.content?.html || moment.spec?.content?.raw || "";
   const content = container.textContent?.replace(/\s+/g, " ").trim();
 
   if (!content) {
-    return "一条瞬间";
+    return isChinese ? "一条瞬间" : "A moment";
   }
 
   return content.length > 60 ? `${content.slice(0, 60)}...` : content;
@@ -210,13 +223,14 @@ const getSiteActivities = (
   tags: ContentTaxonomy[],
   categories: ContentTaxonomy[],
   photos: Photo[],
+  isChinese: boolean,
 ) => {
   const activities: Array<SiteActivity | undefined> = [
     ...posts.map((post) =>
       createSiteActivity(
         post.spec?.publishTime,
         "published",
-        post.spec?.title?.trim() || "未命名文章",
+        post.spec?.title?.trim() || (isChinese ? "未命名文章" : "Untitled post"),
         post.status?.permalink || "/archives",
       ),
     ),
@@ -224,7 +238,7 @@ const getSiteActivities = (
       createSiteActivity(
         moment.spec?.releaseTime || moment.metadata?.creationTimestamp,
         "moment-published",
-        getMomentTitle(moment),
+        getMomentTitle(moment, isChinese),
         "/moments",
       ),
     ),
@@ -232,7 +246,7 @@ const getSiteActivities = (
       createSiteActivity(
         tag.metadata?.creationTimestamp,
         "tag-created",
-        tag.spec?.displayName?.trim() || "未命名标签",
+        tag.spec?.displayName?.trim() || (isChinese ? "未命名标签" : "Untitled tag"),
         tag.status?.permalink || "/tags",
       ),
     ),
@@ -240,7 +254,7 @@ const getSiteActivities = (
       createSiteActivity(
         category.metadata?.creationTimestamp,
         "category-created",
-        category.spec?.displayName?.trim() || "未命名分类",
+        category.spec?.displayName?.trim() || (isChinese ? "未命名分类" : "Untitled category"),
         category.status?.permalink || "/categories",
       ),
     ),
@@ -248,7 +262,7 @@ const getSiteActivities = (
       createSiteActivity(
         photo.metadata?.creationTimestamp,
         "photo-added",
-        photo.spec?.displayName?.trim() || "未命名图片",
+        photo.spec?.displayName?.trim() || (isChinese ? "未命名图片" : "Untitled photo"),
         photo.permalink || "/photos",
       ),
     ),
@@ -259,14 +273,24 @@ const getSiteActivities = (
     .sort((left, right) => right.date.getTime() - left.date.getTime());
 };
 
-const activityLabels: Record<ActivityKind, string> = {
-  "category-created": "创建了分类",
-  "moment-published": "发布了瞬间",
-  "photo-added": "添加了图库内容",
-  published: "发布了文章",
-  "tag-created": "创建了标签",
-  updated: "更新了文章",
-};
+const getActivityLabels = (isChinese: boolean): Record<ActivityKind, string> =>
+  isChinese
+    ? {
+        "category-created": "创建了分类",
+        "moment-published": "发布了瞬间",
+        "photo-added": "添加了图库内容",
+        published: "发布了文章",
+        "tag-created": "创建了标签",
+        updated: "更新了文章",
+      }
+    : {
+        "category-created": "Created a category",
+        "moment-published": "Published a moment",
+        "photo-added": "Added a photo",
+        published: "Published a post",
+        "tag-created": "Created a tag",
+        updated: "Updated a post",
+      };
 
 const activityIcons: Record<ActivityKind, string> = {
   "category-created": "lucide:folder-plus",
@@ -277,7 +301,11 @@ const activityIcons: Record<ActivityKind, string> = {
   updated: "lucide:file-pen-line",
 };
 
-const createActivityItem = (activity: SiteActivity) => {
+const createActivityItem = (
+  activity: SiteActivity,
+  isChinese: boolean,
+  displayDateFormatter: Intl.DateTimeFormat,
+) => {
   const item = document.createElement("div");
   item.className = "activity-item";
 
@@ -292,7 +320,7 @@ const createActivityItem = (activity: SiteActivity) => {
   copy.className = "activity-copy";
 
   const heading = document.createElement("h3");
-  heading.textContent = activityLabels[activity.kind];
+  heading.textContent = getActivityLabels(isChinese)[activity.kind];
 
   const link = document.createElement("a");
   link.href = activity.permalink;
@@ -315,7 +343,9 @@ const renderActivity = (
   currentYear: number,
   page: number,
   pageSize: number,
-  selectedDateKey?: string,
+  selectedDateKey: string | undefined,
+  isChinese: boolean,
+  formatters: ContributionFormatters,
 ) => {
   const visible = activities.filter(
     (activity) =>
@@ -333,7 +363,13 @@ const renderActivity = (
   if (!displayed.length) {
     const empty = document.createElement("p");
     empty.className = "activity-empty";
-    empty.textContent = selectedDateKey ? "该日期暂无站点动态。" : "这个时间段暂无站点动态。";
+    empty.textContent = selectedDateKey
+      ? isChinese
+        ? "该日期暂无站点动态。"
+        : "No site activity on this date."
+      : isChinese
+        ? "这个时间段暂无站点动态。"
+        : "No site activity for this period.";
     container.append(empty);
     return { currentPage: 1, totalPages: 1, totalItems: 0 };
   }
@@ -353,11 +389,14 @@ const renderActivity = (
     const month = document.createElement("div");
     month.className = "activity-month";
     const heading = document.createElement("h3");
-    heading.textContent = activityMonthFormatter.format(items[0].date);
+    heading.textContent = formatters.activityMonth.format(items[0].date);
     const rule = document.createElement("span");
     month.append(heading, rule);
 
-    section.append(month, ...items.map(createActivityItem));
+    section.append(
+      month,
+      ...items.map((activity) => createActivityItem(activity, isChinese, formatters.displayDate)),
+    );
     container.append(section);
   });
 
@@ -374,6 +413,8 @@ const renderContributionGraph = (
   currentYear: number,
   selectedDateKey: string | undefined,
   onSelectDate: (dateKey: string) => void,
+  isChinese: boolean,
+  formatters: ContributionFormatters,
 ) => {
   const days = getRangeDays(range);
   const today = atNoon(new Date());
@@ -401,8 +442,12 @@ const renderContributionGraph = (
   months.replaceChildren();
   total.textContent =
     selectedYear === currentYear
-      ? `过去一年有 ${totalCount} 次站点互动`
-      : `${selectedYear} 年有 ${totalCount} 次站点互动`;
+      ? isChinese
+        ? `过去一年有 ${totalCount} 次站点互动`
+        : `${totalCount} contributions in the last year`
+      : isChinese
+        ? `${selectedYear} 年有 ${totalCount} 次站点互动`
+        : `${totalCount} contributions in ${selectedYear}`;
 
   days.forEach((day) => {
     const key = dateKey(day);
@@ -413,7 +458,9 @@ const renderContributionGraph = (
     const level =
       items.length && maximum ? Math.max(1, Math.ceil((items.length / maximum) * 4)) : 0;
     const titles = items.map(({ title }) => title).join(", ");
-    const description = `${items.length} contribution${items.length === 1 ? "" : "s"} on ${displayDateFormatter.format(day)}${titles ? `: ${titles}` : ""}`;
+    const description = isChinese
+      ? `${formatters.displayDate.format(day)}有 ${items.length} 次站点互动${titles ? `：${titles}` : ""}`
+      : `${items.length} contribution${items.length === 1 ? "" : "s"} on ${formatters.displayDate.format(day)}${titles ? `: ${titles}` : ""}`;
 
     const isSelected = key === selectedDateKey;
     cell.type = "button";
@@ -435,7 +482,7 @@ const renderContributionGraph = (
 
     previousMonth = day.getMonth();
     const label = document.createElement("span");
-    label.textContent = monthFormatter.format(day);
+    label.textContent = formatters.month.format(day);
     label.style.gridColumn = String(Math.floor(index / 7) + 1);
     months.append(label);
   });
@@ -474,6 +521,8 @@ const setupContributions = async () => {
   const activityLimit = Number.isNaN(configuredLimit)
     ? 6
     : Math.min(Math.max(configuredLimit, 1), 50);
+  const isChinese = root.dataset.contributionLanguage === "zh-CN";
+  const formatters = getContributionFormatters(isChinese);
 
   try {
     const [posts, moments, tags, categories, photos] = await Promise.all([
@@ -483,7 +532,7 @@ const setupContributions = async () => {
       fetchOptional<ContentTaxonomy>(categoriesEndpoint),
       fetchOptional<Photo>(photosEndpoint),
     ]);
-    const siteActivities = getSiteActivities(posts, moments, tags, categories, photos);
+    const siteActivities = getSiteActivities(posts, moments, tags, categories, photos, isChinese);
     const currentYear = new Date().getFullYear();
     const earliestYear = Math.min(
       currentYear,
@@ -513,6 +562,8 @@ const setupContributions = async () => {
           activityPage = 1;
           render();
         },
+        isChinese,
+        formatters,
       );
       const pageResult = renderActivity(
         activity,
@@ -523,6 +574,8 @@ const setupContributions = async () => {
         activityPage,
         activityLimit,
         selectedDateKey,
+        isChinese,
+        formatters,
       );
       activityPage = pageResult.currentPage;
       pagination.hidden = pageResult.totalPages <= 1;
@@ -531,9 +584,12 @@ const setupContributions = async () => {
       pageLabel.textContent = `${activityPage} / ${pageResult.totalPages}`;
       if (selectedDateKey) {
         const [year, month, day] = selectedDateKey.split("-").map(Number);
-        activityHeading.textContent = `${selectedDateFormatter.format(new Date(year, month - 1, day, 12))}站点动态`;
+        const selectedDate = formatters.selectedDate.format(new Date(year, month - 1, day, 12));
+        activityHeading.textContent = isChinese
+          ? `${selectedDate}站点动态`
+          : `Site activity on ${selectedDate}`;
       } else {
-        activityHeading.textContent = "站点动态";
+        activityHeading.textContent = isChinese ? "站点动态" : "Site activity";
       }
       years.querySelectorAll("button").forEach((button) => {
         const isActive = Number((button as HTMLButtonElement).dataset.year) === selectedYear;
@@ -569,8 +625,8 @@ const setupContributions = async () => {
 
     render();
   } catch {
-    total.textContent = "Contribution activity unavailable";
-    activity.innerHTML = '<p class="activity-empty">Unable to load post activity.</p>';
+    total.textContent = isChinese ? "无法加载贡献图" : "Contribution activity unavailable";
+    activity.innerHTML = `<p class="activity-empty">${isChinese ? "无法加载站点动态。" : "Unable to load site activity."}</p>`;
   }
 };
 

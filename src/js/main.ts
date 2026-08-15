@@ -287,6 +287,34 @@ const setupSiteRuntime = () => {
   window.setInterval(updateRuntime, 1_000);
 };
 
+const setupHeaderClock = () => {
+  const clock = document.querySelector<HTMLTimeElement>("[data-header-clock]");
+
+  if (!clock) {
+    return;
+  }
+
+  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const updateClock = () => {
+    const now = new Date();
+    const dateTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+    clock.dateTime = dateTime;
+    clock.textContent = `${now.getMonth() + 1}月${now.getDate()}日 周${weekdays[now.getDay()]} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  };
+
+  const scheduleNextUpdate = () => {
+    updateClock();
+    const now = new Date();
+    const delay = 60_000 - now.getSeconds() * 1_000 - now.getMilliseconds() + 20;
+
+    window.setTimeout(scheduleNextUpdate, delay);
+  };
+
+  scheduleNextUpdate();
+};
+
 const normalizeMenuPath = (path: string | null | undefined) => {
   const value = (path || "").trim();
 
@@ -2165,6 +2193,201 @@ const setupSidebarCategories = () => {
   void loadCategories();
 };
 
+const setupTaxonomyPage = () => {
+  const list = document.querySelector<HTMLUListElement>("[data-taxonomy-page-list]");
+  const empty = document.querySelector<HTMLElement>("[data-taxonomy-page-empty]");
+  const kind = list?.dataset.taxonomyKind;
+
+  if (!list || !empty || (kind !== "categories" && kind !== "tags")) {
+    return;
+  }
+
+  type Taxonomy = {
+    metadata?: { name?: string };
+    postCount?: number;
+    spec?: {
+      cover?: string;
+      description?: string;
+      displayName?: string;
+      hideFromList?: boolean;
+    };
+    status?: { permalink?: string; postCount?: number; visiblePostCount?: number };
+  };
+
+  type Post = {
+    categories?: Array<{ metadata?: { name?: string } }>;
+    spec?: { cover?: string };
+    stats?: { comment?: number; upvote?: number; visit?: number };
+  };
+
+  const fetchAll = async <T>(endpoint: string) => {
+    const items: T[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+      const response = await fetch(`${endpoint}?page=${page}&size=100`);
+
+      if (!response.ok) {
+        throw new Error(`Unable to load ${endpoint}: ${response.status}`);
+      }
+
+      const result = (await response.json()) as { items?: T[]; totalPages?: number };
+      items.push(...(result.items || []));
+      totalPages = Math.max(1, result.totalPages || 1);
+      page += 1;
+    } while (page <= totalPages);
+
+    return items;
+  };
+
+  const createMetric = (iconName: string, label: string) => {
+    const metric = document.createElement("span");
+    const icon = document.createElement("iconify-icon");
+    const text = document.createElement("span");
+
+    metric.className = "category-directory-metric";
+    icon.setAttribute("icon", iconName);
+    icon.setAttribute("aria-hidden", "true");
+    text.textContent = label;
+    metric.append(icon, text);
+    return metric;
+  };
+
+  const createCategoryDirectoryItem = (category: Taxonomy, posts: Post[]) => {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    const cover = document.createElement("span");
+    const fallback = document.createElement("span");
+    const content = document.createElement("span");
+    const title = document.createElement("strong");
+    const description = document.createElement("span");
+    const metrics = document.createElement("span");
+    const name = category.spec?.displayName?.trim() || "未命名分类";
+    const categoryPosts = posts.filter((post) =>
+      post.categories?.some(
+        (postCategory) => postCategory.metadata?.name === category.metadata?.name,
+      ),
+    );
+    const stats = categoryPosts.reduce(
+      (total, post) => ({
+        comment: total.comment + (post.stats?.comment || 0),
+        upvote: total.upvote + (post.stats?.upvote || 0),
+        visit: total.visit + (post.stats?.visit || 0),
+      }),
+      { comment: 0, upvote: 0, visit: 0 },
+    );
+    const coverUrl =
+      category.spec?.cover || categoryPosts.find((post) => post.spec?.cover)?.spec?.cover;
+    const postCount =
+      categoryPosts.length ||
+      category.status?.visiblePostCount ||
+      category.status?.postCount ||
+      category.postCount ||
+      0;
+
+    item.className = "category-directory-item";
+    link.className = "category-directory-card";
+    link.href = category.status?.permalink || "/categories";
+    cover.className = "category-directory-cover";
+    fallback.className = "category-directory-cover-fallback";
+    fallback.textContent = name.slice(0, 1);
+    content.className = "category-directory-content";
+    title.className = "category-directory-title";
+    title.textContent = name;
+    description.className = "category-directory-description";
+    description.textContent = category.spec?.description?.trim() || "暂无分类描述";
+    metrics.className = "category-directory-metrics";
+    metrics.append(
+      createMetric("octicon:repo-16", `${postCount} 篇内容`),
+      createMetric("octicon:eye-16", `共 ${stats.visit} 阅读`),
+      createMetric("octicon:heart-16", `共 ${stats.upvote} 点赞`),
+      createMetric("octicon:comment-16", `共 ${stats.comment} 评论`),
+    );
+
+    if (coverUrl) {
+      const image = document.createElement("img");
+      image.src = coverUrl;
+      image.alt = `${name} 分类封面`;
+      image.loading = "lazy";
+      image.addEventListener("error", () => image.replaceWith(fallback));
+      cover.append(image);
+    } else {
+      cover.append(fallback);
+    }
+
+    content.append(title, description, metrics);
+    link.append(cover, content);
+    item.append(link);
+    return item;
+  };
+
+  const loadTaxonomy = async () => {
+    try {
+      const taxonomies = await fetchAll<Taxonomy>(`/apis/api.content.halo.run/v1alpha1/${kind}`);
+      const posts =
+        kind === "categories"
+          ? await fetchAll<Post>("/apis/api.content.halo.run/v1alpha1/posts").catch(() => [])
+          : [];
+
+      const visibleTaxonomies = taxonomies.filter(
+        (taxonomy) =>
+          taxonomy.spec?.displayName?.trim() &&
+          (kind !== "categories" || !taxonomy.spec.hideFromList),
+      );
+
+      if (!visibleTaxonomies.length) {
+        empty.hidden = false;
+        return;
+      }
+
+      visibleTaxonomies.sort((left, right) => {
+        if (kind === "categories") {
+          const countDifference =
+            (right.status?.postCount ?? right.postCount ?? 0) -
+            (left.status?.postCount ?? left.postCount ?? 0);
+
+          if (countDifference) {
+            return countDifference;
+          }
+        }
+
+        return (left.spec?.displayName || "").localeCompare(right.spec?.displayName || "", "zh-CN");
+      });
+
+      list.replaceChildren(
+        ...visibleTaxonomies.map((taxonomy) => {
+          if (kind === "categories") {
+            return createCategoryDirectoryItem(taxonomy, posts);
+          }
+
+          const item = document.createElement("li");
+          const link = document.createElement("a");
+          const title = document.createElement("strong");
+          const meta = document.createElement("span");
+
+          link.className = "tag taxonomy-card";
+          link.href = taxonomy.status?.permalink || "/tags";
+          title.className = "taxonomy-card-title";
+          title.textContent = taxonomy.spec?.displayName?.trim() || "";
+          meta.className = "taxonomy-card-meta";
+          meta.textContent = "标签";
+          link.append(title, meta);
+          item.append(link);
+          return item;
+        }),
+      );
+      empty.hidden = true;
+    } catch {
+      list.replaceChildren();
+      empty.textContent = kind === "categories" ? "无法加载分类。" : "无法加载标签。";
+      empty.hidden = false;
+    }
+  };
+
+  void loadTaxonomy();
+};
+
 const setupLoveCounter = () => {
   const root = document.querySelector<HTMLElement>("[data-love-counter]");
   const elapsed = root?.querySelector<HTMLElement>("[data-love-elapsed]");
@@ -2233,6 +2456,7 @@ setupCustomMenuIcons();
 setupThemeToggle();
 setupSiteTimeline();
 setupSiteRuntime();
+setupHeaderClock();
 setupActiveMenuItem();
 setupLinkLogoFallbacks();
 setupFriendLinkApplication();
@@ -2249,5 +2473,6 @@ void setupUserMenu();
 setupSearch();
 setupSidebarTags();
 setupSidebarCategories();
+setupTaxonomyPage();
 setupLoveCounter();
 setupBackToTop();

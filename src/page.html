@@ -231,7 +231,7 @@
     <div class="article-content" th:utext="${singlePage.content.content}"></div>
   </article>
 
-  <div th:if="${haloCommentEnabled}">
+  <div id="page-comments" th:if="${haloCommentEnabled}">
     <halo:comment
       group="content.halo.run"
       kind="SinglePage"
