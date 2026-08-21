@@ -14,7 +14,11 @@
   </template>
 
   <article>
-    <header class="article-header">
+    <header
+      class="article-header"
+      th:classappend="${not #strings.isEmpty(post.spec.cover) ? 'article-header--cover' : ''}"
+      th:style="|--article-cover: url('${post.spec.cover}')|"
+    >
       <h1 class="article-title" th:text="${post.spec.title}"></h1>
       <div class="article-meta">
         <time th:text="${#temporals.format(post.spec.publishTime, 'yyyy-MM-dd')}"></time>

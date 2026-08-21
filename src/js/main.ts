@@ -1371,12 +1371,24 @@ const setupRepositoryFilters = () => {
 
   type FilterKind = "category" | "tag" | "sort";
   type SortOrder = "newest" | "oldest" | "title";
+  const taxonomyOptionLimit = 10;
   type TaxonomyListResult = {
     items?: Array<{
+      metadata?: {
+        name?: string;
+      };
       spec?: {
         displayName?: string;
       };
     }>;
+    hasNext?: boolean;
+    last?: boolean;
+    page?: number;
+    pages?: number;
+    size?: number;
+    total?: number;
+    totalElements?: number;
+    totalItems?: number;
     totalPages?: number;
   };
   type RepositoryItem = {
@@ -1400,10 +1412,12 @@ const setupRepositoryFilters = () => {
   }));
   let categories = Array.from(
     new Set(repositoryItems.flatMap(({ categories }) => categories).filter(Boolean)),
-  ).sort((left, right) => left.localeCompare(right, "zh-CN"));
-  let tags = Array.from(new Set(repositoryItems.flatMap(({ tags }) => tags).filter(Boolean))).sort(
-    (left, right) => left.localeCompare(right, "zh-CN"),
-  );
+  )
+    .sort((left, right) => left.localeCompare(right, "zh-CN"))
+    .slice(0, taxonomyOptionLimit);
+  let tags = Array.from(new Set(repositoryItems.flatMap(({ tags }) => tags).filter(Boolean)))
+    .sort((left, right) => left.localeCompare(right, "zh-CN"))
+    .slice(0, taxonomyOptionLimit);
   const labels: Record<FilterKind, string> = {
     category: "分类",
     sort: "排序",
@@ -1416,10 +1430,11 @@ const setupRepositoryFilters = () => {
   const fetchTaxonomyNames = async (endpoint: string) => {
     const names: string[] = [];
     let page = 1;
-    let totalPages = 1;
+    let hasNext = true;
+    let previousPageSignature = "";
 
     try {
-      do {
+      while (hasNext && page <= 100) {
         const response = await fetch(`${endpoint}?page=${page}&size=100`);
 
         if (!response.ok) {
@@ -1427,22 +1442,45 @@ const setupRepositoryFilters = () => {
         }
 
         const result = (await response.json()) as TaxonomyListResult;
-        names.push(
-          ...(result.items || [])
-            .map((item) => item.spec?.displayName?.trim() || "")
-            .filter(Boolean),
-        );
-        totalPages = Math.max(1, result.totalPages || 1);
+        const items = result.items || [];
+        const pageSignature = items
+          .map((item) => item.metadata?.name || item.spec?.displayName || "")
+          .join("\u0000");
+
+        if (!items.length || pageSignature === previousPageSignature) {
+          break;
+        }
+
+        previousPageSignature = pageSignature;
+        names.push(...items.map((item) => item.spec?.displayName?.trim() || "").filter(Boolean));
+
+        const totalPages = result.totalPages || result.pages || 0;
+        const pageSize = result.size || items.length;
+        const total = result.total || result.totalItems || result.totalElements || 0;
+        if (typeof result.hasNext === "boolean") {
+          hasNext = result.hasNext;
+        } else if (typeof result.last === "boolean") {
+          hasNext = !result.last;
+        } else if (totalPages > 0) {
+          hasNext = page < totalPages;
+        } else if (total > 0) {
+          hasNext = page * pageSize < total;
+        } else {
+          // 兼容未返回总数的 Halo 版本，继续请求直到下一页为空。
+          hasNext = true;
+        }
         page += 1;
-      } while (page <= totalPages);
+      }
     } catch {
       return [];
     }
 
-    return Array.from(new Set(names)).sort((left, right) => left.localeCompare(right, "zh-CN"));
+    return Array.from(new Set(names))
+      .sort((left, right) => left.localeCompare(right, "zh-CN"))
+      .slice(0, taxonomyOptionLimit);
   };
 
-  void Promise.all([
+  const taxonomyNamesReady = Promise.all([
     fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/categories"),
     fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/tags"),
   ]).then(([loadedCategories, loadedTags]) => {
@@ -1524,11 +1562,19 @@ const setupRepositoryFilters = () => {
     return button;
   };
 
-  const openMenu = (trigger: HTMLButtonElement, kind: FilterKind) => {
+  const openMenu = async (trigger: HTMLButtonElement, kind: FilterKind) => {
     window.clearTimeout(closeTimer);
 
     if (menu && trigger.getAttribute("aria-expanded") === "true") {
       return;
+    }
+
+    if (kind === "category" || kind === "tag") {
+      await taxonomyNamesReady;
+
+      if (!trigger.matches(":hover") && document.activeElement !== trigger) {
+        return;
+      }
     }
 
     closeMenu();
@@ -1588,7 +1634,7 @@ const setupRepositoryFilters = () => {
       const kind = trigger.dataset.repositoryFilter as FilterKind | undefined;
 
       if (kind) {
-        openMenu(trigger, kind);
+        void openMenu(trigger, kind);
       }
     };
 
