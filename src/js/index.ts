@@ -37,9 +37,12 @@ type Moment = {
 
 type Photo = {
   metadata?: Metadata;
-  permalink?: string;
   spec?: {
     displayName?: string;
+    url?: string;
+  };
+  status?: {
+    permalink?: string;
   };
 };
 
@@ -263,7 +266,7 @@ const getSiteActivities = (
         photo.metadata?.creationTimestamp,
         "photo-added",
         photo.spec?.displayName?.trim() || (isChinese ? "未命名图片" : "Untitled photo"),
-        photo.permalink || "/photos",
+        photo.spec?.url || photo.status?.permalink || "/photos",
       ),
     ),
   ];

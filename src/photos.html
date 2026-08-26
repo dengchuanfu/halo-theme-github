@@ -37,6 +37,7 @@
       <a
         class="photo-album"
         th:each="group : ${photoFinder.groupBy()}"
+        th:if="${group.photos != null and not #lists.isEmpty(group.photos)}"
         th:href="@{|/photos?group=${group.metadata.name}|}"
       >
         <span
