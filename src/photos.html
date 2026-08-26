@@ -126,7 +126,7 @@
 
   <nav
     class="pagination"
-    th:if="${photos != null and #lists.isEmpty(param.ungrouped) and (photos.hasPrevious() || photos.hasNext())}"
+    th:if="${photos != null and not #lists.isEmpty(param.group) and #lists.isEmpty(param.ungrouped) and (photos.hasPrevious() || photos.hasNext())}"
   >
     <a th:if="${photos.hasPrevious()}" th:href="@{${photos.prevUrl}}">Previous</a>
     <span th:text="|${photos.page} / ${photos.totalPages}|"></span>
