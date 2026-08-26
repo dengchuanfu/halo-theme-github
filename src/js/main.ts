@@ -1380,6 +1380,11 @@ const setupRepositoryFilters = () => {
       spec?: {
         displayName?: string;
       };
+      postCount?: number;
+      status?: {
+        postCount?: number;
+        visiblePostCount?: number;
+      };
     }>;
     hasNext?: boolean;
     last?: boolean;
@@ -1398,6 +1403,10 @@ const setupRepositoryFilters = () => {
     tags: string[];
     title: string;
   };
+  type TaxonomyOption = {
+    name: string;
+    postCount: number;
+  };
 
   const repositoryItems: RepositoryItem[] = items.map((element) => ({
     categories: Array.from(
@@ -1410,13 +1419,36 @@ const setupRepositoryFilters = () => {
     ),
     title: element.dataset.repositoryTitle?.trim() || "",
   }));
-  let categories = Array.from(
-    new Set(repositoryItems.flatMap(({ categories }) => categories).filter(Boolean)),
-  )
-    .sort((left, right) => left.localeCompare(right, "zh-CN"))
+  const categoryUsage = new Map<string, number>();
+  repositoryItems.forEach(({ categories }) => {
+    categories.forEach((name) => {
+      if (name) {
+        categoryUsage.set(name, (categoryUsage.get(name) || 0) + 1);
+      }
+    });
+  });
+  let categories: TaxonomyOption[] = Array.from(categoryUsage, ([name, postCount]) => ({
+    name,
+    postCount,
+  }))
+    .sort(
+      (left, right) =>
+        right.postCount - left.postCount || left.name.localeCompare(right.name, "zh-CN"),
+    )
     .slice(0, taxonomyOptionLimit);
-  let tags = Array.from(new Set(repositoryItems.flatMap(({ tags }) => tags).filter(Boolean)))
-    .sort((left, right) => left.localeCompare(right, "zh-CN"))
+  const tagUsage = new Map<string, number>();
+  repositoryItems.forEach(({ tags }) => {
+    tags.forEach((name) => {
+      if (name) {
+        tagUsage.set(name, (tagUsage.get(name) || 0) + 1);
+      }
+    });
+  });
+  let tags: TaxonomyOption[] = Array.from(tagUsage, ([name, postCount]) => ({ name, postCount }))
+    .sort(
+      (left, right) =>
+        right.postCount - left.postCount || left.name.localeCompare(right.name, "zh-CN"),
+    )
     .slice(0, taxonomyOptionLimit);
   const labels: Record<FilterKind, string> = {
     category: "分类",
@@ -1427,8 +1459,8 @@ const setupRepositoryFilters = () => {
   let menu: HTMLElement | undefined;
   let closeTimer = 0;
 
-  const fetchTaxonomyNames = async (endpoint: string) => {
-    const names: string[] = [];
+  const fetchTaxonomyNames = async (endpoint: string, sortByPostCount = false) => {
+    const names: Array<{ name: string; postCount: number }> = [];
     let page = 1;
     let hasNext = true;
     let previousPageSignature = "";
@@ -1452,7 +1484,15 @@ const setupRepositoryFilters = () => {
         }
 
         previousPageSignature = pageSignature;
-        names.push(...items.map((item) => item.spec?.displayName?.trim() || "").filter(Boolean));
+        names.push(
+          ...items
+            .map((item) => ({
+              name: item.spec?.displayName?.trim() || "",
+              postCount:
+                item.postCount ?? item.status?.visiblePostCount ?? item.status?.postCount ?? 0,
+            }))
+            .filter((item) => item.name),
+        );
 
         const totalPages = result.totalPages || result.pages || 0;
         const pageSize = result.size || items.length;
@@ -1475,14 +1515,19 @@ const setupRepositoryFilters = () => {
       return [];
     }
 
-    return Array.from(new Set(names))
-      .sort((left, right) => left.localeCompare(right, "zh-CN"))
+    const uniqueNames = Array.from(new Map(names.map((item) => [item.name, item])).values());
+    return uniqueNames
+      .sort((left, right) =>
+        sortByPostCount
+          ? right.postCount - left.postCount || left.name.localeCompare(right.name, "zh-CN")
+          : left.name.localeCompare(right.name, "zh-CN"),
+      )
       .slice(0, taxonomyOptionLimit);
   };
 
   const taxonomyNamesReady = Promise.all([
-    fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/categories"),
-    fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/tags"),
+    fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/categories", true),
+    fetchTaxonomyNames("/apis/api.content.halo.run/v1alpha1/tags", true),
   ]).then(([loadedCategories, loadedTags]) => {
     if (loadedCategories.length) {
       categories = loadedCategories;
@@ -1586,12 +1631,12 @@ const setupRepositoryFilters = () => {
       kind === "category"
         ? [
             option("全部分类", "", !filters.category),
-            ...categories.map((name) => option(name, name, filters.category === name)),
+            ...categories.map(({ name }) => option(name, name, filters.category === name)),
           ]
         : kind === "tag"
           ? [
               option("全部标签", "", !filters.tag),
-              ...tags.map((name) => option(name, name, filters.tag === name)),
+              ...tags.map(({ name }) => option(name, name, filters.tag === name)),
             ]
           : [
               option("最新发布", "newest", filters.sort === "newest"),

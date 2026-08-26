@@ -7,17 +7,21 @@
   shellClass="github-shell-full"
   sidebarClass="is-hidden"
   contentClass="content-column-full"
+  showBackToTop="true"
 >
   <template name="head">
     <title th:text="|${title ?: '图库'} - ${site.title}|">图库</title>
   </template>
 
-  <section class="photos-page">
+  <section
+    class="photos-page"
+    th:with="ungroupedPhotos=${photos != null and photos.items != null ? photos.items.?[#strings.isEmpty(spec.groupName)] : null}"
+  >
     <header class="links-hero photos-hero">
       <div>
         <p class="links-eyebrow">Photos</p>
         <h1 th:text="${title ?: '图库'}">图库</h1>
-        <p>把照片按分组铺开，像浏览项目截图一样轻松查看。</p>
+        <p>光影、地点与日常。</p>
       </div>
       <span class="links-count" th:if="${photos != null}">
         <span th:text="${photos.total ?: 0}">0</span>
@@ -25,33 +29,84 @@
       </span>
     </header>
 
-    <nav class="photos-tabs" th:if="${photoFinder != null}">
+    <section
+      class="photo-albums"
+      th:if="${photoFinder != null and #lists.isEmpty(param.group)}"
+      aria-label="影集列表"
+    >
       <a
-        class="tag"
-        th:href="@{/photos}"
-        th:classappend="${#lists.isEmpty(param.group) ? 'is-active' : ''}"
-      >
-        全部
-      </a>
-      <a
-        class="tag"
+        class="photo-album"
         th:each="group : ${photoFinder.groupBy()}"
         th:href="@{|/photos?group=${group.metadata.name}|}"
-        th:classappend="${#lists.contains(param.group, group.metadata.name) ? 'is-active' : ''}"
-        th:text="${group.spec.displayName}"
-      ></a>
+      >
+        <span
+          class="photo-album-cover"
+          th:if="${group.photos != null and not #lists.isEmpty(group.photos)}"
+        >
+          <img
+            th:each="photo, photoStat : ${group.photos}"
+            th:if="${photoStat.index < 4}"
+            th:src="${photo.spec.url}"
+            alt=""
+            loading="lazy"
+          />
+        </span>
+        <span class="photo-album-meta">
+          <strong th:text="${group.spec.displayName}">影展名称</strong>
+          <span class="photo-album-kind">影展</span>
+          <span th:text="|${group.status?.photoCount ?: 0} 件作品|">0 件作品</span>
+        </span>
+      </a>
+      <a
+        class="photo-album"
+        th:if="${ungroupedPhotos != null and not #lists.isEmpty(ungroupedPhotos)}"
+        th:href="@{/photos(ungrouped=1)}"
+      >
+        <span class="photo-album-cover">
+          <img
+            th:each="photo, photoStat : ${ungroupedPhotos}"
+            th:if="${photoStat.index < 4}"
+            th:src="${photo.spec.url}"
+            alt=""
+            loading="lazy"
+          />
+        </span>
+        <span class="photo-album-meta">
+          <strong>未分组</strong>
+          <span class="photo-album-kind">影展</span>
+          <span th:text="|${#lists.size(ungroupedPhotos)} 件作品|">0 件作品</span>
+        </span>
+      </a>
+    </section>
+
+    <nav
+      class="photo-gallery-toolbar"
+      th:if="${not #lists.isEmpty(param.group) or not #lists.isEmpty(param.ungrouped)}"
+    >
+      <a class="photo-gallery-back" th:href="@{/photos}">
+        <iconify-icon icon="octicon:arrow-left-16" aria-hidden="true"></iconify-icon>
+        <span>全部影集</span>
+      </a>
+      <span>影展作品</span>
     </nav>
 
-    <div class="links-empty" th:if="${photos == null or #lists.isEmpty(photos.items)}">
+    <div
+      class="links-empty"
+      th:if="${photos == null or #lists.isEmpty(photos.items) or (not #lists.isEmpty(param.ungrouped) and #lists.isEmpty(ungroupedPhotos))}"
+    >
       <iconify-icon icon="octicon:image-16"></iconify-icon>
       <h2>暂无照片</h2>
       <p>在图库管理插件里上传照片后，这里会自动显示。</p>
     </div>
 
-    <div class="photos-grid" th:if="${photos != null and not #lists.isEmpty(photos.items)}">
+    <div
+      class="photos-grid"
+      th:if="${photos != null and not #lists.isEmpty(photos.items) and (not #lists.isEmpty(param.group) or not #lists.isEmpty(param.ungrouped))}"
+    >
       <a
         class="photo-card"
         th:each="photo : ${photos.items}"
+        th:if="${#lists.isEmpty(param.ungrouped) or #strings.isEmpty(photo.spec.groupName)}"
         th:href="${photo.spec.url}"
         target="_blank"
         rel="noreferrer"
@@ -68,7 +123,10 @@
     </div>
   </section>
 
-  <nav class="pagination" th:if="${photos != null and (photos.hasPrevious() || photos.hasNext())}">
+  <nav
+    class="pagination"
+    th:if="${photos != null and #lists.isEmpty(param.ungrouped) and (photos.hasPrevious() || photos.hasNext())}"
+  >
     <a th:if="${photos.hasPrevious()}" th:href="@{${photos.prevUrl}}">Previous</a>
     <span th:text="|${photos.page} / ${photos.totalPages}|"></span>
     <a th:if="${photos.hasNext()}" th:href="@{${photos.nextUrl}}">Next</a>
