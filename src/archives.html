@@ -55,6 +55,8 @@
           <li
             class="repository-list-item"
             th:each="post : ${month.posts}"
+            th:classappend="${theme.config.styles.archive_cover_enabled == true and not #strings.isEmpty(post.spec.cover) ? 'repository-list-item--cover' : ''}"
+            th:style="|--repository-cover: url('${post.spec.cover}')|"
             th:attr="data-repository-title=${post.spec.title}, data-repository-date=${post.spec.publishTime}"
           >
             <div class="repository-list-copy">

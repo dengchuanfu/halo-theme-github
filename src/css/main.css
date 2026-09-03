@@ -1403,6 +1403,92 @@ svg {
   border-bottom: 1px solid var(--border);
 }
 
+.repository-list-item--cover {
+  position: relative;
+  min-height: 172px;
+  margin-top: 12px;
+  padding: 24px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  isolation: isolate;
+}
+
+.repository-list-item--cover::before,
+.repository-list-item--cover::after {
+  position: absolute;
+  z-index: -1;
+  content: "";
+  inset: 0;
+}
+
+.repository-list-item--cover::before {
+  background-image: var(--repository-cover);
+  background-position: center;
+  background-size: cover;
+  filter: saturate(0.82);
+  transform: scale(1.01);
+  transition: transform 280ms ease;
+}
+
+.repository-list-item--cover::after {
+  background:
+    linear-gradient(
+      105deg,
+      rgb(13 17 23 / 92%) 0%,
+      rgb(13 17 23 / 78%) 45%,
+      rgb(13 17 23 / 34%) 100%
+    ),
+    linear-gradient(180deg, rgb(13 17 23 / 8%), rgb(13 17 23 / 58%));
+}
+
+.repository-list-item--cover:hover::before {
+  transform: scale(1.05);
+}
+
+.repository-list-item--cover .repository-list-title a {
+  color: #ffffff;
+}
+
+.repository-list-item--cover .repository-list-title a:hover {
+  text-decoration: underline;
+}
+
+.repository-list-item--cover .repository-list-desc,
+.repository-list-item--cover .repository-list-meta,
+.repository-list-item--cover .repository-list-meta a,
+.repository-list-item--cover .repository-engagement,
+.repository-list-item--cover .repository-engagement-metric,
+.repository-list-item--cover .repository-action-button,
+.repository-list-item--cover .repository-action-button iconify-icon {
+  color: rgb(255 255 255 / 82%);
+}
+
+.repository-list-item--cover .repository-title-tag {
+  border-color: rgb(255 255 255 / 32%);
+  background: rgb(13 17 23 / 22%);
+  color: rgb(255 255 255 / 86%);
+}
+
+.repository-list-item--cover .repository-title-tag:hover {
+  border-color: rgb(255 255 255 / 72%);
+  color: #ffffff;
+}
+
+.repository-list-item--cover .repository-action-group {
+  border-color: rgb(255 255 255 / 24%);
+  background: rgb(13 17 23 / 42%);
+  backdrop-filter: blur(8px);
+}
+
+.repository-list-item--cover .repository-action-button + .repository-action-button {
+  border-left-color: rgb(255 255 255 / 24%);
+}
+
+.repository-list-item--cover .repository-action-button:hover {
+  background: rgb(255 255 255 / 14%);
+}
+
 .repository-list-item[hidden] {
   display: none;
 }

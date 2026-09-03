@@ -504,6 +504,11 @@ spec:
           label: 强调色
           value: "#0969da"
         - $formkit: checkbox
+          name: archive_cover_enabled
+          label: 归档列表显示封面背景
+          value: false
+          help: 开启后，有封面图的文章会在 /archives 列表中显示渐变封面背景
+        - $formkit: checkbox
           name: header_clock_enabled
           label: 显示顶部时间
           value: false
