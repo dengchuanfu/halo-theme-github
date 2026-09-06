@@ -1,0 +1,128 @@
+<include
+  src="layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass="love-shell"
+  sidebarClass="is-hidden"
+  contentClass="love-content-column"
+>
+  <template name="head">
+    <title th:text="|${couple.headline()} - ${site.title}|">情侣主页</title>
+  </template>
+
+  <section class="love-page" th:style="|--love-wallpaper-image: url('${coverImage}')|">
+    <section class="love-hero" aria-label="情侣头像">
+      <div class="love-hero-inner">
+        <div class="love-people-card">
+          <div class="love-person">
+            <a
+              class="love-avatar-link"
+              th:if="${not #strings.isEmpty(leftProfileUrl)}"
+              th:href="${leftProfileUrl}"
+              target="_blank"
+              rel="noopener noreferrer"
+              th:aria-label="|打开 ${couple.left_name()} 的链接|"
+            >
+              <img
+                class="love-avatar"
+                th:src="${leftAvatar}"
+                th:alt="${couple.left_name() + ' 的头像'}"
+              />
+            </a>
+            <img
+              class="love-avatar"
+              th:unless="${not #strings.isEmpty(leftProfileUrl)}"
+              th:src="${leftAvatar}"
+              th:alt="${couple.left_name() + ' 的头像'}"
+            />
+            <span th:text="${couple.left_name()}">我们</span>
+          </div>
+          <span class="love-page-heart" aria-label="相爱">
+            <iconify-icon icon="octicon:heart-fill-16" aria-hidden="true"></iconify-icon>
+          </span>
+          <div class="love-person">
+            <a
+              class="love-avatar-link"
+              th:if="${not #strings.isEmpty(rightProfileUrl)}"
+              th:href="${rightProfileUrl}"
+              target="_blank"
+              rel="noopener noreferrer"
+              th:aria-label="|打开 ${couple.right_name()} 的链接|"
+            >
+              <img
+                class="love-avatar"
+                th:src="${rightAvatar}"
+                th:alt="${couple.right_name() + ' 的头像'}"
+              />
+            </a>
+            <img
+              class="love-avatar"
+              th:unless="${not #strings.isEmpty(rightProfileUrl)}"
+              th:src="${rightAvatar}"
+              th:alt="${couple.right_name() + ' 的头像'}"
+            />
+            <span th:text="${couple.right_name()}">彼此</span>
+          </div>
+        </div>
+      </div>
+      <svg class="love-waves" viewBox="0 24 150 28" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <path
+            id="love-gentle-wave"
+            d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18v44h-352z"
+          />
+        </defs>
+        <g class="love-wave-parallax">
+          <use href="#love-gentle-wave" x="48" y="0" fill="rgb(255 255 255 / 70%)" />
+          <use href="#love-gentle-wave" x="48" y="3" fill="rgb(255 255 255 / 50%)" />
+          <use href="#love-gentle-wave" x="48" y="5" fill="rgb(255 255 255 / 30%)" />
+          <use href="#love-gentle-wave" x="48" y="7" fill="var(--canvas)" />
+        </g>
+      </svg>
+    </section>
+
+    <section
+      class="love-timer-panel"
+      id="love-timer"
+      th:attr="data-start=${couple.started_at()}"
+      aria-live="polite"
+    >
+      <span class="love-timer-caption">这是我们一起走过的</span>
+      <div class="love-timer">
+        <span><b data-unit="days">0</b><small>天</small></span>
+        <span><b data-unit="hours">0</b><small>时</small></span>
+        <span><b data-unit="minutes">0</b><small>分</small></span>
+        <span><b data-unit="seconds">0</b><small>秒</small></span>
+      </div>
+      <p class="love-page-message" th:text="${couple.message()}">
+        愿每一个平常的日子，都有彼此相伴。
+      </p>
+    </section>
+  </section>
+
+  <script th:inline="javascript">
+    (function () {
+      var timer = document.getElementById("love-timer");
+      if (!timer || !timer.dataset.start) return;
+      var start = new Date(timer.dataset.start + "T00:00:00");
+      if (Number.isNaN(start.getTime())) return;
+      function update() {
+        var diff = Math.max(0, Date.now() - start.getTime());
+        var values = {
+          days: Math.floor(diff / 86400000),
+          hours: Math.floor(diff / 3600000) % 24,
+          minutes: Math.floor(diff / 60000) % 60,
+          seconds: Math.floor(diff / 1000) % 60,
+        };
+        Object.keys(values).forEach(function (unit) {
+          var node = timer.querySelector('[data-unit="' + unit + '"]');
+          if (node) node.textContent = String(values[unit]);
+        });
+      }
+      update();
+      window.setInterval(update, 1000);
+    })();
+  </script>
+</include>
