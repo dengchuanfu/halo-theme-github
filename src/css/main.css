@@ -1206,6 +1206,7 @@ svg {
 
 .repo-card {
   display: flex;
+  min-width: 0;
   min-height: 114px;
   padding: 16px;
   flex-direction: column;
@@ -1243,7 +1244,10 @@ svg {
 }
 
 .repo-visibility {
+  min-width: 0;
+  max-width: 45%;
   flex: 0 0 auto;
+  overflow: hidden;
   padding: 0 7px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -1251,10 +1255,16 @@ svg {
   font-size: 12px;
   font-weight: 500;
   line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .repo-visibility a {
+  display: block;
+  overflow: hidden;
   color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .repo-desc {
@@ -1265,6 +1275,7 @@ svg {
   color: var(--fg-muted);
   font-size: 12px;
   font-weight: 400;
+  overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -1281,6 +1292,11 @@ svg {
 
 .repo-meta a {
   color: var(--fg-muted);
+}
+
+.repo-meta > span:not(.language-dot) {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .language-dot {
@@ -4457,18 +4473,23 @@ article {
 
   .profile-avatar {
     width: 160px;
+    margin-right: auto;
+    margin-left: auto;
   }
 
   .profile-status {
-    margin: -44px 0 20px 122px;
+    margin: -44px auto 20px;
+    transform: translateX(61px);
   }
 
   .profile-name {
     font-size: 24px;
+    text-align: center;
   }
 
   .profile-username {
     font-size: 20px;
+    text-align: center;
   }
 
   .category-directory-card {
