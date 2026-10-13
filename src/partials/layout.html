@@ -218,6 +218,7 @@
             isPhotosMenu=${menuHref == '/photos' or menuHref == 'photos' or #strings.startsWith(menuHref, '/photos')},
             isMomentsMenu=${menuHref == '/moments' or menuHref == 'moments' or #strings.startsWith(menuHref, '/moments')},
             isMessageMenu=${menuHref == '/message' or menuHref == 'message' or #strings.startsWith(menuHref, '/message')},
+            isBusinessMenu=${menuHref == '/services' or menuHref == 'services' or menuHref == '/Services' or menuHref == 'Services' or menuHref == '/Business' or menuHref == 'Business' or menuHref == '/business' or menuHref == 'business' or #strings.startsWith(menuHref, '/services/') or #strings.startsWith(menuHref, '/Services/') or #strings.startsWith(menuHref, '/Business/') or #strings.startsWith(menuHref, '/business/')},
             customMenuIcon=${theme.config.icons.custom_menu_icons != null ? theme.config.icons.custom_menu_icons.^[
               #this.path == menuHref or ('/' + #this.path) == menuHref or #this.path == ('/' + menuHref)
             ] : null}
@@ -230,6 +231,7 @@
             (isPostsMenu and '{{activePosts}}' == 'is-active') or
             (isCategoryMenu and '{{activeProjects}}' == 'is-active') or
             (isTagsMenu and '{{activePackages}}' == 'is-active') or
+            (isBusinessMenu and singlePage != null and (singlePage.spec?.template == 'business.html' or singlePage.spec?.slug == 'services' or singlePage.spec?.slug == 'Services' or singlePage.spec?.slug == 'business' or singlePage.spec?.slug == 'Business')) or
             (singlePage != null and singlePage.status?.permalink != null and (singlePage.status.permalink == menuHref or #strings.endsWith(singlePage.status.permalink, menuHref)))
           ) ? 'is-active' : ''}"
         >
@@ -252,9 +254,11 @@
                             ? (theme.config.icons.moments ?: 'mingcute:moment-line')
                             : (isMessageMenu
                               ? (theme.config.icons.message ?: 'tabler:message')
-                              : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
-                                ? customMenuIcon.icon
-                                : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16')))))))))
+                              : (isBusinessMenu
+                                ? (theme.config.icons.business ?: 'octicon:briefcase-16')
+                                : (customMenuIcon != null and customMenuIcon.icon != null and customMenuIcon.icon != ''
+                                  ? customMenuIcon.icon
+                                  : (theme.config.icons.fallback ?: theme.config.icons.other ?: theme.config.icons.stars ?: 'octicon:star-16'))))))))))
             }"
           ></iconify-icon>
           <span th:text="${item.status.displayName}">菜单</span>
@@ -292,6 +296,13 @@
           ></iconify-icon>
           <span>关于</span>
         </a>
+        <a th:href="@{/services}">
+          <iconify-icon
+            class="tab-icon"
+            th:attr="icon=${theme.config.icons.business ?: 'octicon:briefcase-16'}"
+          ></iconify-icon>
+          <span>服务</span>
+        </a>
       </th:block>
     </nav>
 
@@ -313,8 +324,14 @@
       ></span>
     </div>
 
-    <main class="site-main github-shell {{shellClass}}">
-      <aside class="profile-sidebar {{sidebarClass}}">
+    <main
+      class="site-main github-shell {{shellClass}}"
+      th:classappend="${singlePage != null and (singlePage.spec.slug == 'services' or singlePage.spec.slug == 'Services' or singlePage.spec.slug == 'business' or singlePage.spec.slug == 'Business') ? 'github-shell-full' : ''}"
+    >
+      <aside
+        class="profile-sidebar {{sidebarClass}}"
+        th:classappend="${singlePage != null and (singlePage.spec.slug == 'services' or singlePage.spec.slug == 'Services' or singlePage.spec.slug == 'business' or singlePage.spec.slug == 'Business') ? 'is-hidden' : ''}"
+      >
         <div class="profile-card">
           <img
             class="profile-avatar"
@@ -534,7 +551,10 @@
           </section>
         </div>
       </aside>
-      <div class="content-column {{contentClass}}">
+      <div
+        class="content-column {{contentClass}}"
+        th:classappend="${singlePage != null and (singlePage.spec.slug == 'services' or singlePage.spec.slug == 'Services' or singlePage.spec.slug == 'business' or singlePage.spec.slug == 'Business') ? 'content-column-full' : ''}"
+      >
         <slot />
       </div>
     </main>

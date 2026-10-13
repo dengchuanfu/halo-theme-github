@@ -27,9 +27,9 @@ spec:
             - text: "ShenZhen"
               icon: "octicon:location-16"
               url: ""
-            - text: "monster@ffbf.top"
+            - text: "767267711@qq.com"
               icon: "octicon:mail-16"
-              url: "mailto:monster@ffbf.top"
+              url: "mailto:767267711@qq.com"
           addLabel: 添加资料信息
           emptyText: 暂无资料信息
           help: 可自定义内容、Iconify 图标和链接，并拖动调整显示顺序
@@ -51,7 +51,7 @@ spec:
               name: url
               label: 链接（可选）
               value: ""
-              placeholder: "mailto:monster@ffbf.top"
+              placeholder: "mailto:767267711@qq.com"
         - $formkit: checkbox
           name: show_stats
           label: 是否显示网站统计信息
@@ -286,6 +286,11 @@ spec:
           label: 留言板图标（/message）
           value: "tabler:message"
           help: 对应后台菜单链接 /message，填写 Iconify 图标名称，例如 tabler:message
+        - $formkit: text
+          name: business
+          label: 服务图标（/services）
+          value: "octicon:briefcase-16"
+          help: 对应后台菜单链接 /services，填写 Iconify 图标名称，例如 octicon:briefcase-16
         - $formkit: array
           name: custom_menu_icons
           label: 其他菜单栏自定义图标
@@ -315,6 +320,179 @@ spec:
           label: 未匹配菜单默认图标
           value: "octicon:star-16"
           help: 只有菜单路径没有匹配到上面的自定义规则时才使用
+    - group: business
+      label: 服务设置
+      formSchema:
+        - $formkit: checkbox
+          name: enabled
+          label: 启用服务页面
+          value: true
+          help: 关闭后服务页面显示为空状态，但不会影响后台菜单配置
+        - $formkit: text
+          name: title
+          label: 页面标题
+          value: "我可以为你做什么"
+          placeholder: "我可以为你做什么"
+        - $formkit: textarea
+          name: intro
+          label: 页面介绍
+          value: "从基础设施到网络接入，为个人与企业提供清晰、可靠、可落地的技术服务。点击卡片查看服务范围和联系方式。"
+          help: 显示在服务卡片上方，支持换行
+        - $formkit: array
+          name: services
+          label: 服务项目
+          value:
+            - enabled: true
+              name: "服务器"
+              summary: "选型、部署、迁移与稳定性维护"
+              description: "覆盖云服务器与物理服务器，从配置选型、系统初始化到服务上线和日常维护，帮助网站与应用稳定运行。"
+              deliverables: "服务器选型与配置建议\nLinux 系统部署与安全加固\n网站、数据库与容器部署\n监控、备份与故障排查"
+              price: "按配置与工作量评估"
+              icon: "octicon:server-16"
+              contact_label: "咨询服务器服务"
+              contact_url: "mailto:767267711@qq.com?subject=服务器服务咨询"
+              contact_wechat: ""
+              contact_qq: ""
+              contact_phone: ""
+              background_image: ""
+            - enabled: true
+              name: "SSL 证书"
+              summary: "证书申请、部署与 HTTPS 排障"
+              description: "为网站、API 和后台系统配置可靠的 HTTPS 访问，处理证书申请、域名验证、自动续期以及浏览器安全告警。"
+              deliverables: "证书类型与品牌选型\n域名验证与证书签发\nNginx、Apache、CDN 部署\n续期配置与 HTTPS 故障排查"
+              price: "按证书类型与站点数量评估"
+              icon: "octicon:shield-check-16"
+              contact_label: "咨询 SSL 证书"
+              contact_url: "mailto:767267711@qq.com?subject=SSL证书咨询"
+              contact_wechat: ""
+              contact_qq: ""
+              contact_phone: ""
+              background_image: ""
+            - enabled: true
+              name: "品牌机"
+              summary: "办公、设计与企业采购配置"
+              description: "根据预算、软件环境和使用场景匹配品牌台式机、笔记本与工作站，兼顾性能、售后和后续扩展。"
+              deliverables: "使用场景与预算梳理\n品牌型号与配置对比\n批量采购与到货验收建议\n系统初始化与软件环境配置"
+              price: "按型号与采购数量报价"
+              icon: "octicon:device-desktop-16"
+              contact_label: "咨询品牌机服务"
+              contact_url: "mailto:767267711@qq.com?subject=品牌机咨询"
+              contact_wechat: ""
+              contact_qq: ""
+              contact_phone: ""
+              background_image: ""
+            - enabled: true
+              name: "组装机"
+              summary: "按需定制，平衡性能、预算与升级空间"
+              description: "针对办公、开发、设计和轻度创作等需求定制主机方案，细化每一项配件，减少性能浪费和兼容性风险。"
+              deliverables: "需求分析与整机方案\nCPU、显卡与存储搭配\n配件兼容性与散热评估\n装机验机与系统调试"
+              price: "按配置方案报价"
+              icon: "octicon:cpu-16"
+              contact_label: "咨询组装机服务"
+              contact_url: "mailto:767267711@qq.com?subject=组装机咨询"
+              contact_wechat: ""
+              contact_qq: ""
+              contact_phone: ""
+              background_image: ""
+            - enabled: true
+              name: "中文网址"
+              summary: "中文域名注册、解析与品牌保护"
+              description: "为品牌、项目和个人站点提供中文域名的注册建议、实名认证、DNS 解析与访问配置，让网址更易记、更贴近品牌。"
+              deliverables: "域名后缀与名称建议\n注册、实名认证与转移\nDNS 解析与访问配置\n续费提醒与域名保护建议"
+              price: "按域名后缀与注册年限报价"
+              icon: "octicon:globe-16"
+              contact_label: "咨询中文网址"
+              contact_url: "mailto:767267711@qq.com?subject=中文网址咨询"
+              contact_wechat: ""
+              contact_qq: ""
+              contact_phone: ""
+              background_image: ""
+            - enabled: true
+              name: "SD-WAN"
+              summary: "多分支互联、链路优化与网络可视化"
+              description: "面向门店、分支和远程办公场景，梳理现有线路与服务流量，设计更稳定、可观测、易运维的 SD-WAN 接入方案。"
+              deliverables: "网络现状与链路质量评估\n组网架构与设备选型建议\n策略下发、链路调度与容灾\n上线验收与运维交接"
+              price: "按站点数量与组网复杂度评估"
+              icon: "octicon:workflow-16"
+              contact_label: "咨询 SD-WAN 服务"
+              contact_url: "mailto:767267711@qq.com?subject=SD-WAN咨询"
+              contact_wechat: ""
+              contact_qq: ""
+              contact_phone: ""
+              background_image: ""
+          addLabel: 添加服务项目
+          emptyText: 暂无服务项目，请添加后在前台展示
+          help: 关闭某项的“显示此服务”后，该项目不会出现在前台
+          itemLabels:
+            - type: text
+              label: "$value.name"
+          children:
+            - $formkit: checkbox
+              name: enabled
+              label: 显示此服务
+              value: true
+            - $formkit: text
+              name: name
+              label: 服务名称
+              value: ""
+              placeholder: "服务器运维"
+            - $formkit: text
+              name: summary
+              label: 卡片简介
+              value: ""
+              placeholder: "一句话说明这项服务"
+            - $formkit: textarea
+              name: description
+              label: 详细介绍
+              value: ""
+              placeholder: "介绍适用场景、服务方式和你能解决的问题"
+            - $formkit: textarea
+              name: deliverables
+              label: 服务内容
+              value: ""
+              placeholder: "每行填写一项服务内容"
+              help: 每行一项，前台详情弹窗会自动转换为列表
+            - $formkit: text
+              name: price
+              label: 费用说明
+              value: ""
+              placeholder: "按项目评估"
+            - $formkit: text
+              name: icon
+              label: Iconify 图标
+              value: "octicon:briefcase-16"
+              placeholder: "octicon:server-16"
+            - $formkit: text
+              name: contact_label
+              label: 联系按钮文字
+              value: "立即咨询"
+              placeholder: "立即咨询"
+            - $formkit: text
+              name: contact_url
+              label: 联系地址
+              value: ""
+              placeholder: "mailto:you@example.com 或 https://..."
+            - $formkit: text
+              name: contact_wechat
+              label: 微信号
+              value: ""
+              placeholder: "填写后在详情中显示"
+            - $formkit: text
+              name: contact_qq
+              label: QQ 号
+              value: ""
+              placeholder: "填写后在详情中显示"
+            - $formkit: text
+              name: contact_phone
+              label: 手机号
+              value: ""
+              placeholder: "填写后在详情中显示"
+            - $formkit: attachment
+              name: background_image
+              label: 卡片背景图片
+              value: ""
+              accept: "image/*"
+              help: 可上传或从附件库选择卡片背景图片；留空则使用默认卡片背景
     - group: about
       label: 关于设置
       formSchema:

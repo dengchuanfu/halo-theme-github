@@ -18,7 +18,10 @@ spec:
       - name: 留言板
         description: 带评论飘屏效果的留言板页面
         file: message.html
-  version: 1.1.18
+      - name: 服务
+        description: 可配置服务项目并支持点击查看详情的服务展示页面
+        file: business.html
+  version: 1.1.19
   requires: ">=2.0.0"
   license:
     - name: "GPL-3.0"

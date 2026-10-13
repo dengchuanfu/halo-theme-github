@@ -1,0 +1,164 @@
+<section class="business-page" th:with="businessConfig=${theme.config.business}">
+  <header class="business-hero">
+    <div class="business-hero-copy">
+      <span class="business-eyebrow"
+        ><iconify-icon icon="octicon:briefcase-16"></iconify-icon> SERVICES</span
+      >
+      <h1 th:text="${businessConfig.title ?: '我可以为你做什么'}">我可以为你做什么</h1>
+      <p
+        th:text="${businessConfig.intro ?: '面向个人与企业，提供从基础设施到网络接入的一站式技术服务。'}"
+      >
+        面向个人与企业，提供从基础设施到网络接入的一站式技术服务。
+      </p>
+    </div>
+  </header>
+
+  <div class="business-disabled" th:if="${businessConfig.enabled == false}">
+    <iconify-icon icon="octicon:eye-closed-16"></iconify-icon>
+    <h2>服务页面暂未开放</h2>
+    <p>可以在主题设置中重新开启服务页面。</p>
+  </div>
+
+  <div
+    class="business-grid"
+    th:if="${businessConfig.enabled != false and businessConfig.services != null and not #lists.isEmpty(businessConfig.services)}"
+  >
+    <article
+      class="business-card"
+      th:each="service, serviceStat : ${businessConfig.services}"
+      th:if="${service.enabled != false and not #strings.isEmpty(service.name)}"
+      th:classappend="${not #strings.isEmpty(service.background_image) ? 'business-card--image' : ''}"
+      th:style="|--business-card-image: url('${service.background_image}')|"
+    >
+      <button class="business-card-trigger" type="button" data-business-open>
+        <span class="business-card-topline">
+          <span
+            class="business-card-index"
+            th:text="${serviceStat.index < 9 ? '0' + (serviceStat.index + 1) : serviceStat.index + 1}"
+            >01</span
+          >
+          <span class="business-card-kicker">TECH SERVICE</span>
+          <iconify-icon
+            class="business-card-arrow"
+            icon="octicon:arrow-up-right-16"
+            aria-hidden="true"
+          ></iconify-icon>
+        </span>
+        <span class="business-card-main">
+          <span class="business-card-icon">
+            <iconify-icon
+              th:attr="icon=${service.icon ?: 'octicon:briefcase-16'}"
+              aria-hidden="true"
+            ></iconify-icon>
+          </span>
+          <span class="business-card-copy">
+            <strong th:text="${service.name}">服务器</strong>
+            <span th:text="${service.summary ?: '查看服务详情'}">查看服务详情</span>
+          </span>
+        </span>
+        <span class="business-card-tags" th:if="${not #strings.isEmpty(service.deliverables)}">
+          <span
+            th:each="item, itemStat : ${#strings.arraySplit(service.deliverables, '\n')}"
+            th:if="${itemStat.index < 3 and not #strings.isEmpty(item)}"
+            th:text="${item}"
+            >系统部署</span
+          >
+        </span>
+      </button>
+      <template data-business-detail>
+        <div class="business-modal-heading">
+          <span class="business-modal-icon">
+            <iconify-icon
+              th:attr="icon=${service.icon ?: 'octicon:briefcase-16'}"
+              aria-hidden="true"
+            ></iconify-icon>
+          </span>
+          <div>
+            <span class="business-eyebrow">TECH SERVICE</span>
+            <h2 th:text="${service.name}">服务器运维</h2>
+          </div>
+        </div>
+        <p class="business-modal-description" th:text="${service.description ?: service.summary}">
+          详细介绍
+        </p>
+        <div class="business-modal-section" th:if="${not #strings.isEmpty(service.deliverables)}">
+          <h3>服务内容</h3>
+          <ul>
+            <li
+              th:each="item : ${#strings.arraySplit(service.deliverables, '\n')}"
+              th:if="${not #strings.isEmpty(item)}"
+              th:text="${item}"
+            >
+              服务内容
+            </li>
+          </ul>
+        </div>
+        <div class="business-modal-meta" th:if="${not #strings.isEmpty(service.price)}">
+          <span>费用说明</span>
+          <strong th:text="${service.price}">按项目评估</strong>
+        </div>
+        <div
+          class="business-contact-list"
+          th:if="${not #strings.isEmpty(service.contact_wechat) or not #strings.isEmpty(service.contact_qq) or not #strings.isEmpty(service.contact_phone)}"
+        >
+          <div
+            class="business-contact-item"
+            th:if="${not #strings.isEmpty(service.contact_wechat)}"
+          >
+            <iconify-icon icon="simple-icons:wechat" aria-hidden="true"></iconify-icon>
+            <span>微信</span>
+            <strong th:text="${service.contact_wechat}">微信号</strong>
+          </div>
+          <div class="business-contact-item" th:if="${not #strings.isEmpty(service.contact_qq)}">
+            <iconify-icon icon="simple-icons:qq" aria-hidden="true"></iconify-icon>
+            <span>QQ</span>
+            <strong th:text="${service.contact_qq}">QQ 号</strong>
+          </div>
+          <div class="business-contact-item" th:if="${not #strings.isEmpty(service.contact_phone)}">
+            <iconify-icon icon="octicon:device-mobile-16" aria-hidden="true"></iconify-icon>
+            <span>手机</span>
+            <strong th:text="${service.contact_phone}">手机号</strong>
+          </div>
+        </div>
+        <a
+          class="business-contact-button"
+          th:if="${not #strings.isEmpty(service.contact_url)}"
+          th:href="${service.contact_url}"
+          th:text="${service.contact_label ?: '立即咨询'}"
+          th:attr="target=${#strings.startsWith(service.contact_url, 'http') ? '_blank' : null}, rel=${#strings.startsWith(service.contact_url, 'http') ? 'noreferrer' : null}"
+          >立即咨询</a
+        >
+      </template>
+    </article>
+  </div>
+
+  <div
+    class="business-empty"
+    th:if="${businessConfig.enabled != false and (businessConfig.services == null or #lists.isEmpty(businessConfig.services))}"
+  >
+    <iconify-icon icon="octicon:inbox-16"></iconify-icon>
+    <p>暂时还没有开放的服务项目。</p>
+  </div>
+</section>
+
+<div class="business-modal" data-business-modal hidden>
+  <div class="business-modal-backdrop" data-business-close></div>
+  <section
+    class="business-modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="business-modal-title"
+    data-business-panel
+  >
+    <button
+      class="business-modal-close"
+      type="button"
+      data-business-close
+      aria-label="关闭详情"
+      title="关闭详情"
+    >
+      <iconify-icon icon="octicon:x-16" aria-hidden="true"></iconify-icon>
+    </button>
+    <div data-business-modal-content></div>
+  </section>
+</div>

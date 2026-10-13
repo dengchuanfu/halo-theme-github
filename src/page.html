@@ -10,7 +10,18 @@
 >
   <template name="head">
     <title th:text="|${singlePage.spec.title} - ${site.title}|">Page Title</title>
+    <script
+      type="module"
+      src="./js/business.ts"
+      th:if="${singlePage.spec.slug == 'services' or singlePage.spec.slug == 'Services' or singlePage.spec.slug == 'business' or singlePage.spec.slug == 'Business'}"
+    ></script>
   </template>
+
+  <th:block
+    th:if="${singlePage.spec.slug == 'services' or singlePage.spec.slug == 'Services' or singlePage.spec.slug == 'business' or singlePage.spec.slug == 'Business'}"
+  >
+    <include src="partials/business-content.html"></include>
+  </th:block>
 
   <section
     class="about-page"
@@ -224,7 +235,9 @@
     </section>
   </section>
 
-  <article th:unless="${singlePage.spec.slug == 'about'}">
+  <article
+    th:unless="${singlePage.spec.slug == 'about' or singlePage.spec.slug == 'services' or singlePage.spec.slug == 'Services' or singlePage.spec.slug == 'business' or singlePage.spec.slug == 'Business'}"
+  >
     <header class="article-header">
       <h1 class="article-title" th:text="${singlePage.spec.title}"></h1>
     </header>

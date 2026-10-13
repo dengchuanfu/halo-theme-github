@@ -1,0 +1,17 @@
+<include
+  src="partials/layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass="github-shell-full"
+  sidebarClass="is-hidden"
+  contentClass="content-column-full"
+>
+  <template name="head">
+    <title th:text="|${theme.config.business.title ?: '服务'} - ${site.title}|">服务</title>
+    <script type="module" src="./js/business.ts"></script>
+  </template>
+
+  <include src="partials/business-content.html"></include>
+</include>
