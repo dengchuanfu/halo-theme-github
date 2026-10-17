@@ -1,9 +1,7 @@
 .business-page {
   width: 100%;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--canvas);
+  overflow: visible;
+  background: transparent;
 }
 
 .business-hero {
@@ -14,7 +12,7 @@
   justify-content: space-between;
   gap: 24px;
   border-bottom: 1px solid var(--border);
-  background: var(--canvas-subtle);
+  background: transparent;
 }
 
 .business-hero-copy {
@@ -55,7 +53,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  padding: 24px 44px 40px;
+  padding: 28px 0 40px;
 }
 
 .business-card {
@@ -452,7 +450,7 @@
 
   .business-grid {
     grid-template-columns: 1fr;
-    padding: 18px 20px 24px;
+    padding: 20px 0 24px;
   }
 
   .business-card-trigger {
@@ -472,7 +470,7 @@
 @media (min-width: 721px) and (max-width: 1040px) {
   .business-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding-inline: 28px;
+    padding-inline: 0;
   }
 
   .business-hero {
