@@ -677,6 +677,12 @@ spec:
           name: background_color
           label: 背景颜色
           value: "#ffffff"
+        - $formkit: attachment
+          name: background_image
+          label: 自定义背景图
+          value: ""
+          accept: "image/*"
+          help: 上传或从附件库选择背景图片；留空时仅使用背景颜色
         - $formkit: color
           name: accent_color
           label: 强调色

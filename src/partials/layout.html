@@ -9,7 +9,8 @@
     <script type="module" src="./js/main.ts"></script>
   </head>
   <body
-    th:style="|--configured-page-bg: ${theme.config.styles.background_color ?: '#ffffff'}; --configured-accent: ${theme.config.styles.accent_color ?: '#0969da'}|"
+    th:style="|--configured-page-bg: ${theme.config.styles.background_color ?: '#ffffff'}; --configured-accent: ${theme.config.styles.accent_color ?: '#0969da'};|"
+    th:styleappend="${not #strings.isEmpty(theme.config.styles.background_image) ? '--configured-background-image: url(' + theme.config.styles.background_image + ')' : ''}"
     th:classappend="${theme.config.announcement.prayer_mode == true ? 'is-prayer-mode' : ''}"
   >
     <header class="github-header">
