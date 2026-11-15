@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html
+  lang="zh-CN"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -354,70 +358,72 @@
           <p class="profile-username" th:text="${theme.config.basic.description ?: 'halo-user'}">
             halo-user
           </p>
-          <a
-            class="profile-button"
-            th:if="${singlePage != null and singlePage.spec.slug == 'about'}"
-            th:href="@{/console/theme/settings/about}"
-            target="_blank"
-            rel="noreferrer"
-            >编辑关于</a
-          >
-          <a
-            class="profile-button"
-            th:if="${singlePage != null and singlePage.spec.template == 'message.html'}"
-            th:href="@{/console/comments}"
-            target="_blank"
-            rel="noreferrer"
-            >管理留言</a
-          >
-          <a
-            class="profile-button"
-            th:if="${(singlePage == null or (singlePage.spec.slug != 'about' and singlePage.spec.template != 'message.html')) and linksTitle != null}"
-            th:href="@{/console/links}"
-            target="_blank"
-            rel="noreferrer"
-            >管理友链</a
-          >
-          <a
-            class="profile-button"
-            th:if="${linksTitle == null and (category != null or categories != null)}"
-            th:href="@{/console/posts/categories}"
-            target="_blank"
-            rel="noreferrer"
-            >管理分类</a
-          >
-          <a
-            class="profile-button"
-            th:if="${linksTitle == null and category == null and categories == null and (moment != null or moments != null)}"
-            th:href="@{/console/moments}"
-            target="_blank"
-            rel="noreferrer"
-            >发布瞬间</a
-          >
-          <a
-            class="profile-button"
-            th:if="${linksTitle == null and category == null and categories == null and moment == null and moments == null and (post != null or archives != null)}"
-            th:href="@{/console/posts/editor}"
-            target="_blank"
-            rel="noreferrer"
-            >发布文章</a
-          >
-          <a
-            class="profile-button"
-            th:if="${'{{activeHome}}' == 'is-active'}"
-            th:href="@{/console}"
-            target="_blank"
-            rel="noreferrer"
-            >后台管理</a
-          >
-          <a
-            class="profile-button"
-            th:unless="${(singlePage != null and (singlePage.spec.slug == 'about' or singlePage.spec.template == 'message.html')) or linksTitle != null or category != null or categories != null or moment != null or moments != null or post != null or archives != null or '{{activeHome}}' == 'is-active'}"
-            th:href="@{/console}"
-            target="_blank"
-            rel="noreferrer"
-            >Edit profile</a
-          >
+          <th:block sec:authorize="isAuthenticated()">
+            <a
+              class="profile-button"
+              th:if="${singlePage != null and singlePage.spec.slug == 'about'}"
+              th:href="@{/console/theme/settings/about}"
+              target="_blank"
+              rel="noreferrer"
+              >编辑关于</a
+            >
+            <a
+              class="profile-button"
+              th:if="${singlePage != null and singlePage.spec.template == 'message.html'}"
+              th:href="@{/console/comments}"
+              target="_blank"
+              rel="noreferrer"
+              >管理留言</a
+            >
+            <a
+              class="profile-button"
+              th:if="${(singlePage == null or (singlePage.spec.slug != 'about' and singlePage.spec.template != 'message.html')) and linksTitle != null}"
+              th:href="@{/console/links}"
+              target="_blank"
+              rel="noreferrer"
+              >管理友链</a
+            >
+            <a
+              class="profile-button"
+              th:if="${linksTitle == null and (category != null or categories != null)}"
+              th:href="@{/console/posts/categories}"
+              target="_blank"
+              rel="noreferrer"
+              >管理分类</a
+            >
+            <a
+              class="profile-button"
+              th:if="${linksTitle == null and category == null and categories == null and (moment != null or moments != null)}"
+              th:href="@{/console/moments}"
+              target="_blank"
+              rel="noreferrer"
+              >发布瞬间</a
+            >
+            <a
+              class="profile-button"
+              th:if="${linksTitle == null and category == null and categories == null and moment == null and moments == null and (post != null or archives != null)}"
+              th:href="@{/console/posts/editor}"
+              target="_blank"
+              rel="noreferrer"
+              >发布文章</a
+            >
+            <a
+              class="profile-button"
+              th:if="${'{{activeHome}}' == 'is-active'}"
+              th:href="@{/console}"
+              target="_blank"
+              rel="noreferrer"
+              >后台管理</a
+            >
+            <a
+              class="profile-button"
+              th:unless="${(singlePage != null and (singlePage.spec.slug == 'about' or singlePage.spec.template == 'message.html')) or linksTitle != null or category != null or categories != null or moment != null or moments != null or post != null or archives != null or '{{activeHome}}' == 'is-active'}"
+              th:href="@{/console}"
+              target="_blank"
+              rel="noreferrer"
+              >Edit profile</a
+            >
+          </th:block>
           <ul class="profile-meta">
             <th:block th:if="${not #lists.isEmpty(theme.config.basic.profile_meta)}">
               <li th:each="item : ${theme.config.basic.profile_meta}" th:if="${item.text}">
