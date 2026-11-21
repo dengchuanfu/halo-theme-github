@@ -291,6 +291,11 @@ spec:
           label: 服务图标（/services）
           value: "octicon:briefcase-16"
           help: 对应后台菜单链接 /services，填写 Iconify 图标名称，例如 octicon:briefcase-16
+        - $formkit: text
+          name: sponsor
+          label: 赞助图标（/sponsor）
+          value: "iconoven:sponsor-tag"
+          help: 对应赞助页面菜单链接 /sponsor 的图标
         - $formkit: array
           name: custom_menu_icons
           label: 其他菜单栏自定义图标
@@ -493,6 +498,16 @@ spec:
               value: ""
               accept: "image/*"
               help: 可上传或从附件库选择卡片背景图片；留空则使用默认卡片背景
+    - group: sponsor
+      label: 赞助设置
+      formSchema:
+        - $formkit: textarea
+          name: supporter_lines
+          label: 赞助名单（批量录入）
+          value: ""
+          rows: 12
+          placeholder: "张三 | 50 | 2026-11-21 | 感谢支持\n李四 | 100 | 2026-11-22 | 留言（可选）"
+          help: "每行一位赞助者，格式为：赞助者 | 金额 | 日期 | 留言。金额、日期和留言可以留空，未填写日期时按名单顺序显示在最新记录中。已有的旧版赞助名单会继续保留并显示。"
     - group: about
       label: 关于设置
       formSchema:

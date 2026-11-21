@@ -1,0 +1,63 @@
+<include
+  src="partials/layout.html"
+  activeHome=""
+  activePosts=""
+  activeProjects=""
+  activePackages=""
+  shellClass="github-shell-full"
+  sidebarClass="is-hidden"
+  contentClass="content-column-full"
+>
+  <template name="head">
+    <title th:text="|${singlePage.spec.title} - ${site.title}|">赞助名单</title>
+    <script type="module" src="./js/sponsor.ts"></script>
+  </template>
+
+  <section class="sponsor-page" th:with="sponsorConfig=${theme.config.sponsor}">
+    <header class="sponsor-heading">
+      <div class="sponsor-title-group">
+        <p class="sponsor-eyebrow">
+          <iconify-icon icon="iconoven:sponsor-tag" aria-hidden="true"></iconify-icon>
+          COMMUNITY SUPPORT
+        </p>
+        <h1 th:text="${singlePage.spec.title}">赞助名单</h1>
+        <p class="sponsor-lead">每一份支持，都是这个小站继续前进的动力。</p>
+      </div>
+    </header>
+
+    <div
+      class="sponsor-intro article-content"
+      th:if="${singlePage.content != null and not #strings.isEmpty(singlePage.content.content)}"
+      th:utext="${singlePage.content.content}"
+    ></div>
+
+    <div
+      class="sponsor-data"
+      th:if="${(sponsorConfig.supporters != null and not #lists.isEmpty(sponsorConfig.supporters)) or not #strings.isEmpty(sponsorConfig.supporter_lines)}"
+    >
+      <span
+        data-sponsor-entry
+        th:each="supporter : ${sponsorConfig.supporters}"
+        th:if="${#strings.isEmpty(sponsorConfig.supporter_lines) and not #strings.isEmpty(supporter.name)}"
+        th:attr="data-name=${supporter.name}, data-amount=${supporter.amount}, data-date=${supporter.date}, data-message=${supporter.message}"
+      ></span>
+      <pre
+        data-sponsor-bulk
+        th:if="${not #strings.isEmpty(sponsorConfig.supporter_lines)}"
+        th:text="${sponsorConfig.supporter_lines}"
+      ></pre>
+    </div>
+    <div class="sponsor-dashboard" data-sponsor-dashboard aria-live="polite"></div>
+
+    <div
+      class="sponsor-empty"
+      th:if="${(sponsorConfig.supporters == null or #lists.isEmpty(sponsorConfig.supporters)) and #strings.isEmpty(sponsorConfig.supporter_lines)}"
+    >
+      <span class="sponsor-empty-icon">
+        <iconify-icon icon="iconoven:sponsor-tag" aria-hidden="true"></iconify-icon>
+      </span>
+      <h2>支持正在汇聚</h2>
+      <p>感谢每一份心意，期待与你在这里相遇。</p>
+    </div>
+  </section>
+</include>
