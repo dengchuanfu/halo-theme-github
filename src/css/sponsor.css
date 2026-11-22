@@ -278,6 +278,38 @@
   border: 1px solid transparent;
   border-top-color: var(--border-muted);
   border-radius: 4px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.sponsor-rank-watermark {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 42px;
+  pointer-events: none;
+  opacity: 0.14;
+  transform: translateX(-50%);
+}
+
+.sponsor-rank-card--1 .sponsor-rank-watermark {
+  color: #bf8700;
+}
+
+.sponsor-rank-card--2 .sponsor-rank-watermark {
+  color: #8b949e;
+}
+
+.sponsor-rank-card--3 .sponsor-rank-watermark {
+  color: #b36a3c;
+}
+
+.sponsor-rank-card > :not(.sponsor-rank-watermark) {
+  position: relative;
+  z-index: 1;
 }
 
 .sponsor-rank-card--1 {

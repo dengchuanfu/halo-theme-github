@@ -88,6 +88,7 @@ if (dashboard && data) {
         right.timestamp - left.timestamp || right.entry.originalIndex - left.entry.originalIndex,
     )
     .map(({ entry }) => entry);
+  const supporterCount = new Set(entries.map((entry) => entry.name)).size;
   const totalAmount = entries.reduce((total, entry) => total + (entry.numericAmount ?? 0), 0);
   const amountFormatter = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 });
   const formatAmount = (amount: number) => `¥${amountFormatter.format(amount)}`;
@@ -129,9 +130,24 @@ if (dashboard && data) {
   summary.setAttribute("aria-label", "赞助统计");
 
   const summaryItems = [
-    { icon: "solar:donut-chart-linear", label: "累计赞助", value: formatAmount(totalAmount) },
-    { icon: "solar:users-group-rounded-linear", label: "支持者", value: `${entries.length} 位` },
-    { icon: "solar:heart-linear", label: "赞助记录", value: `${entries.length} 笔` },
+    {
+      icon: "solar:donut-chart-linear",
+      watermark: "solar:hand-money-linear",
+      label: "累计赞助",
+      value: formatAmount(totalAmount),
+    },
+    {
+      icon: "solar:users-group-rounded-linear",
+      watermark: "solar:users-group-rounded-linear",
+      label: "支持者",
+      value: `${supporterCount} 位`,
+    },
+    {
+      icon: "solar:heart-linear",
+      watermark: "solar:heart-linear",
+      label: "赞助记录",
+      value: `${entries.length} 笔`,
+    },
   ];
 
   summaryItems.forEach((item, index) => {
@@ -140,7 +156,7 @@ if (dashboard && data) {
 
     const watermark = document.createElement("iconify-icon");
     watermark.className = "sponsor-stat-watermark";
-    watermark.setAttribute("icon", item.icon);
+    watermark.setAttribute("icon", item.watermark ?? item.icon);
     watermark.setAttribute("aria-hidden", "true");
 
     const icon = document.createElement("iconify-icon");
@@ -213,7 +229,7 @@ if (dashboard && data) {
 
   const rankSection = document.createElement("section");
   rankSection.className = "sponsor-panel sponsor-ranking";
-  appendHeading(rankSection, "TOP SUPPORTERS", "累计赞助排行", `${showRank.length} 位`);
+  appendHeading(rankSection, "TOP SUPPORTERS", "累计赞助排行", `前 ${topEntries.length} 名`);
 
   if (topEntries.length) {
     const list = document.createElement("ol");
@@ -222,6 +238,13 @@ if (dashboard && data) {
     topEntries.forEach((entry, index) => {
       const item = document.createElement("li");
       item.className = `sponsor-rank-card${index < 4 ? ` sponsor-rank-card--${index + 1}` : ""}`;
+      if (index < 3) {
+        const watermark = document.createElement("iconify-icon");
+        watermark.className = "sponsor-rank-watermark";
+        watermark.setAttribute("icon", "mdi:medal");
+        watermark.setAttribute("aria-hidden", "true");
+        item.append(watermark);
+      }
       const medal = document.createElement("span");
       medal.className = "sponsor-medal";
       medal.textContent = String(index + 1).padStart(2, "0");
