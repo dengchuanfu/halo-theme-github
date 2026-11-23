@@ -23,7 +23,52 @@
         <h1 th:text="${singlePage.spec.title}">赞助名单</h1>
         <p class="sponsor-lead">每一份支持，都是这个小站继续前进的动力。</p>
       </div>
+      <div class="sponsor-payment-methods" role="group" aria-label="选择赞助方式">
+        <button
+          class="sponsor-payment-button sponsor-payment-button--wechat"
+          type="button"
+          data-sponsor-payment="微信"
+          th:attr="data-sponsor-qrcode=${sponsorConfig.wechat_qrcode}"
+          aria-label="微信赞助"
+          aria-haspopup="dialog"
+          aria-controls="sponsor-payment-dialog"
+        >
+          <iconify-icon icon="simple-icons:wechat" aria-hidden="true"></iconify-icon>
+          <span>微信</span>
+        </button>
+        <button
+          class="sponsor-payment-button sponsor-payment-button--alipay"
+          type="button"
+          data-sponsor-payment="支付宝"
+          th:attr="data-sponsor-qrcode=${sponsorConfig.alipay_qrcode}"
+          aria-label="支付宝赞助"
+          aria-haspopup="dialog"
+          aria-controls="sponsor-payment-dialog"
+        >
+          <iconify-icon icon="simple-icons:alipay" aria-hidden="true"></iconify-icon>
+          <span>支付宝</span>
+        </button>
+      </div>
     </header>
+
+    <dialog
+      class="sponsor-payment-dialog"
+      id="sponsor-payment-dialog"
+      aria-labelledby="sponsor-payment-title"
+      aria-describedby="sponsor-payment-hint"
+    >
+      <div class="sponsor-payment-panel">
+        <button class="sponsor-payment-close" type="button" aria-label="关闭赞助窗口" autofocus>
+          <iconify-icon icon="octicon:x-16" aria-hidden="true"></iconify-icon>
+        </button>
+        <h2 id="sponsor-payment-title">扫码赞助</h2>
+        <p id="sponsor-payment-hint">感谢你的每一份支持。</p>
+        <img class="sponsor-payment-qrcode" data-sponsor-payment-image alt="赞助收款码" hidden />
+        <p class="sponsor-payment-empty" data-sponsor-payment-empty hidden>
+          暂未提供收款码，感谢你的支持。
+        </p>
+      </div>
+    </dialog>
 
     <div
       class="sponsor-intro article-content"
@@ -39,7 +84,7 @@
         data-sponsor-entry
         th:each="supporter : ${sponsorConfig.supporters}"
         th:if="${#strings.isEmpty(sponsorConfig.supporter_lines) and not #strings.isEmpty(supporter.name)}"
-        th:attr="data-name=${supporter.name}, data-amount=${supporter.amount}, data-date=${supporter.date}, data-message=${supporter.message}"
+        th:attr="data-name=${supporter.name}, data-amount=${supporter.amount}, data-date=${supporter.date}, data-message=${supporter.message}, data-website=${supporter.website}"
       ></span>
       <pre
         data-sponsor-bulk

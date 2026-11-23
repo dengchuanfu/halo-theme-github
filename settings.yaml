@@ -501,13 +501,25 @@ spec:
     - group: sponsor
       label: 赞助设置
       formSchema:
+        - $formkit: attachment
+          name: wechat_qrcode
+          label: 微信赞助收款码
+          value: ""
+          accept: "image/*"
+          help: 点击赞助页顶部的微信图标后显示；可上传或从附件库选择收款码图片
+        - $formkit: attachment
+          name: alipay_qrcode
+          label: 支付宝赞助收款码
+          value: ""
+          accept: "image/*"
+          help: 点击赞助页顶部的支付宝图标后显示；可上传或从附件库选择收款码图片
         - $formkit: textarea
           name: supporter_lines
           label: 赞助名单（批量录入）
           value: ""
           rows: 12
-          placeholder: "张三 | 50 | 2026-11-21 | 感谢支持\n李四 | 100 | 2026-11-22 | 留言（可选）"
-          help: "每行一位赞助者，格式为：赞助者 | 金额 | 日期 | 留言。金额、日期和留言可以留空，未填写日期时按名单顺序显示在最新记录中。已有的旧版赞助名单会继续保留并显示。"
+          placeholder: "张三 | 50 | 2026-11-21 | 感谢支持 | https://example.com\n李四 | 100 | 2026-11-22 | 留言（可选）"
+          help: "每行一笔赞助，格式为：赞助者 | 金额 | 日期 | 留言 | 网站地址。网站地址请填写完整的 http:// 或 https:// 链接，填写后可点击赞助者名字在新标签页访问；留空或地址无效时名字为普通文字。金额、日期、留言和网站地址均可留空，保留对应位置的 | 分隔符即可。兼容原来的四列名单，未填写日期时按名单顺序显示在最新记录中。"
     - group: about
       label: 关于设置
       formSchema:

@@ -8,7 +8,9 @@
   display: flex;
   min-height: 178px;
   padding: 36px 44px 32px;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
   background: var(--canvas);
@@ -48,6 +50,131 @@
   font-size: 13px;
 }
 
+.sponsor-payment-methods {
+  display: flex;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.sponsor-payment-button {
+  display: flex;
+  width: 100px;
+  min-height: 88px;
+  padding: 14px 18px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--payment-color) 20%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--payment-color) 5%, var(--canvas));
+  color: var(--payment-color);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sponsor-payment-button--wechat {
+  --payment-color: #07a653;
+}
+
+.sponsor-payment-button--alipay {
+  --payment-color: #1677ff;
+}
+
+.sponsor-payment-button > iconify-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+}
+
+.sponsor-payment-button > span {
+  color: var(--fg);
+}
+
+.sponsor-payment-button:hover {
+  border-color: var(--payment-color);
+  background: color-mix(in srgb, var(--payment-color) 10%, var(--canvas));
+}
+
+.sponsor-payment-button:focus-visible,
+.sponsor-payment-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.sponsor-payment-dialog {
+  width: min(360px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--canvas);
+  color: var(--fg);
+  box-shadow: 0 16px 64px rgb(0 0 0 / 0.18);
+}
+
+.sponsor-payment-dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.sponsor-payment-panel {
+  position: relative;
+  padding: 32px 24px 24px;
+  text-align: center;
+}
+
+.sponsor-payment-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+
+.sponsor-payment-close:hover {
+  background: var(--canvas-subtle);
+  color: var(--fg);
+}
+
+.sponsor-payment-panel h2 {
+  margin: 0 0 8px;
+  font-size: 21px;
+}
+
+.sponsor-payment-panel > p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+.sponsor-payment-qrcode {
+  max-width: 100%;
+  max-height: 360px;
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  object-fit: contain;
+}
+
+.sponsor-payment-panel > .sponsor-payment-empty {
+  margin-top: 24px;
+  padding: 24px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--canvas-subtle);
+}
+
 .sponsor-intro {
   margin: 0 44px;
   padding-top: 20px;
@@ -55,6 +182,23 @@
 
 .sponsor-data {
   display: none;
+}
+
+.sponsor-name-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.sponsor-name-link:hover,
+.sponsor-name-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sponsor-name-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .sponsor-dashboard {
@@ -210,7 +354,8 @@
   animation: sponsor-latest-scroll 22s linear infinite;
 }
 
-.sponsor-latest-list:hover .sponsor-latest-track--scrolling {
+.sponsor-latest-list:hover .sponsor-latest-track--scrolling,
+.sponsor-latest-list:focus-within .sponsor-latest-track--scrolling {
   animation-play-state: paused;
 }
 
@@ -498,6 +643,8 @@
   .sponsor-heading {
     min-height: 160px;
     padding: 28px 22px 25px;
+    flex-wrap: wrap;
+    gap: 22px;
   }
 
   .sponsor-dashboard {
@@ -527,6 +674,19 @@
 
   .sponsor-heading h1 {
     font-size: 25px;
+  }
+
+  .sponsor-payment-methods {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .sponsor-payment-button {
+    width: auto;
+    min-width: 0;
+    min-height: 76px;
+    padding: 12px;
+    flex: 1;
   }
 
   .sponsor-dashboard {

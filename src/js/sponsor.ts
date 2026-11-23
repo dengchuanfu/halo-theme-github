@@ -1,16 +1,73 @@
 import "../css/sponsor.css";
 
+const paymentDialog = document.querySelector<HTMLDialogElement>("#sponsor-payment-dialog");
+const paymentImage = paymentDialog?.querySelector<HTMLImageElement>("[data-sponsor-payment-image]");
+const paymentEmpty = paymentDialog?.querySelector<HTMLElement>("[data-sponsor-payment-empty]");
+const paymentTitle = paymentDialog?.querySelector<HTMLElement>("#sponsor-payment-title");
+const paymentHint = paymentDialog?.querySelector<HTMLElement>("#sponsor-payment-hint");
+
+if (paymentDialog && paymentImage && paymentEmpty && paymentTitle && paymentHint) {
+  const showPaymentUnavailable = () => {
+    paymentImage.hidden = true;
+    paymentImage.removeAttribute("src");
+    paymentEmpty.hidden = false;
+    paymentHint.textContent = "感谢你的每一份支持。";
+  };
+
+  document.querySelectorAll<HTMLButtonElement>("[data-sponsor-payment]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const platform = button.dataset.sponsorPayment ?? "";
+      const qrcode = button.dataset.sponsorQrcode?.trim();
+      paymentTitle.textContent = `${platform}赞助`;
+      paymentImage.alt = `${platform}赞助收款码`;
+      paymentEmpty.textContent = "暂未提供收款码，感谢你的支持。";
+
+      if (qrcode) {
+        paymentImage.src = qrcode;
+        paymentImage.hidden = false;
+        paymentEmpty.hidden = true;
+        paymentHint.textContent = `使用${platform}扫描下方收款码。`;
+      } else {
+        showPaymentUnavailable();
+      }
+
+      paymentDialog.showModal();
+    });
+  });
+
+  paymentImage.addEventListener("error", () => {
+    showPaymentUnavailable();
+    paymentEmpty.textContent = "收款码加载失败，请稍后重试。";
+  });
+  paymentDialog.querySelector(".sponsor-payment-close")?.addEventListener("click", () => {
+    paymentDialog.close();
+  });
+  paymentDialog.addEventListener("click", (event) => {
+    if (event.target === paymentDialog) {
+      paymentDialog.close();
+    }
+  });
+  paymentDialog.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      paymentDialog.close();
+    }
+  });
+}
+
 interface SponsorEntry {
   name: string;
   amount: string;
   date: string;
   message: string;
+  website: string;
   numericAmount: number | null;
   originalIndex: number;
 }
 
 interface SponsorTotal {
   name: string;
+  website: string;
   amount: number;
   count: number;
   originalIndex: number;
@@ -18,6 +75,33 @@ interface SponsorTotal {
 
 const dashboard = document.querySelector<HTMLElement>("[data-sponsor-dashboard]");
 const data = document.querySelector<HTMLElement>(".sponsor-data");
+
+const normalizeSponsorWebsite = (value: string) => {
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+  } catch {
+    return "";
+  }
+};
+
+const createSponsorName = (name: string, website: string) => {
+  const element = document.createElement("strong");
+
+  if (website) {
+    const link = document.createElement("a");
+    link.className = "sponsor-name-link";
+    link.textContent = name;
+    link.href = website;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    element.append(link);
+  } else {
+    element.textContent = name;
+  }
+
+  return element;
+};
 
 if (dashboard && data) {
   const legacyEntries = Array.from(data.querySelectorAll<HTMLElement>("[data-sponsor-entry]"))
@@ -30,6 +114,7 @@ if (dashboard && data) {
         amount,
         date: element.dataset.date?.trim() ?? "",
         message: element.dataset.message?.trim() ?? "",
+        website: normalizeSponsorWebsite(element.dataset.website ?? ""),
         numericAmount: amount && Number.isFinite(numericAmount) ? numericAmount : null,
         originalIndex,
       };
@@ -38,7 +123,7 @@ if (dashboard && data) {
   const bulkEntries = (data.querySelector<HTMLElement>("[data-sponsor-bulk]")?.textContent ?? "")
     .split(/\r?\n/)
     .map((line, originalIndex): SponsorEntry => {
-      const [name = "", amount = "", date = "", ...messageParts] = line.split("|");
+      const [name = "", amount = "", date = "", message = "", website = ""] = line.split("|");
       const normalizedAmount = amount.trim();
       const numericAmount = Number(normalizedAmount.replace(/[￥¥,，\s]/g, ""));
 
@@ -46,13 +131,30 @@ if (dashboard && data) {
         name: name.trim(),
         amount: normalizedAmount,
         date: date.trim(),
-        message: messageParts.join("|").trim(),
+        message: message.trim(),
+        website: normalizeSponsorWebsite(website),
         numericAmount: normalizedAmount && Number.isFinite(numericAmount) ? numericAmount : null,
         originalIndex: legacyEntries.length + originalIndex,
       };
     })
     .filter((entry) => entry.name);
   const entries = [...legacyEntries, ...bulkEntries];
+  const entriesNewestFirst = entries
+    .map((entry) => {
+      const parsedDate = Date.parse(entry.date);
+      return { entry, timestamp: Number.isNaN(parsedDate) ? -Infinity : parsedDate };
+    })
+    .sort(
+      (left, right) =>
+        right.timestamp - left.timestamp || right.entry.originalIndex - left.entry.originalIndex,
+    )
+    .map(({ entry }) => entry);
+  const supporterWebsites = new Map<string, string>();
+  entriesNewestFirst.forEach((entry) => {
+    if (entry.website && !supporterWebsites.has(entry.name)) {
+      supporterWebsites.set(entry.name, entry.website);
+    }
+  });
 
   const showRank = Array.from(
     entries
@@ -68,6 +170,7 @@ if (dashboard && data) {
         } else {
           totals.set(entry.name, {
             name: entry.name,
+            website: supporterWebsites.get(entry.name) ?? "",
             amount: entry.numericAmount,
             count: 1,
             originalIndex: entry.originalIndex,
@@ -78,16 +181,6 @@ if (dashboard && data) {
       }, new Map<string, SponsorTotal>())
       .values(),
   ).sort((left, right) => right.amount - left.amount || left.originalIndex - right.originalIndex);
-  const entriesNewestFirst = entries
-    .map((entry) => {
-      const parsedDate = Date.parse(entry.date);
-      return { entry, timestamp: Number.isNaN(parsedDate) ? -Infinity : parsedDate };
-    })
-    .sort(
-      (left, right) =>
-        right.timestamp - left.timestamp || right.entry.originalIndex - left.entry.originalIndex,
-    )
-    .map(({ entry }) => entry);
   const supporterCount = new Set(entries.map((entry) => entry.name)).size;
   const totalAmount = entries.reduce((total, entry) => total + (entry.numericAmount ?? 0), 0);
   const amountFormatter = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 });
@@ -193,8 +286,7 @@ if (dashboard && data) {
 
       const copy = document.createElement("div");
       copy.className = "sponsor-latest-copy";
-      const name = document.createElement("strong");
-      name.textContent = entry.name;
+      const name = createSponsorName(entry.name, entry.website);
       const note = document.createElement("span");
       note.textContent = entry.message || "感谢支持本站";
       copy.append(name, note);
@@ -214,6 +306,9 @@ if (dashboard && data) {
     if (latestEntries.length === 5) {
       const duplicate = sequence.cloneNode(true) as HTMLElement;
       duplicate.setAttribute("aria-hidden", "true");
+      duplicate.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
+        link.tabIndex = -1;
+      });
       track.append(duplicate);
       track.classList.add("sponsor-latest-track--scrolling");
     }
@@ -248,8 +343,7 @@ if (dashboard && data) {
       const medal = document.createElement("span");
       medal.className = "sponsor-medal";
       medal.textContent = String(index + 1).padStart(2, "0");
-      const name = document.createElement("strong");
-      name.textContent = entry.name;
+      const name = createSponsorName(entry.name, entry.website);
       const count = document.createElement("span");
       count.className = "sponsor-rank-count";
       count.textContent = `${entry.count} 笔赞助`;
@@ -299,10 +393,14 @@ if (dashboard && data) {
       entry.message || "—",
       entry.date || "—",
     ];
-    values.forEach((text) => {
+    values.forEach((text, columnIndex) => {
       const cell = document.createElement("span");
       cell.setAttribute("role", "cell");
-      cell.textContent = text;
+      if (columnIndex === 1) {
+        cell.append(createSponsorName(entry.name, entry.website));
+      } else {
+        cell.textContent = text;
+      }
       row.append(cell);
     });
 
